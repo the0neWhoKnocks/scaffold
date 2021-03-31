@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Source: https://gist.github.com/the0neWhoKnocks/c05fd2a082936fc95642849bddb7205b
+
+##
+# This command will run after `git pull`, and check if new modules need to be
+# installed.
+
+# Collect a list of changed files
+changedFiles="$(git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD)"
+
+# NOTE - Uncomment one of the below lines to test against yarn or npm changes
+# changedFiles="$changedFiles"$'\n'"yarn.lock"
+# changedFiles="$changedFiles"$'\n'"package-lock.json"
+
+depsChanged=$(echo "$changedFiles" | grep -e "package-lock.json" -e "yarn.lock")
+
+# Define update msg variable
+upgradeMsg=$(cat <<-DOC
+
+ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+ ┃ Node dependencies have changed. ┃
+ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+ 
+ Update Now? (y/n) : 
+DOC
+)
+
+# Prompt the user to update deps
+if [ -n "$depsChanged" ]; then
+  # NOTE - since this script is being executed by a git-hook (which closes the
+  # std input), it needs to be restored.
+  exec < /dev/tty
+  
+  # Grab the user's reply
+  read -n 1 -p "$upgradeMsg" reply
+  echo;
+
+  if [ "$reply" != "${reply#[Yy]}" ];then
+    if [[ $depsChanged =~ "package" ]]; then
+      binary='npm'
+    else
+      binary='yarn'
+    fi
+    
+    echo;
+    echo " [UPDATE] '$binary' dependencies"
+    echo;
+    
+    if [[ "$binary" == "npm" ]]; then
+      npm i
+    else
+      yarn
+    fi
+  fi
+fi

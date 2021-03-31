@@ -1,0 +1,23 @@
+{
+  "name": "scaffold",
+  "version": "0.1.0",
+  "description": "A CLI for scaffolding projects",
+  "main": "scaffold.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/the0neWhoKnocks/scaffold.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/the0neWhoKnocks/scaffold/issues"
+  },
+  "homepage": "https://github.com/the0neWhoKnocks/scaffold#readme",
+  "dependencies": {
+    "enquirer": "^2.3.6",
+    "mkdirp": "^1.0.4"
+  }
+}
