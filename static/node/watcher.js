@@ -7,7 +7,6 @@ const logger = require('anylogger')('watcher');
 const { SERVER__PORT } = require('./src/constants');
 
 const browserSync = create();
-const LOG_PREFIX = '[WATCHER]';
 let httpModule;
 let protocol = 'http';
 let bSyncHTTPS;
