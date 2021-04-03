@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/the0neWhoKnocks/scaffold#readme",
   "dependencies": {
+    "del": "^6.0.0",
     "inquirer": "^8.0.0",
     "mkdirp": "^1.0.4"
   }
