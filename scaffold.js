@@ -1,14 +1,11 @@
 const {
   existsSync,
-  promises: {
-    copyFile
-  },
-  readFileSync,
+  promises: { copyFile },
   writeFileSync,
 } = require('fs');
 const { dirname, resolve } = require('path');
 const mkdirp = require('mkdirp');
-const { prompt } = require('inquirer');
+const globby = require('globby');
 
 const [
   nodeBinary,
@@ -16,6 +13,12 @@ const [
   PATH__PROJECT_ROOT,
 ] = process.argv;
 const PATH__SOURCE_ROOT = dirname(PATH__SOURCE_SCRIPT);
+const PATTERNS = [
+  '**/*',
+  '!.git',
+  '!LICENSE',
+  '!node_modules',
+];
 
 // Prevent running the script in it's repo
 if (PATH__PROJECT_ROOT.startsWith(PATH__SOURCE_ROOT)) {
@@ -30,53 +33,21 @@ if (PATH__PROJECT_ROOT.startsWith(PATH__SOURCE_ROOT)) {
   process.exit(0);
 }
 
-const replaceTokens = (src, tokens = []) => {
-  let _src = src;
-  
-  tokens.forEach(({ remove, replacement, token }) => {
-    if (replacement) {
-      _src = _src.replace(new RegExp(`\/\/\{TOKEN:#${token}\}`), replacement);
-    }
-    else {
-      const regToken = `(?:\\s+)?\/\/\{TOKEN:(?:\\^|\\$)${token}\}\\n`;
-      const reg = new RegExp(`${regToken}(?<inner>[\\s\\S]+\\n)(?=${regToken})${regToken}`, 'm');
-      const [wrapped, inner] = _src.match(reg);
-      _src = _src.replace(wrapped, remove ? '\n' : `\n${inner}`);
-    }
-  });
-  
-  return _src;
-};
-const addParsedFile = (
-  fileName,
-  srcPath,
-  outputPath,
-  tokens = []
-) => new Promise((resolve) => {
-  const rawText = readFileSync(`${PATH__SOURCE_ROOT}/${srcPath}/${fileName}`, 'utf8');
-  const updatedText = replaceTokens(rawText, tokens);
-  writeFileSync(`${PATH__PROJECT_ROOT}/${outputPath}/${fileName}`, updatedText, 'utf8');
-  resolve();
+const replaceTokens = require('./utils/replaceTokens');
+const addParsedFile = require('./utils/addParsedFile')({
+  outputRoot: PATH__PROJECT_ROOT,
+  srcRoot: PATH__SOURCE_ROOT,
 });
+const merge = require('./utils/merge');
+const sortObj = require('./utils/sortObj');
+const getFileList = require('./utils/getFileList');
 
-const merge = (arr) => {
-  return arr.reduce((obj, curr) => {
-    Object.keys(curr).forEach((key) => {
-      const isObj = typeof curr[key] === 'function' || typeof curr[key] === 'object' && curr[key] !== null;
-      if (isObj) {
-        if (obj[key] === undefined) obj[key] = {};
-        obj[key] = { ...obj[key], ...curr[key] };
-      }
-      else obj[key] = curr[key];
-    });
-    return obj;
-  }, {});
-};
-
-const sortObj = (obj) => Object.keys(obj).sort().reduce((sorted, prop) => { sorted[prop] = obj[prop]; return sorted; }, {});
-
-async function scaffold() {
+async function scaffold() {  
+  // NOTE - inquirer is very slow to load, so only bring it in when needed
+  const { prompt } = require('inquirer');
+  
   const projectType = 'node';
+  
   const scaffoldOpts = await prompt([
     // {
     //   message: 'Project Type',
@@ -86,6 +57,18 @@ async function scaffold() {
     //     { name: 'Node.js', value: 'node' },
     //   ],
     // },
+    {
+      message: 'Remove previously scaffolded files?',
+      type: 'confirm',
+      name: 'removePreviousScaffold',
+      when: () => {
+        let previouslyScaffolded = false;
+        
+        if (projectType === 'node') previouslyScaffolded = existsSync(`${PATH__PROJECT_ROOT}/src`);
+        
+        return previouslyScaffolded;
+      },
+    },
     {
       message: 'Standards',
       type: 'checkbox',
@@ -185,6 +168,7 @@ async function scaffold() {
       message: 'Dev Options',
       type: 'checkbox',
       name: 'devOptions',
+      when: ({ addClient, addServer }) => addClient || addServer,
       filter: answers => merge(answers),
       choices: [
         { name: 'Watch for changes', value: { hasWatcher: true }, checked: true },
@@ -202,7 +186,7 @@ async function scaffold() {
       type: 'input',
       name: 'loggerNamespace',
       default: 'app',
-      when: ({ devOptions }) => !!devOptions.logger,
+      when: ({ devOptions }) => devOptions && devOptions.logger,
     },
   ]);
   
@@ -212,25 +196,52 @@ async function scaffold() {
     appTitle,
     bundler,
     clientFramework,
-    devOptions: {
-      hasWatcher,
-      logger,
-    } = {},
+    devOptions,
     loggerNamespace,
-    serverOptions: {
-      externalRequests,
-      framework: serverFramework,
-      middleware: {
-        compression,
-        cookies,
-        staticFiles,
-      } = {},
-      webSocket,
-    } = {},
+    removePreviousScaffold,
+    serverOptions,
     standards,
   } = scaffoldOpts;
+  const {
+    hasWatcher,
+    logger,
+  } = (devOptions || {});
+  const {
+    externalRequests,
+    framework: serverFramework,
+    middleware,
+    webSocket,
+  } = (serverOptions || {});
+  const {
+    compression,
+    cookies,
+    staticFiles,
+  } = (middleware || {});
   
   if (projectType === 'node') {
+    if (removePreviousScaffold) {
+      const del = require('del');
+      const filesToDelete = await del(PATTERNS, {
+        absolute: true,
+        cwd: PATH__PROJECT_ROOT,
+        dot: true,
+        dryRun: true, // del specific
+        onlyFiles: false, // globby specific
+        root: PATH__PROJECT_ROOT,
+      });
+      const { deleteList } = await prompt({
+        message: 'These files will be removed',
+        type: 'checkbox',
+        name: 'deleteList',
+        choices: filesToDelete.map(f => ({
+          name: f,
+          checked: true,
+        }))
+      });
+      
+      await del(deleteList, { cwd: PATH__PROJECT_ROOT });
+    }
+    
     const packageJSON = {
       scripts: {
         build: './bin/prep-dist.sh && NODE_ENV=production webpack',
@@ -340,21 +351,28 @@ async function scaffold() {
     packageJSON.scripts = sortObj(packageJSON.scripts);
     writeFileSync(`${PATH__PROJECT_ROOT}/package.json`, JSON.stringify(packageJSON, null, 2), 'utf8');
     
-    mkdirp.sync(`${PATH__PROJECT_ROOT}/src/client`);
-    mkdirp.sync(`${PATH__PROJECT_ROOT}/src/server`);
+    if (addClient) {
+      mkdirp.sync(`${PATH__PROJECT_ROOT}/src/client`);
+    }
     
-    await addParsedFile(
-      'constants.js',
-      'static/node',
-      'src',
-      [
-        { token: 'CONST__APP_TITLE', replacement: appTitle },
-        { token: 'CONST__SVELTE_MNT', remove: clientFramework !== 'svelte' },
-        { token: 'CONST__LOGGER_NAMESPACE', remove: !logger },
-        { token: 'CONST__LOGGER_NAMESPACE', replacement: loggerNamespace || '--' },
-        { token: 'CONST__WS_MESSAGES', remove: !webSocket },
-      ]
-    );
+    if (addServer) {
+      mkdirp.sync(`${PATH__PROJECT_ROOT}/src/server`);
+    }
+    
+    if (addClient || addServer) {
+      await addParsedFile(
+        'constants.js',
+        'static/node',
+        'src',
+        [
+          { token: 'CONST__APP_TITLE', replacement: appTitle },
+          { token: 'CONST__SVELTE_MNT', remove: clientFramework !== 'svelte' },
+          { token: 'CONST__LOGGER_NAMESPACE', remove: !logger },
+          { token: 'CONST__LOGGER_NAMESPACE', replacement: loggerNamespace || '--' },
+          { token: 'CONST__WS_MESSAGES', remove: !webSocket },
+        ]
+      );
+    }
     
     // TODO
     // - watcher needs tokens for client and server
@@ -370,6 +388,9 @@ async function scaffold() {
   await Promise.all([
     copyFile(`${PATH__SOURCE_ROOT}/static/.gitignore`, `${PATH__PROJECT_ROOT}/.gitignore`),
   ]);
+  
+  const fileList = await getFileList(PATH__PROJECT_ROOT);
+  console.log(`\n#[ RESULT ]#######\n\n${fileList}`);
 }
 
 scaffold();
