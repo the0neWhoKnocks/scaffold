@@ -402,7 +402,12 @@ async function scaffold() {
   ]);
   
   const fileList = await getFileList(PATH__PROJECT_ROOT);
-  console.log(`\n#[ RESULT ]#######\n\n${fileList}`);
+  console.log([
+    '\n ╭────────╮',
+    '\n │ RESULT │',
+    '\n─┘        └────────',
+    `\n${fileList}`,
+  ].join(''));
 }
 
 scaffold();
