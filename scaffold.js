@@ -337,6 +337,47 @@ async function scaffold() {
       }
     }
     
+    if (addClient || addServer) {
+      await addParsedFile(
+        'constants.js',
+        'node',
+        'src',
+        [
+          { token: 'CONST__APP_TITLE', replacement: appTitle },
+          { token: 'CONST__SVELTE_MNT', remove: !clientFrameworkIsSvelte },
+          { token: 'CONST__LOGGER_NAMESPACE', remove: !logger },
+          { token: 'CONST__LOGGER_NAMESPACE', replacement: loggerNamespace || '--' },
+          { token: 'CONST__WS_MESSAGES', remove: !webSocket },
+        ]
+      );
+      
+      mkdirp.sync(`${PATH__PROJECT_ROOT}/bin`);
+      const removeEmpty = i => !!i; 
+      const prepFolders = [
+        addServer ? './dist/server' : '',
+        addClient ? './dist/public' : '',
+      ];
+      const prepServerPaths = [
+        './src/constants.js',
+        addServer ? './src/server' : '',
+      ];
+      await addParsedFile(
+        'prep-dist.sh',
+        'node/bin',
+        'bin',
+        [
+          {
+            token: 'PREP__FOLDERS',
+            replacement: prepFolders.filter(removeEmpty).join(' '),
+          },
+          {
+            token: 'PREP__SERVER_FILE_PATHS',
+            replacement: `${prepServerPaths.filter(removeEmpty).join(' \\\n  ')} \\`,
+          },
+        ]
+      );
+    }
+    
     if (hasWatcher) {
       if (addServer) {
         packageJSON.devDependencies['chokidar'] = '3.5.1';
@@ -369,21 +410,6 @@ async function scaffold() {
       
       packageJSON.dependencies['anylogger'] = '1.0.10';
       packageJSON.dependencies[logger] = moduleVersion;
-    }
-    
-    if (addClient || addServer) {
-      await addParsedFile(
-        'constants.js',
-        'node',
-        'src',
-        [
-          { token: 'CONST__APP_TITLE', replacement: appTitle },
-          { token: 'CONST__SVELTE_MNT', remove: !clientFrameworkIsSvelte },
-          { token: 'CONST__LOGGER_NAMESPACE', remove: !logger },
-          { token: 'CONST__LOGGER_NAMESPACE', replacement: loggerNamespace || '--' },
-          { token: 'CONST__WS_MESSAGES', remove: !webSocket },
-        ]
-      );
     }
     
     if (standards.eslint) {
