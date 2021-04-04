@@ -106,7 +106,7 @@ module.exports = {
       ],
     }),
     new webpack.DefinePlugin({
-      'process.env.WP_BUNDLE': JSON.stringify(true),
+      'process.env.FOR_CLIENT_BUNDLE': JSON.stringify(true),
     }),
     //TOKEN:^WP__SVELTE_PLUGINS
     new MiniCssExtractPlugin({

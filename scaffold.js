@@ -360,6 +360,7 @@ async function scaffold() {
       const prepServerPaths = [
         './src/constants.js',
         addServer ? './src/server' : '',
+        logger ? './src/utils' : '',
       ];
       await addParsedFile(
         'prep-dist.sh',
@@ -410,6 +411,9 @@ async function scaffold() {
       
       packageJSON.dependencies['anylogger'] = '1.0.10';
       packageJSON.dependencies[logger] = moduleVersion;
+      
+      mkdirp.sync(`${PATH__PROJECT_ROOT}/src/utils`);
+      filesToCopy.push(copyFile('node/utils/logger.js', `src/utils`));
     }
     
     if (standards.eslint) {
