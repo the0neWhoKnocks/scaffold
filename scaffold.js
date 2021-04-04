@@ -35,7 +35,7 @@ if (PATH__PROJECT_ROOT.startsWith(PATH__SOURCE_ROOT)) {
 const replaceTokens = require('./utils/replaceTokens');
 const addParsedFile = require('./utils/addParsedFile')({
   outputRoot: PATH__PROJECT_ROOT,
-  srcRoot: PATH__SOURCE_ROOT,
+  srcRoot: `${PATH__SOURCE_ROOT}/static`,
 });
 const merge = require('./utils/merge');
 const sortObj = require('./utils/sortObj');
@@ -316,7 +316,7 @@ async function scaffold() {
           
           await addParsedFile(
             'webpack.config.js',
-            'static/node',
+            'node',
             '',
             [
               { token: 'WP__SVELTE_ALIAS', remove: !clientFrameworkIsSvelte },
@@ -347,7 +347,7 @@ async function scaffold() {
       
       await addParsedFile(
         'watcher.js',
-        'static/node',
+        'node',
         '',
         [
           { token: 'WATCHER__CLIENT', remove: !addClient },
@@ -374,7 +374,7 @@ async function scaffold() {
     if (addClient || addServer) {
       await addParsedFile(
         'constants.js',
-        'static/node',
+        'node',
         'src',
         [
           { token: 'CONST__APP_TITLE', replacement: appTitle },
@@ -395,7 +395,7 @@ async function scaffold() {
       
       await addParsedFile(
         '.eslintrc.js',
-        'static/node',
+        'node',
         '',
         [
           { token: 'LINT__SVELTE', remove: !clientFrameworkIsSvelte },
@@ -415,6 +415,15 @@ async function scaffold() {
   }
   
   // TODO - add .github/workflows
+  
+  await addParsedFile(
+    'README.md',
+    '',
+    '',
+    [
+      { token: 'README__TITLE', replacement: appTitle },
+    ]
+  );
   
   await Promise.all(filesToCopy.map(fn => fn()));
   
