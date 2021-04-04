@@ -6,10 +6,11 @@ module.exports = function replaceTokens(src, tokens = []) {
       _src = _src.replace(new RegExp(`\/\/\{TOKEN:#${token}\}`), replacement);
     }
     else {
-      const regToken = `(?:\\s+)?\/\/\{TOKEN:(?:\\^|\\$)${token}\}\\n`;
-      const reg = new RegExp(`${regToken}(?<inner>[\\s\\S]+\\n)(?=${regToken})${regToken}`, 'm');
-      const [wrapped, inner] = _src.match(reg);
-      _src = _src.replace(wrapped, remove ? '\n' : `\n${inner}`);
+      const regToken = `(?:^\\s+)?\\/\\/\\{TOKEN:(?:\\^|\\$)${token}\\}\\n`;
+      _src = _src.replace(
+        new RegExp(`${regToken}(?<inner>[\\s\\S]*?)(?=${regToken})${regToken}`, 'gm'),
+        remove ? '' : '$1'
+      );
     }
   });
   

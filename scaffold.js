@@ -42,7 +42,7 @@ const merge = require('./utils/merge');
 const sortObj = require('./utils/sortObj');
 const getFileList = require('./utils/getFileList');
 
-async function scaffold() {  
+async function scaffold() {
   // NOTE - inquirer is very slow to load, so only bring it in when needed
   const { prompt } = require('inquirer');
   
@@ -330,6 +330,17 @@ async function scaffold() {
       }
       
       if (addClient) packageJSON.devDependencies['browser-sync'] = '2.26.12';
+      
+      await addParsedFile(
+        'watcher.js',
+        'static/node',
+        '',
+        [
+          { token: 'WATCHER__CLIENT', remove: !addClient },
+          { token: 'WATCHER__LOGGER', remove: !logger },
+          { token: 'WATCHER__SERVER', remove: !addServer },
+        ]
+      );
     }
     
     if (logger) {
@@ -353,10 +364,14 @@ async function scaffold() {
     
     if (addClient) {
       mkdirp.sync(`${PATH__PROJECT_ROOT}/src/client`);
+      
+      // TODO - copy over Svelte app
     }
     
     if (addServer) {
       mkdirp.sync(`${PATH__PROJECT_ROOT}/src/server`);
+      
+      // TODO - copy over server
     }
     
     if (addClient || addServer) {
@@ -373,17 +388,14 @@ async function scaffold() {
         ]
       );
     }
-    
-    // TODO
-    // - watcher needs tokens for client and server
-    // - copy over Svelte app
-    // - create/copy over server code
   }
 
   const containerPlatform = 'docker';
   if (containerPlatform === 'docker') {
-    // copy over docker stuff
+    // TODO copy over docker stuff
   }
+  
+  // TODO - add .github/workflows
   
   await Promise.all([
     copyFile(`${PATH__SOURCE_ROOT}/static/.gitignore`, `${PATH__PROJECT_ROOT}/.gitignore`),
