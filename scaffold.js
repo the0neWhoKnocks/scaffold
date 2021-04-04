@@ -1,6 +1,5 @@
 const {
   existsSync,
-  promises: { copyFile },
   writeFileSync,
 } = require('fs');
 const { dirname, resolve } = require('path');
@@ -41,6 +40,10 @@ const addParsedFile = require('./utils/addParsedFile')({
 const merge = require('./utils/merge');
 const sortObj = require('./utils/sortObj');
 const getFileList = require('./utils/getFileList');
+const copyFile = require('./utils/copyFile')({
+  outputRoot: PATH__PROJECT_ROOT,
+  staticRoot: `${PATH__SOURCE_ROOT}/static`,
+});
 
 async function scaffold() {
   // NOTE - inquirer is very slow to load, so only bring it in when needed
@@ -224,6 +227,10 @@ async function scaffold() {
     staticFiles,
   } = (middleware || {});
   
+  const filesToCopy = [
+    copyFile(`/.gitignore`, '/'),
+  ];
+  
   if (projectType === 'node') {
     if (removePreviousScaffold) {
       const del = require('del');
@@ -371,7 +378,9 @@ async function scaffold() {
     if (addClient) {
       mkdirp.sync(`${PATH__PROJECT_ROOT}/src/client`);
       
-      // TODO - copy over Svelte app
+      if (clientFramework === 'svelte') {
+        filesToCopy.push(copyFile('/node/client/svelte/app.js', `/src/client/`));
+      }
     }
     
     if (addServer) {
@@ -403,9 +412,7 @@ async function scaffold() {
   
   // TODO - add .github/workflows
   
-  await Promise.all([
-    copyFile(`${PATH__SOURCE_ROOT}/static/.gitignore`, `${PATH__PROJECT_ROOT}/.gitignore`),
-  ]);
+  await Promise.all(filesToCopy.map(fn => fn()));
   
   const fileList = await getFileList(PATH__PROJECT_ROOT);
   console.log([
