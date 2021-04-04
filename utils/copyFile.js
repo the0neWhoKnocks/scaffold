@@ -7,5 +7,5 @@ module.exports = ({
 }) => function copyFile(srcFile, outputPath) {
   const _srcFile = `${staticRoot}/${srcFile}`;
   const filename = basename(_srcFile);
-  return () => fsCopyFile(_srcFile, `${outputRoot}${outputPath}/${filename}`);
+  return () => fsCopyFile(_srcFile, `${outputRoot}/${outputPath}/${filename}`);
 }
