@@ -4,29 +4,29 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 const IgnoreEmitPlugin = require('ignore-emit-webpack-plugin');
-//{TOKEN:^WP__SVELTE_MODULES}
+//TOKEN:^WP__SVELTE_MODULES
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-//{TOKEN:$WP__SVELTE_MODULES}
+//TOKEN:$WP__SVELTE_MODULES
 
 const HASH_LENGTH = 5;
 const alias = {
-  //{TOKEN:^WP__SVELTE_ALIAS}
+  //TOKEN:^WP__SVELTE_ALIAS
   svelte: resolve('node_modules', 'svelte'),
-  //{TOKEN:$WP__SVELTE_ALIAS}
+  //TOKEN:$WP__SVELTE_ALIAS
 };
 const extensions = [
-  //{TOKEN:^WP__SVELTE_EXT}
+  //TOKEN:^WP__SVELTE_EXT
   '.svelte',
-  //{TOKEN:$WP__SVELTE_EXT}
+  //TOKEN:$WP__SVELTE_EXT
   '.mjs',
   '.js',
   '.json',
   '.html',
 ];
 const mainFields = [
-  //{TOKEN:^WP__SVELTE_MAIN}
+  //TOKEN:^WP__SVELTE_MAIN
   'svelte',
-  //{TOKEN:$WP__SVELTE_MAIN}
+  //TOKEN:$WP__SVELTE_MAIN
   'module',
   'browser',
   'main',
@@ -42,7 +42,7 @@ module.exports = {
   mode,
   module: {
     rules: [
-      //{TOKEN:^WP__SVELTE_LOADERS}
+      //TOKEN:^WP__SVELTE_LOADERS
       {
         test: /\.(svelte|html)$/,
         use: {
@@ -66,7 +66,7 @@ module.exports = {
           },
         ],
       },
-      //{TOKEN:$WP__SVELTE_LOADERS}
+      //TOKEN:$WP__SVELTE_LOADERS
     ]
   },
   optimization: {
@@ -108,11 +108,11 @@ module.exports = {
     new webpack.DefinePlugin({
       'process.env.WP_BUNDLE': JSON.stringify(true),
     }),
-    //{TOKEN:^WP__SVELTE_PLUGINS}
+    //TOKEN:^WP__SVELTE_PLUGINS
     new MiniCssExtractPlugin({
       filename: `[name]_[chunkhash:${HASH_LENGTH}].css`,
     }),
-    //{TOKEN:$WP__SVELTE_PLUGINS}
+    //TOKEN:$WP__SVELTE_PLUGINS
     /**
      * WP tries to emit the JS files for extracted CSS files, this prevents that
      */
