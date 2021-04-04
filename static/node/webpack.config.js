@@ -37,7 +37,7 @@ const dev = mode === 'development';
 module.exports = {
   devtool: dev && 'source-map',
   entry: {
-    'js/app': resolve(__dirname, './src/app'),
+    'js/app': resolve(__dirname, './src/client/index.js'),
   },
   mode,
   module: {

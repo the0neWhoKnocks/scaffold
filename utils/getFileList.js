@@ -19,7 +19,13 @@ module.exports = async function getFileList(dirPath, filesArr = [], subDir) {
   for (let i=0; i<rawPaths.folders.length; i++) {
     const currPath = rawPaths.folders[i];
     _filesArr.push(currPath);
-    await getFileList(currPath, _filesArr, true);
+    
+    if (!currPath.includes('node_modules')) {  
+      await getFileList(currPath, _filesArr, true);
+    }
+    else {
+      _filesArr.push(`${currPath}[ Not Expanded ]`);
+    }
   }
   // add files
   _filesArr.push(...rawPaths.files);
