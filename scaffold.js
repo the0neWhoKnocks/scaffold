@@ -76,6 +76,10 @@ async function scaffold() {
       message: 'Standards',
       type: 'checkbox',
       name: 'standards',
+      filter: answers => answers.reduce((obj, a) => {
+        obj[a] = true;
+        return obj;
+      }, {}),
       choices: [
         { name: 'ESLint', value: 'eslint', checked: true }
       ],
@@ -227,6 +231,7 @@ async function scaffold() {
     staticFiles,
   } = (middleware || {});
   
+  const clientFrameworkIsSvelte = clientFramework === 'svelte';
   const filesToCopy = [
     copyFile(`/.gitignore`, '/'),
   ];
@@ -265,11 +270,9 @@ async function scaffold() {
       devDependencies: {},
     };
     
-    if (standards.includes('eslint')) {
-      packageJSON.devDependencies['eslint'] = '7.5.0';
-    }
-    
     if (addServer) {
+      mkdirp.sync(`${PATH__PROJECT_ROOT}/src/server`);
+      
       switch(serverFramework) {
         case 'express': {
           packageJSON.devDependencies['express'] = '4.17.1';
@@ -290,23 +293,15 @@ async function scaffold() {
         packageJSON.dependencies['supports-color'] = '7.2.0';
         packageJSON.dependencies['ws'] = '7.3.1';
       }
+      
+      // TODO - copy over server
     }
     
     if (addClient) {
-      switch(clientFramework) {
-        case 'svelte': {
-          packageJSON.devDependencies['svelte'] = '3.29.0';
-          
-          if (standards.includes('eslint')) {
-            packageJSON.devDependencies['eslint-plugin-svelte3'] = '3.0.0';
-          }
-        }
-      }
+      mkdirp.sync(`${PATH__PROJECT_ROOT}/src/client`);
       
       switch(bundler) {
         case 'webpack': {
-          const usingSvelte = clientFramework === 'svelte';
-          
           packageJSON.devDependencies['clean-webpack-plugin'] = '3.0.0';
           packageJSON.devDependencies['css-loader'] = '4.3.0';
           packageJSON.devDependencies['ignore-emit-webpack-plugin'] = '2.0.3';
@@ -317,22 +312,28 @@ async function scaffold() {
           packageJSON.devDependencies['webpack-cli'] = '3.3.12';
           packageJSON.devDependencies['webpack-manifest-plugin'] = '2.2.0';
           
-          if (usingSvelte) packageJSON.devDependencies['svelte-loader'] = '2.13.6';
+          if (clientFrameworkIsSvelte) packageJSON.devDependencies['svelte-loader'] = '2.13.6';
           
           await addParsedFile(
             'webpack.config.js',
             'static/node',
             '',
             [
-              { token: 'WP__SVELTE_ALIAS', remove: !usingSvelte },
-              { token: 'WP__SVELTE_EXT', remove: !usingSvelte },
-              { token: 'WP__SVELTE_LOADERS', remove: !usingSvelte },
-              { token: 'WP__SVELTE_MAIN', remove: !usingSvelte },
-              { token: 'WP__SVELTE_MODULES', remove: !usingSvelte },
-              { token: 'WP__SVELTE_PLUGINS', remove: !usingSvelte },
+              { token: 'WP__SVELTE_ALIAS', remove: !clientFrameworkIsSvelte },
+              { token: 'WP__SVELTE_EXT', remove: !clientFrameworkIsSvelte },
+              { token: 'WP__SVELTE_LOADERS', remove: !clientFrameworkIsSvelte },
+              { token: 'WP__SVELTE_MAIN', remove: !clientFrameworkIsSvelte },
+              { token: 'WP__SVELTE_MODULES', remove: !clientFrameworkIsSvelte },
+              { token: 'WP__SVELTE_PLUGINS', remove: !clientFrameworkIsSvelte },
             ]
           );
         }
+      }
+      
+      if (clientFrameworkIsSvelte) {
+        packageJSON.devDependencies['svelte'] = '3.29.0';
+        
+        filesToCopy.push(copyFile('/node/client/svelte/app.js', `/src/client/`));
       }
     }
     
@@ -370,25 +371,6 @@ async function scaffold() {
       packageJSON.dependencies[logger] = moduleVersion;
     }
     
-    packageJSON.dependencies = sortObj(packageJSON.dependencies);
-    packageJSON.devDependencies = sortObj(packageJSON.devDependencies);
-    packageJSON.scripts = sortObj(packageJSON.scripts);
-    writeFileSync(`${PATH__PROJECT_ROOT}/package.json`, JSON.stringify(packageJSON, null, 2), 'utf8');
-    
-    if (addClient) {
-      mkdirp.sync(`${PATH__PROJECT_ROOT}/src/client`);
-      
-      if (clientFramework === 'svelte') {
-        filesToCopy.push(copyFile('/node/client/svelte/app.js', `/src/client/`));
-      }
-    }
-    
-    if (addServer) {
-      mkdirp.sync(`${PATH__PROJECT_ROOT}/src/server`);
-      
-      // TODO - copy over server
-    }
-    
     if (addClient || addServer) {
       await addParsedFile(
         'constants.js',
@@ -396,13 +378,35 @@ async function scaffold() {
         'src',
         [
           { token: 'CONST__APP_TITLE', replacement: appTitle },
-          { token: 'CONST__SVELTE_MNT', remove: clientFramework !== 'svelte' },
+          { token: 'CONST__SVELTE_MNT', remove: !clientFrameworkIsSvelte },
           { token: 'CONST__LOGGER_NAMESPACE', remove: !logger },
           { token: 'CONST__LOGGER_NAMESPACE', replacement: loggerNamespace || '--' },
           { token: 'CONST__WS_MESSAGES', remove: !webSocket },
         ]
       );
     }
+    
+    if (standards.eslint) {
+      packageJSON.devDependencies['eslint'] = '7.5.0';
+      
+      if (clientFrameworkIsSvelte) {
+        packageJSON.devDependencies['eslint-plugin-svelte3'] = '3.0.0';
+      }
+      
+      await addParsedFile(
+        '.eslintrc.js',
+        'static/node',
+        '',
+        [
+          { token: 'LINT__SVELTE', remove: !clientFrameworkIsSvelte },
+        ]
+      );
+    }
+    
+    packageJSON.dependencies = sortObj(packageJSON.dependencies);
+    packageJSON.devDependencies = sortObj(packageJSON.devDependencies);
+    packageJSON.scripts = sortObj(packageJSON.scripts);
+    writeFileSync(`${PATH__PROJECT_ROOT}/package.json`, JSON.stringify(packageJSON, null, 2), 'utf8');
   }
 
   const containerPlatform = 'docker';
