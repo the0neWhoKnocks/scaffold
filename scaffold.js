@@ -148,6 +148,7 @@ async function scaffold() {
       type: 'list',
       name: 'clientFramework',
       when: ({ addClient }) => addClient,
+      default: 'svelte',
       choices: [
         { name: 'None', value: 'none' },
         { name: 'Svelte', value: 'svelte' },
@@ -158,11 +159,16 @@ async function scaffold() {
       type: 'list',
       name: 'bundler',
       when: ({ addClient }) => addClient,
-      choices: [
-        { name: 'None', value: 'none' },
-        { name: 'Webpack', value: 'webpack' },
-        // { name: 'Rollup', value: 'rollup' },
-      ],
+      choices: ({ clientFramework }) => {
+        return [
+          { name: 'None', value: 'none' },
+          { name: 'Webpack', value: 'webpack' },
+          // { name: 'Rollup', value: 'rollup' },
+        ].filter(q => {
+          if (clientFramework !== 'svelte') return true;
+          return clientFramework === 'svelte' && q.value !== 'none';
+        });
+      },
     },
     {
       message: 'Dev Options',
