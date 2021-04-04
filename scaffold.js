@@ -233,7 +233,7 @@ async function scaffold() {
   
   const clientFrameworkIsSvelte = clientFramework === 'svelte';
   const filesToCopy = [
-    copyFile(`/.gitignore`, '/'),
+    copyFile(`.gitignore`, ''),
   ];
   
   if (projectType === 'node') {
@@ -333,7 +333,7 @@ async function scaffold() {
       if (clientFrameworkIsSvelte) {
         packageJSON.devDependencies['svelte'] = '3.29.0';
         
-        filesToCopy.push(copyFile('/node/client/svelte/app.js', `/src/client/`));
+        filesToCopy.push(copyFile('node/client/svelte/app.js', `src/client`));
       }
     }
     
