@@ -93,6 +93,7 @@ async function scaffold() {
       message: 'Server Framework',
       type: 'list',
       name: 'serverFramework',
+      default: 'polka',
       when: ({ addServer }) => addServer,
       choices: [
         { name: 'Node', value: 'node' },
@@ -212,6 +213,7 @@ async function scaffold() {
     devOptions,
     loggerNamespace,
     removePreviousScaffold,
+    serverFramework,
     serverOptions,
     standards,
   } = scaffoldOpts;
@@ -221,7 +223,6 @@ async function scaffold() {
   } = (devOptions || {});
   const {
     externalRequests,
-    framework: serverFramework,
     middleware,
     webSocket,
   } = (serverOptions || {});
@@ -232,6 +233,9 @@ async function scaffold() {
   } = (middleware || {});
   
   const clientFrameworkIsSvelte = clientFramework === 'svelte';
+  const bundlerIsWebpack = bundler === 'webpack';
+  const serverFrameworkIsExpress = serverFramework === 'express';
+  const serverFrameworkIsPolka = serverFramework === 'polka';
   const filesToCopy = [
     copyFile(`.gitignore`, ''),
   ];
@@ -273,15 +277,11 @@ async function scaffold() {
     if (addServer) {
       mkdirp.sync(`${PATH__PROJECT_ROOT}/src/server`);
       
-      switch(serverFramework) {
-        case 'express': {
-          packageJSON.devDependencies['express'] = '4.17.1';
-          break;
-        }
-        case 'polka': {
-          packageJSON.devDependencies['polka'] = '1.0.0-next.13';
-          break;
-        }
+      if (serverFrameworkIsPolka) {
+        packageJSON.devDependencies['polka'] = '1.0.0-next.13';
+      }
+      else if (serverFrameworkIsExpress) {
+        packageJSON.devDependencies['express'] = '4.17.1';
       }
       
       if (externalRequests) packageJSON.dependencies['teeny-request'] = '7.0.1';
@@ -294,46 +294,76 @@ async function scaffold() {
         packageJSON.dependencies['ws'] = '7.3.1';
       }
       
-      // TODO - copy over server
+      await addParsedFile(
+        'index.js',
+        'node/server',
+        'src/server',
+        [
+          { token: 'SERVER__COMPRESS', remove: !compression },
+          { token: 'SERVER__COOKIES', remove: !cookies },
+          { token: 'SERVER__FRAMEWORK__POLKA', remove: !serverFrameworkIsPolka },
+          { token: 'SERVER__STATIC', remove: !staticFiles },
+          { token: 'SERVER__WEBSOCKET', remove: !webSocket },
+        ]
+      );
+      await addParsedFile(
+        'shell.js',
+        'node/server',
+        'src/server',
+        [
+          { token: 'SHELL__BUNDLER__WEBPACK', remove: !bundlerIsWebpack },
+          { token: 'SHELL__HEROKU', remove: true },
+          { token: 'SHELL__SVELTE', remove: !clientFrameworkIsSvelte },
+        ]
+      );
+      
+      if (webSocket) {
+        filesToCopy.push(copyFile('node/server/socket.js', `src/server`));
+      }
     }
     
     if (addClient) {
       mkdirp.sync(`${PATH__PROJECT_ROOT}/src/client`);
       
-      switch(bundler) {
-        case 'webpack': {
-          packageJSON.devDependencies['clean-webpack-plugin'] = '3.0.0';
-          packageJSON.devDependencies['css-loader'] = '4.3.0';
-          packageJSON.devDependencies['ignore-emit-webpack-plugin'] = '2.0.3';
-          packageJSON.devDependencies['mini-css-extract-plugin'] = '0.12.0';
-          packageJSON.devDependencies['optimize-css-assets-webpack-plugin'] = '5.0.4';
-          packageJSON.devDependencies['terser-webpack-plugin'] = '4.2.3';
-          packageJSON.devDependencies['webpack'] = '4.44.2';
-          packageJSON.devDependencies['webpack-cli'] = '3.3.12';
-          packageJSON.devDependencies['webpack-manifest-plugin'] = '2.2.0';
-          
-          if (clientFrameworkIsSvelte) packageJSON.devDependencies['svelte-loader'] = '2.13.6';
-          
-          await addParsedFile(
-            'webpack.config.js',
-            'node',
-            '',
-            [
-              { token: 'WP__SVELTE_ALIAS', remove: !clientFrameworkIsSvelte },
-              { token: 'WP__SVELTE_EXT', remove: !clientFrameworkIsSvelte },
-              { token: 'WP__SVELTE_LOADERS', remove: !clientFrameworkIsSvelte },
-              { token: 'WP__SVELTE_MAIN', remove: !clientFrameworkIsSvelte },
-              { token: 'WP__SVELTE_MODULES', remove: !clientFrameworkIsSvelte },
-              { token: 'WP__SVELTE_PLUGINS', remove: !clientFrameworkIsSvelte },
-            ]
-          );
-        }
+      if (bundlerIsWebpack) {
+        packageJSON.devDependencies['clean-webpack-plugin'] = '3.0.0';
+        packageJSON.devDependencies['css-loader'] = '4.3.0';
+        packageJSON.devDependencies['ignore-emit-webpack-plugin'] = '2.0.3';
+        packageJSON.devDependencies['mini-css-extract-plugin'] = '0.12.0';
+        packageJSON.devDependencies['optimize-css-assets-webpack-plugin'] = '5.0.4';
+        packageJSON.devDependencies['terser-webpack-plugin'] = '4.2.3';
+        packageJSON.devDependencies['webpack'] = '4.44.2';
+        packageJSON.devDependencies['webpack-cli'] = '3.3.12';
+        packageJSON.devDependencies['webpack-manifest-plugin'] = '2.2.0';
+        
+        if (clientFrameworkIsSvelte) packageJSON.devDependencies['svelte-loader'] = '2.13.6';
+        
+        await addParsedFile(
+          'webpack.config.js',
+          'node',
+          '',
+          [
+            { token: 'WP__SVELTE_ALIAS', remove: !clientFrameworkIsSvelte },
+            { token: 'WP__SVELTE_EXT', remove: !clientFrameworkIsSvelte },
+            { token: 'WP__SVELTE_LOADERS', remove: !clientFrameworkIsSvelte },
+            { token: 'WP__SVELTE_MAIN', remove: !clientFrameworkIsSvelte },
+            { token: 'WP__SVELTE_MODULES', remove: !clientFrameworkIsSvelte },
+            { token: 'WP__SVELTE_PLUGINS', remove: !clientFrameworkIsSvelte },
+          ]
+        );
       }
       
       if (clientFrameworkIsSvelte) {
         packageJSON.devDependencies['svelte'] = '3.29.0';
         
-        filesToCopy.push(copyFile('node/client/svelte/app.js', `src/client`));
+        filesToCopy.push(
+          copyFile('node/client/svelte/app.svelte', `src/client`),
+          copyFile('node/client/svelte/index.js', `src/client`),
+        );
+      }
+      
+      if (webSocket) {
+        filesToCopy.push(copyFile('node/client/socket.js', `src/client`));
       }
     }
     
@@ -399,6 +429,18 @@ async function scaffold() {
       );
     }
     
+    mkdirp.sync(`${PATH__PROJECT_ROOT}/src/utils`);
+    
+    await addParsedFile(
+      'logger.js',
+      'node/utils',
+      'src/utils',
+      [
+        { token: 'LOGGER__CUSTOM', remove: !logger },
+        { token: 'LOGGER__DEFAULT', remove: logger },
+      ]
+    );
+    
     if (logger) {
       let moduleVersion;
 
@@ -411,9 +453,6 @@ async function scaffold() {
       
       packageJSON.dependencies['anylogger'] = '1.0.10';
       packageJSON.dependencies[logger] = moduleVersion;
-      
-      mkdirp.sync(`${PATH__PROJECT_ROOT}/src/utils`);
-      filesToCopy.push(copyFile('node/utils/logger.js', `src/utils`));
     }
     
     if (standards.eslint) {
