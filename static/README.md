@@ -1,4 +1,4 @@
-# //{TOKEN:#README__TITLE}
+# //TOKEN:#README__TITLE
 
 ---
 
