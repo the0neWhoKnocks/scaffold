@@ -405,7 +405,8 @@ async function scaffold() {
             token: 'PREP__SERVER_FILE_PATHS',
             replacement: `${prepServerPaths.filter(removeEmpty).join(' \\\n  ')} \\`,
           },
-        ]
+        ],
+        true,
       );
     }
     
@@ -425,7 +426,8 @@ async function scaffold() {
           { token: 'WATCHER__CLIENT', remove: !addClient },
           { token: 'WATCHER__LOGGER', remove: !logger },
           { token: 'WATCHER__SERVER', remove: !addServer },
-        ]
+        ],
+        true,
       );
     }
     
