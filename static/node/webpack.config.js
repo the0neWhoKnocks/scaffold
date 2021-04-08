@@ -1,11 +1,12 @@
 const { resolve } = require('path');
 const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const ManifestPlugin = require('webpack-manifest-plugin');
+const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 const IgnoreEmitPlugin = require('ignore-emit-webpack-plugin');
 //TOKEN:^WP__SVELTE
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 //TOKEN:$WP__SVELTE
 
 const HASH_LENGTH = 5;
@@ -125,7 +126,7 @@ module.exports = {
      * to their corresponding output file so that tools can load them without
      * having to know the hashed name.
      */
-    new ManifestPlugin({
+    new WebpackManifestPlugin({
       filter: ({ isChunk, isInitial, path }) => {
         return (
           (isChunk && isInitial)

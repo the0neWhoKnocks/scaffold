@@ -278,20 +278,20 @@ async function scaffold() {
       mkdirp.sync(`${PATH__PROJECT_ROOT}/src/server`);
       
       if (serverFrameworkIsPolka) {
-        packageJSON.devDependencies['polka'] = '1.0.0-next.13';
+        packageJSON.devDependencies['polka'] = '1.0.0-next.14';
       }
       else if (serverFrameworkIsExpress) {
         packageJSON.devDependencies['express'] = '4.17.1';
       }
       
       if (externalRequests) packageJSON.dependencies['teeny-request'] = '7.0.1';
-      if (compression) packageJSON.dependencies['compression'] = '1.7.1';
+      if (compression) packageJSON.dependencies['compression'] = '1.7.4';
       if (cookies) packageJSON.dependencies['cookie-parser'] = '1.4.5';
-      if (staticFiles) packageJSON.dependencies['sirv'] = '0.4.0';
+      if (staticFiles) packageJSON.dependencies['sirv'] = '1.0.11';
       if (webSocket) {
-        packageJSON.dependencies['bufferutil'] = '4.0.1';
-        packageJSON.dependencies['supports-color'] = '7.2.0';
-        packageJSON.dependencies['ws'] = '7.3.1';
+        packageJSON.dependencies['bufferutil'] = '4.0.3';
+        packageJSON.dependencies['supports-color'] = '8.1.1';
+        packageJSON.dependencies['ws'] = '7.4.4';
       }
       
       await addParsedFile(
@@ -327,16 +327,18 @@ async function scaffold() {
       
       if (bundlerIsWebpack) {
         packageJSON.devDependencies['clean-webpack-plugin'] = '3.0.0';
-        packageJSON.devDependencies['css-loader'] = '4.3.0';
-        packageJSON.devDependencies['ignore-emit-webpack-plugin'] = '2.0.3';
-        packageJSON.devDependencies['mini-css-extract-plugin'] = '0.12.0';
-        packageJSON.devDependencies['optimize-css-assets-webpack-plugin'] = '5.0.4';
-        packageJSON.devDependencies['terser-webpack-plugin'] = '4.2.3';
-        packageJSON.devDependencies['webpack'] = '4.44.2';
-        packageJSON.devDependencies['webpack-cli'] = '3.3.12';
-        packageJSON.devDependencies['webpack-manifest-plugin'] = '2.2.0';
+        packageJSON.devDependencies['ignore-emit-webpack-plugin'] = '2.0.6';
+        packageJSON.devDependencies['terser-webpack-plugin'] = '5.1.1';
+        packageJSON.devDependencies['webpack'] = '5.31.0';
+        packageJSON.devDependencies['webpack-cli'] = '4.6.0';
+        packageJSON.devDependencies['webpack-manifest-plugin'] = '3.1.1';
         
-        if (clientFrameworkIsSvelte) packageJSON.devDependencies['svelte-loader'] = '2.13.6';
+        if (clientFrameworkIsSvelte) {
+          packageJSON.devDependencies['css-loader'] = '5.2.0';
+          packageJSON.devDependencies['css-minimizer-webpack-plugin'] = '1.3.0';
+          packageJSON.devDependencies['mini-css-extract-plugin'] = '1.4.1';
+          packageJSON.devDependencies['svelte-loader'] = '3.1.0';
+        }
         
         await addParsedFile(
           'webpack.config.js',
@@ -349,7 +351,7 @@ async function scaffold() {
       }
       
       if (clientFrameworkIsSvelte) {
-        packageJSON.devDependencies['svelte'] = '3.29.0';
+        packageJSON.devDependencies['svelte'] = '3.37.0';
         
         filesToCopy.push(
           copyFile('node/client/svelte/app.svelte', `src/client`),
@@ -408,10 +410,10 @@ async function scaffold() {
     if (hasWatcher) {
       if (addServer) {
         packageJSON.devDependencies['chokidar'] = '3.5.1';
-        packageJSON.devDependencies['nodemon'] = '2.0.4';
+        packageJSON.devDependencies['nodemon'] = '2.0.7';
       }
       
-      if (addClient) packageJSON.devDependencies['browser-sync'] = '2.26.12';
+      if (addClient) packageJSON.devDependencies['browser-sync'] = '2.26.14';
       
       await addParsedFile(
         'watcher.js',
@@ -448,15 +450,15 @@ async function scaffold() {
         }
       }
       
-      packageJSON.dependencies['anylogger'] = '1.0.10';
+      packageJSON.dependencies['anylogger'] = '1.0.11';
       packageJSON.dependencies[logger] = moduleVersion;
     }
     
     if (standards.eslint) {
-      packageJSON.devDependencies['eslint'] = '7.5.0';
+      packageJSON.devDependencies['eslint'] = '7.23.0';
       
       if (clientFrameworkIsSvelte) {
-        packageJSON.devDependencies['eslint-plugin-svelte3'] = '3.0.0';
+        packageJSON.devDependencies['eslint-plugin-svelte3'] = '3.1.2';
       }
       
       await addParsedFile(
