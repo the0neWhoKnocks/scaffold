@@ -7,15 +7,18 @@ const constants = {
   //TOKEN:^CONST__LOGGER_NAMESPACE
   LOGGER__NAMESPACE: '//TOKEN:#CONST__LOGGER_NAMESPACE',
   //TOKEN:$CONST__LOGGER_NAMESPACE
-  //TOKEN:^CONST__WS_MESSAGES
+  //TOKEN:^CONST__WEB_SOCKETS
   WS__CLOSE_CODE__USER_REMOVED: 4000, // Close event numbers https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
-  //TOKEN:$CONST__WS_MESSAGES
+  WS__EXAMPLE_MSG: 'test one two',
+  //TOKEN:$CONST__WEB_SOCKETS
 };
 
+//TOKEN:^CONST__SERVER
 // Server only
 if (!process.env.FOR_CLIENT_BUNDLE) {
   constants.DISCONNECT_TIMEOUT = 5000;
   constants.SERVER__PORT = +process.env.SERVER_PORT || 3000;
 }
+//TOKEN:$CONST__SERVER
 
 module.exports = constants;

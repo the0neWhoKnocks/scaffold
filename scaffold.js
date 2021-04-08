@@ -353,8 +353,16 @@ async function scaffold() {
       if (clientFrameworkIsSvelte) {
         packageJSON.devDependencies['svelte'] = '3.37.0';
         
+        await addParsedFile(
+          'app.svelte',
+          'node/client/svelte',
+          'src/client',
+          [
+            { token: 'APP__WEB_SOCKET', remove: !webSocket },
+          ]
+        );
+        
         filesToCopy.push(
-          copyFile('node/client/svelte/app.svelte', `src/client`),
           copyFile('node/client/svelte/index.js', `src/client`),
         );
       }
@@ -374,7 +382,8 @@ async function scaffold() {
           { token: 'CONST__SVELTE_MNT', remove: !clientFrameworkIsSvelte },
           { token: 'CONST__LOGGER_NAMESPACE', remove: !logger },
           { token: 'CONST__LOGGER_NAMESPACE', replacement: loggerNamespace || '--' },
-          { token: 'CONST__WS_MESSAGES', remove: !webSocket },
+          { token: 'CONST__SERVER', remove: !addServer },
+          { token: 'CONST__WEB_SOCKETS', remove: !webSocket },
         ]
       );
       
