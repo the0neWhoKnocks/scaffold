@@ -1,0 +1,4 @@
+# In some IDE's it detects any `.eslintrc.js` file and tries to lint files.
+# Since `static` contains such a file, it can throw errors in those files
+# since eslint isn't installed for this repo. For now, just ignore everything.
+**/*.js
