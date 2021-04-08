@@ -343,12 +343,7 @@ async function scaffold() {
           'node',
           '',
           [
-            { token: 'WP__SVELTE_ALIAS', remove: !clientFrameworkIsSvelte },
-            { token: 'WP__SVELTE_EXT', remove: !clientFrameworkIsSvelte },
-            { token: 'WP__SVELTE_LOADERS', remove: !clientFrameworkIsSvelte },
-            { token: 'WP__SVELTE_MAIN', remove: !clientFrameworkIsSvelte },
-            { token: 'WP__SVELTE_MODULES', remove: !clientFrameworkIsSvelte },
-            { token: 'WP__SVELTE_PLUGINS', remove: !clientFrameworkIsSvelte },
+            { token: 'WP__SVELTE', remove: !clientFrameworkIsSvelte },
           ]
         );
       }
