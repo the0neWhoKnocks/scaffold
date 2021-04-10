@@ -12,13 +12,15 @@
   //TOKEN:^APP__WEB_SOCKET
   let wsData = [];
   
+  log.info('App starting');
+  
   async function init() {
     let socketAPI;
     try {
       let logNdx = 1;
       socketAPI = await connectToSocket();
       socketAPI.on(WS__CLOSE_CODE__USER_REMOVED, () => {
-        log('User disconnected');
+        log.info('User disconnected');
       });
       
       socketAPI.on(WS__EXAMPLE_MSG, ({ msg }) => {
@@ -33,7 +35,7 @@
       
       wsData = [...wsData, 'Connected to Server socket'];
     }
-    catch(err) { log(err); }
+    catch(err) { log.error(err); }
   }
   
   init();

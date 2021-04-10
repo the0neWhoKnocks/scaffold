@@ -46,8 +46,8 @@ const { server } = polka()
     }));
   })
   .listen(SERVER__PORT, err => {
-    if (err) log('Error', err);
-    log(`Server running at: http://localhost:${SERVER__PORT}`);
+    if (err) log.error('Error', err);
+    log.info(`Server running at: http://localhost:${SERVER__PORT}`);
   });
 
 //TOKEN:^SERVER__WEBSOCKET
@@ -55,7 +55,7 @@ const serverSocket = socket(server);
 
 // TODO - https://github.com/the0neWhoKnocks/sloff/blob/master/src/server/socket/index.js
 // function handleServerDeath(signal) {
-//   log(`\n[${signal}] Server closing`);
+//   log.info(`\n[${signal}] Server closing`);
 // 
 //   // NOTE - I've seen this NOT work if there are some zombie WS processes
 //   // floating around from a previous bad run. So try killing all `node`
@@ -67,7 +67,7 @@ const serverSocket = socket(server);
 //   serverSocket.serverInstance.close();
 // 
 //   server.close(() => {
-//     log(`[${signal}] Server closed`);
+//     log.info(`[${signal}] Server closed`);
 //     process.exit(0);
 //   });
 // }

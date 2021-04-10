@@ -6,13 +6,13 @@ module.exports = function socket(server) {
   const wss = new Server({ server });
   
   wss.on('connection', function connected(socket) {
-    log('Client connected');
+    log.info('Client connected');
     server.clientSocket = socket;
     
     socket.on('message', (payload) => {
       const { data, type } = JSON.parse(payload);
     
-      log(`[HANDLE] "${ type }"`);
+      log.info(`[HANDLE] "${ type }"`);
       
       switch(type) {
         case WS__EXAMPLE_MSG: {
@@ -27,7 +27,7 @@ module.exports = function socket(server) {
     });
     
     socket.on('close', (code, reason) => {
-      log(`User disconnected | ${code} | ${reason}`);
+      log.info(`User disconnected | ${code} | ${reason}`);
       delete server.clientSocket;
     });
   });
