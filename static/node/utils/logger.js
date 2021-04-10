@@ -1,3 +1,4 @@
+require('ulog');
 const { LOGGER__NAMESPACE } = require('../constants');
 
 //TOKEN:^LOGGER__DEFAULT
@@ -31,22 +32,10 @@ if (
 else {
   const aL = require('anylogger');
   const rootLogger = aL(LOGGER__NAMESPACE);
-  const enabled = [
-    `${LOGGER__NAMESPACE}:*`,
-  ];
-  // TODO
-  // const disabled = [
-  //   `-${LOGGER__NAMESPACE}:*heartbeat*`,
-  // ];
-
-  // TODO - logging not working
   
   logger = (namespace = '') => (namespace)
     ? aL(`${LOGGER__NAMESPACE}:${namespace}`)
     : rootLogger;
-  
-  // TODO
-  // debug.enable( [ ...enabled, ...disabled ].join(',') );
 }
 //TOKEN:$LOGGER__CUSTOM
 

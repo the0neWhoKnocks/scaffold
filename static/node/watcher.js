@@ -129,6 +129,7 @@ const fileGate = (waitForFileBeforeStart)
 //TOKEN:^WATCHER__SERVER
 const watchedServerFiles = [
   './src/server/**/*.js',
+  './src/utils/**/*.js',
   './src/constants.js',
 ];
 //TOKEN:$WATCHER__SERVER
