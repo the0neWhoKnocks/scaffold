@@ -21,22 +21,12 @@ function l(namespace) {
 const logger = l;
 //TOKEN:$LOGGER__DEFAULT
 //TOKEN:^LOGGER__CUSTOM
-let logger;
+const aL = require('anylogger');
+const rootLogger = aL(LOGGER__NAMESPACE);
 
-if (
-  process.env.NODE_ENV === 'production'
-  && process.env.FOR_CLIENT_BUNDLE
-) {
-  logger = () => () => {};
-}
-else {
-  const aL = require('anylogger');
-  const rootLogger = aL(LOGGER__NAMESPACE);
-  
-  logger = (namespace = '') => (namespace)
-    ? aL(`${LOGGER__NAMESPACE}:${namespace}`)
-    : rootLogger;
-}
+const logger = (namespace = '') => (namespace)
+  ? aL(`${LOGGER__NAMESPACE}:${namespace}`)
+  : rootLogger;
 //TOKEN:$LOGGER__CUSTOM
 
 module.exports = logger;

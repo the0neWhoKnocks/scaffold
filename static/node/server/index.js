@@ -23,7 +23,7 @@ const sirv = require('sirv');
 const {
   SERVER__PORT,
   //TOKEN:^SERVER__WEBSOCKET
-  WS__MSG_TYPE__SERVER_DOWN,
+  WS__MSG__SERVER_DOWN,
   //TOKEN:$SERVER__WEBSOCKET
 } = require('../constants');
 const log = require('../utils/logger')('server');
@@ -110,28 +110,27 @@ server.listen(SERVER__PORT, err => {
 //TOKEN:^SERVER__WEBSOCKET
 const serverSocket = socket(server);
 
-// TODO - https://github.com/the0neWhoKnocks/sloff/blob/master/src/server/socket/index.js
-// function handleServerDeath(signal) {
-//   log.info(`\n[${signal}] Server closing`);
-// 
-//   // NOTE - I've seen this NOT work if there are some zombie WS processes
-//   // floating around from a previous bad run. So try killing all `node`
-//   // instances and see if things work after.
-//   // NOTE - This also only works when the WS isn't being proxied via BrowserSync
-//   // while in development. So if you go to the non-proxied port, things will
-//   // behave as expected.
-//   serverSocket.emitToAll(WS__MSG_TYPE__SERVER_DOWN);
-//   serverSocket.serverInstance.close();
-// 
-//   server.close(() => {
-//     log.info(`[${signal}] Server closed`);
-//     process.exit(0);
-//   });
-// }
-// 
-// [
-//   'SIGINT', 
-//   'SIGQUIT',
-//   'SIGTERM', 
-// ].forEach(signal => process.on(signal, handleServerDeath));
+function handleServerDeath(signal) {
+  log.info(`\n[${signal}] Server closing`);
+
+  // NOTE - I've seen this NOT work if there are some zombie WS processes
+  // floating around from a previous bad run. So try killing all `node`
+  // instances and see if things work after.
+  // NOTE - This also only works when the WS isn't being proxied via BrowserSync
+  // while in development. So if you go to the non-proxied port, things will
+  // behave as expected.
+  serverSocket.emitToAll(WS__MSG__SERVER_DOWN);
+  serverSocket.close();
+
+  server.close(() => {
+    log.info(`[${signal}] Server closed`);
+    process.exit(0);
+  });
+}
+
+[
+  'SIGINT', 
+  'SIGQUIT',
+  'SIGTERM', 
+].forEach(signal => process.on(signal, handleServerDeath));
 //TOKEN:$SERVER__WEBSOCKET

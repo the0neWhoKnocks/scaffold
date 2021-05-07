@@ -1,5 +1,5 @@
-const { Server } = require('ws');
-const { WS__EXAMPLE_MSG } = require('../constants');
+const { OPEN, Server } = require('ws');
+const { WS__MSG__EXAMPLE } = require('../constants');
 const log = require('../utils/logger')('server:socket');
 
 module.exports = function socket(server) {
@@ -15,10 +15,10 @@ module.exports = function socket(server) {
       log.info(`[HANDLE] "${ type }"`);
       
       switch(type) {
-        case WS__EXAMPLE_MSG: {
+        case WS__MSG__EXAMPLE: {
           socket.send(JSON.stringify({
             data: { msg: `Client: ${data.d} | Server: ${Date.now()}` },
-            type: WS__EXAMPLE_MSG,
+            type: WS__MSG__EXAMPLE,
           }));
           
           break;
@@ -27,10 +27,21 @@ module.exports = function socket(server) {
     });
     
     socket.on('close', (code, reason) => {
-      log.info(`User disconnected | ${code} | ${reason}`);
+      log.info(`Client disconnected | ${code} | ${reason}`);
       delete server.clientSocket;
     });
   });
   
-  return wss;
+  return {
+    close() {
+      wss.close();
+    },
+    emitToAll(type, data = {}) {
+      wss.clients.forEach((socket) => {
+        if (socket.readyState === OPEN) {
+          socket.send(JSON.stringify({ data, type }));
+        }
+      });
+    },
+  };
 }

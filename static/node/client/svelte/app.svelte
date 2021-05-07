@@ -3,7 +3,7 @@
   //TOKEN:^APP__WEB_SOCKET
   import {
     WS__CLOSE_CODE__USER_REMOVED,
-    WS__EXAMPLE_MSG,
+    WS__MSG__EXAMPLE,
   } from '../constants';
   import { connectToSocket } from './socket';
   //TOKEN:$APP__WEB_SOCKET
@@ -23,13 +23,13 @@
         log.info('User disconnected');
       });
       
-      socketAPI.on(WS__EXAMPLE_MSG, ({ msg }) => {
+      socketAPI.on(WS__MSG__EXAMPLE, ({ msg }) => {
         wsData = [...wsData, msg];
       });
       let count = 0;
       const int = setInterval(() => {
         if (count === 5) clearInterval(int);
-        else socketAPI.emit(WS__EXAMPLE_MSG, { d: Date.now() });
+        else socketAPI.emit(WS__MSG__EXAMPLE, { d: Date.now() });
         count++;
       }, 1000);
       
