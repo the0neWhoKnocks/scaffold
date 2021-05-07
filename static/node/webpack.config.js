@@ -148,4 +148,10 @@ module.exports = {
     entrypoints: false,
   },
   watch: dev,
+  //TOKEN:^WP__FILE_POLLING
+  watchOptions: {
+    aggregateTimeout: 200,
+    poll: 1000,
+  },
+  //TOKEN:$WP__FILE_POLLING
 };
