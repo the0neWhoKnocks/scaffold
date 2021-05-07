@@ -133,13 +133,16 @@ const watchedServerFiles = [
   './src/constants.js',
 ];
 //TOKEN:$WATCHER__SERVER
+const pollForFileChanges = //TOKEN:#WATCHER__FILE_POLLING; // needed for WSL2 systems
+const chokidarOpts = {
+  ignoreInitial: true,
+  usePolling: pollForFileChanges,
+};
 
 fileGate
   .then(() => {
     //TOKEN:^WATCHER__SERVER
-    const serverFilesWatcher = chokidar.watch(watchedServerFiles, {
-      ignoreInitial: true,
-    });
+    const serverFilesWatcher = chokidar.watch(watchedServerFiles, chokidarOpts);
     serverFilesWatcher
       .on('ready', () => {
         //TOKEN:^WATCHER__LOGGER
@@ -170,6 +173,7 @@ fileGate
       delay: 500,
       exec: 'node --inspect',
       ext: 'js json',
+      legacyWatch: pollForFileChanges,
       script: './dist/server',
       // verbose: true,
       watch: watchedServerFiles,
@@ -222,6 +226,7 @@ fileGate
       ui: {
         port: SERVER__PORT + 2,
       },
+      watchOptions: chokidarOpts,
     });
     //TOKEN:$WATCHER__CLIENT
     
