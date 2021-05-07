@@ -8,7 +8,7 @@ const nodemon = require('nodemon');
 const chokidar = require('chokidar');
 //TOKEN:$WATCHER__SERVER
 //TOKEN:^WATCHER__LOGGER
-const logger = require('anylogger')('watcher');
+const logger = require('./src/utils/logger')('watcher');
 //TOKEN:$WATCHER__LOGGER
 const { SERVER__PORT } = require('./src/constants');
 
