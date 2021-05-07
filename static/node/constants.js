@@ -9,7 +9,8 @@ const constants = {
   //TOKEN:$CONST__LOGGER_NAMESPACE
   //TOKEN:^CONST__WEB_SOCKETS
   WS__CLOSE_CODE__USER_REMOVED: 4000, // Close event numbers https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
-  WS__EXAMPLE_MSG: 'test one two',
+  WS__MSG__EXAMPLE: 'test one two',
+  WS__MSG__SERVER_DOWN: 'server down',
   //TOKEN:$CONST__WEB_SOCKETS
 };
 
