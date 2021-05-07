@@ -303,7 +303,7 @@ async function scaffold() {
         'node/server',
         'src/server',
         [
-          { token: 'SERVER__APP_HANDLER', replacement: serverFrameworkIsPolka ? 'app.handler', 'app' },
+          { token: 'SERVER__APP_HANDLER', replacement: serverFrameworkIsPolka ? 'app.handler' : 'app' },
           { token: 'SERVER__COMPRESS', remove: !compression },
           { token: 'SERVER__COOKIES', remove: !cookies },
           { token: 'SERVER__FRAMEWORK__EXPRESS', remove: !serverFrameworkIsExpress },
