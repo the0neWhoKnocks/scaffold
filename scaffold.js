@@ -108,44 +108,45 @@ async function scaffold() {
       name: 'serverOptions',
       when: ({ addServer }) => addServer,
       filter: answers => merge(answers),
-      choices: ({ serverFramework }) => {
-        const middlewareDisabled = serverFramework === 'node';
-        return [
-          {
-            name: 'Will make external requests',
-            short: 'External Requests',
-            value: { externalRequests: true },
-            checked: true,
-          },
-          {
-            name: 'Should support Web Sockets',
-            short: 'Web Socket',
-            value: { webSocket: true },
-            checked: true,
-          },
-          {
-            name: 'Should gzip responses',
-            short: '[middleware] GZip',
-            value: { middleware: { compression: true } },
-            checked: true,
-            disabled: middlewareDisabled,
-          },
-          {
-            name: 'Should be able to read/write cookies',
-            short: '[middleware] Cookies',
-            value: { middleware: { cookies: true } },
-            checked: true,
-            disabled: middlewareDisabled,
-          },
-          {
-            name: 'Will serve static assets',
-            short: '[middleware] Static',
-            value: { middleware: { staticFiles: true } },
-            checked: true,
-            disabled: middlewareDisabled,
-          },
-        ];
-      },
+      choices: [
+        {
+          name: 'Will make external requests',
+          short: 'External Requests',
+          value: { externalRequests: true },
+          checked: false,
+        },
+        {
+          name: 'Will serve static assets',
+          short: '[middleware] Static',
+          value: { middleware: { staticFiles: true } },
+          checked: false,
+        },
+        {
+          name: 'Should support https',
+          short: 'Secure',
+          value: { secure: true },
+          checked: false,
+          disabled: true,
+        },
+        {
+          name: 'Should support Web Sockets',
+          short: 'Web Socket',
+          value: { webSocket: true },
+          checked: false,
+        },
+        {
+          name: 'Should gzip responses',
+          short: '[middleware] GZip',
+          value: { middleware: { compression: true } },
+          checked: false,
+        },
+        {
+          name: 'Should be able to read/write cookies',
+          short: '[middleware] Cookies',
+          value: { middleware: { cookies: true } },
+          checked: false,
+        },
+      ],
     },
     {
       message: 'Add Client',
@@ -225,6 +226,7 @@ async function scaffold() {
   const {
     externalRequests,
     middleware,
+    secure,
     webSocket,
   } = (serverOptions || {});
   const {
@@ -236,6 +238,7 @@ async function scaffold() {
   const clientFrameworkIsSvelte = clientFramework === 'svelte';
   const bundlerIsWebpack = bundler === 'webpack';
   const serverFrameworkIsExpress = serverFramework === 'express';
+  const serverFrameworkIsNode = serverFramework === 'node';
   const serverFrameworkIsPolka = serverFramework === 'polka';
   const filesToCopy = [
     copyFile(`.gitignore`, ''),
@@ -300,10 +303,15 @@ async function scaffold() {
         'node/server',
         'src/server',
         [
+          { token: 'SERVER__APP_HANDLER', replacement: serverFrameworkIsPolka ? 'app.handler', 'app' },
           { token: 'SERVER__COMPRESS', remove: !compression },
           { token: 'SERVER__COOKIES', remove: !cookies },
+          { token: 'SERVER__FRAMEWORK__EXPRESS', remove: !serverFrameworkIsExpress },
+          { token: 'SERVER__FRAMEWORK__NODE', remove: !serverFrameworkIsNode },
           { token: 'SERVER__FRAMEWORK__POLKA', remove: !serverFrameworkIsPolka },
+          { token: 'SERVER__SECURE', remove: !secure },
           { token: 'SERVER__STATIC', remove: !staticFiles },
+          { token: 'SERVER__UNSECURE', remove: secure },
           { token: 'SERVER__WEBSOCKET', remove: !webSocket },
         ]
       );
