@@ -86,7 +86,7 @@ const checkServer = () => new Promise((rootResolve, rootReject) => {
 });
 //TOKEN:$WATCHER__SERVER
 
-const fileCheck = (file, timeout = 5) => new Promise((resolveCheck, rejectCheck) => {
+const fileCheck = (file, timeout = 30) => new Promise((resolveCheck, rejectCheck) => {
   const { existsSync } = require('fs');
   const { resolve } = require('path');
   const filePath = resolve(__dirname, file);
