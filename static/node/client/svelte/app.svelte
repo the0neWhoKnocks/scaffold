@@ -71,6 +71,7 @@
   .ws-data {
     height: 10em;
     color: #00e100;
+    overflow: auto;
     padding: 0.25em 0.5em;
     margin-bottom: 0;
     background: #222;
