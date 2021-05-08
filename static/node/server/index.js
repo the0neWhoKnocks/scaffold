@@ -131,6 +131,24 @@ server.listen(SERVER__PORT, err => {
 
 //TOKEN:^SERVER__WEBSOCKET
 const serverSocket = socket(server);
+const serverConnections = new Set();
+const deathSignals = [
+  'SIGINT', 
+  'SIGQUIT',
+  'SIGTERM', 
+];
+server.on('connection', connection => {
+  serverConnections.add(connection);
+  connection.on('close', () => {
+    serverConnections.delete(connection);
+  });
+});
+
+function destroyConnections() {
+  for (const connection of serverConnections.values()) {
+    connection.destroy();
+  }
+}
 
 function handleServerDeath(signal) {
   log.info(`\n[${signal}] Server closing`);
@@ -146,13 +164,10 @@ function handleServerDeath(signal) {
 
   server.close(() => {
     log.info(`[${signal}] Server closed`);
-    process.exit(0);
+    process.kill(process.pid, signal);
   });
+  destroyConnections();
 }
 
-[
-  'SIGINT', 
-  'SIGQUIT',
-  'SIGTERM', 
-].forEach(signal => process.on(signal, handleServerDeath));
+deathSignals.forEach(signal => process.once(signal, handleServerDeath));
 //TOKEN:$SERVER__WEBSOCKET
