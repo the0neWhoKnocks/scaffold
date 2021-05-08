@@ -57,25 +57,47 @@ const app = express();
 //TOKEN:^SERVER__FRAMEWORK__NODE
 
 function app(req, res) {
+  const handlers = [...app.reqHandlers.middleware];
+  const pathHandler = app.reqHandlers.methods[req.method][req.url];
   let funcNdx = 0;
   
-  const next = (inc = true) => {
-    if (inc) funcNdx += 1;
-    if (app.reqFuncs[funcNdx]) app.reqFuncs[funcNdx](req, res, next);
+  if (pathHandler) handlers.push(pathHandler); 
+  handlers.push(app.notFoundHandler);
+  
+  const next = () => {
+    if (handlers[funcNdx++]) handlers[funcNdx](req, res, next);
   };
   
-  next(false);
+  next();
 }
-app.reqFuncs = [];
-app.get = function get(path, handler) {
-  app.reqFuncs.push((req, res, next) => {
-    if (req.url === path) handler(req, res);
-    else next();
-  });
+app.reqHandlers = {
+  methods: {
+    GET: {},
+    POST: {},
+  },
+  middleware: [],
+};
+app.pathHandler = (method) => function pathHandler(path, handler) {
+  app.reqHandlers.methods[method][path] = handler;
   return app;
 };
+app.notFoundHandler = function notFound(req, res) {
+  const CODE = 404;
+  const body = httpModule.STATUS_CODES[CODE];
+  
+  log.debug(`Nothing found for "${req.url}"`);
+  
+  res
+    .writeHead(CODE, {
+      'Content-Length': Buffer.byteLength(body),
+      'Content-Type': 'text/plain',
+    })
+    .end(body);
+};
+app.get = app.pathHandler('GET');
+app.post = app.pathHandler('POST');
 app.use = function use(...middleware) {
-  app.reqFuncs.push(...middleware);
+  app.reqHandlers.middleware.push(...middleware);
   return app;
 };
 //TOKEN:$SERVER__FRAMEWORK__NODE
