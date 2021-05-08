@@ -45,13 +45,50 @@ const copyFile = require('./utils/copyFile')({
   outputRoot: PATH__PROJECT_ROOT,
   staticRoot: `${PATH__SOURCE_ROOT}/static`,
 });
+const cmd = require('./utils/cmd');
 
 async function scaffold() {
   // NOTE - inquirer is very slow to load, so only bring it in when needed
   const { prompt } = require('inquirer');
   
-  const projectType = 'node';
+  // Check for updates before running
+  const repoStatus = await cmd('git fetch && git status -sb', { cwd: PATH__SOURCE_ROOT });
+  const behindAhead = repoStatus.split('\n')[0].match(/\[[^\]]+]$/); // get the bracketed content at the end
+  // NOTE - The status could be both `ahead` and `behind` if changes to the remote
+  // have occurred, and the local repo has committed changes as well.
+  if (behindAhead && behindAhead[0].includes('behind')) {
+    const { update } = await prompt([
+      {
+        message: 'Update available. Update now?',
+        type: 'list',
+        name: 'update',
+        default: 'now',
+        choices: [
+          { name: 'Yes', value: 'now' },
+          { name: 'Later', value: 'later' },
+        ],
+      },
+    ]);
+    
+    if (update === 'now') {
+      const unCommittedChangesExist = (await cmd('git diff', { cwd: PATH__SOURCE_ROOT }) !== '');
+      if (unCommittedChangesExist) {
+        console.log('[STASH] changes');
+        await cmd('git stash', { cwd: PATH__SOURCE_ROOT });
+      }
+      
+      // rebase
+      console.log('[REBASING] from origin/master');
+      await cmd('git pull --rebase origin master', { cwd: PATH__SOURCE_ROOT });
+      
+      if (unCommittedChangesExist) {
+        console.log('[UN-STASH] changes');
+        await cmd('git stash apply', { cwd: PATH__SOURCE_ROOT });
+      }
+    }
+  }
   
+  const projectType = 'node';
   const scaffoldOpts = await prompt([
     // {
     //   message: 'Project Type',
