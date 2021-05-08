@@ -1,4 +1,7 @@
 <script>
+  //TOKEN:^APP__SERVER_INTERACTIONS
+  import { afterUpdate } from 'svelte';
+  //TOKEN:$APP__SERVER_INTERACTIONS
   import logger from '../utils/logger';
   //TOKEN:^APP__WEB_SOCKET
   import {
@@ -9,45 +12,90 @@
   //TOKEN:$APP__WEB_SOCKET
   
   const log = logger('app');
+  //TOKEN:^APP__SERVER_INTERACTIONS
+  let serverData = [];
+  let serverDataRef;
+  let updateScroll = false;
+  //TOKEN:$APP__SERVER_INTERACTIONS
   //TOKEN:^APP__WEB_SOCKET
-  let wsData = [];
+  let socketAPI;
+  //TOKEN:$APP__WEB_SOCKET
+  //TOKEN:^APP__API
   
-  log.info('App starting');
+  function callAPI() {
+    fetch('/api')
+      .then(resp => resp.json())
+      .then(data => {
+        serverData = [...serverData, `[API] ${JSON.stringify(data)}`];
+      })
+      .catch(err => {
+        log.error(err);
+        alert(err);
+      });
+  }
+  //TOKEN:$APP__API
+  //TOKEN:^APP__WEB_SOCKET
+  
+  function callSocket() {
+    socketAPI.emit(WS__MSG__EXAMPLE, { d: Date.now() });
+  }
+  //TOKEN:$APP__WEB_SOCKET
   
   async function init() {
-    let socketAPI;
+    log.info('App starting');
+    //TOKEN:^APP__API
+    
+    callAPI();
+    //TOKEN:$APP__API
+    //TOKEN:^APP__WEB_SOCKET
+    
     try {
-      let logNdx = 1;
       socketAPI = await connectToSocket();
+      
       socketAPI.on(WS__CLOSE_CODE__USER_REMOVED, () => {
         log.info('User disconnected');
       });
-      
       socketAPI.on(WS__MSG__EXAMPLE, ({ msg }) => {
-        wsData = [...wsData, msg];
+        serverData = [...serverData, `[WS] ${msg}`];
       });
-      let count = 0;
-      const int = setInterval(() => {
-        if (count === 5) clearInterval(int);
-        else socketAPI.emit(WS__MSG__EXAMPLE, { d: Date.now() });
-        count++;
-      }, 1000);
       
-      wsData = [...wsData, 'Connected to Server socket'];
+      serverData = [...serverData, '[WS] Connected to Web Socket'];
+      callSocket();
     }
     catch(err) { log.error(err); }
+    //TOKEN:$APP__WEB_SOCKET
   }
+  //TOKEN:^APP__SERVER_INTERACTIONS
+  
+  $: serverData, updateScroll = true;
+  afterUpdate(() => {
+    if (updateScroll) {
+      serverDataRef.scrollTop = serverDataRef.scrollHeight;
+      updateScroll = false;
+    }
+  });
+  //TOKEN:^APP__SERVER_INTERACTIONS
   
   init();
-  //TOKEN:$APP__WEB_SOCKET
 </script>
 
 <div class="app">
   <div class="frame">
     Hello World
-    <!--TOKEN:^APP__WEB_SOCKET -->
-    <pre class="ws-data">{wsData.join('\n')}</pre>
-    <!--TOKEN:$APP__WEB_SOCKET -->
+    <!--TOKEN:^APP__SERVER_INTERACTIONS -->
+    <pre
+      class="server-data"
+      bind:this={serverDataRef}
+    >{serverData.join('\n')}</pre>
+    <nav>
+      <!--TOKEN:^APP__API -->
+      <button on:click={callAPI}>Trigger API</button>
+      <!--TOKEN:$APP__API -->
+      <!--TOKEN:^APP__WEB_SOCKET -->
+      <button on:click={callSocket}>Trigger Socket</button>
+      <!--TOKEN:$APP__WEB_SOCKET -->
+    </nav>
+    <!--TOKEN:$APP__SERVER_INTERACTIONS -->
   </div>
 </div>
 
@@ -62,20 +110,31 @@
   }
   
   .frame {
-    width: 30vw;
+    width: 80vw;
+    text-align: center;
     padding: 1em;
     border-radius: 0.25em;
     background: linear-gradient(#ccc, #aaa);
   }
-  /*TOKEN:^APP__WEB_SOCKET */
-  .ws-data {
+  /*TOKEN:^APP__SERVER_INTERACTIONS */
+  
+  .server-data {
     height: 10em;
     color: #00e100;
+    text-align: left;
     overflow: auto;
     padding: 0.25em 0.5em;
     margin-bottom: 0;
     background: #222;
     display: block;
   }
-  /*TOKEN:$APP__WEB_SOCKET */
+  
+  nav {
+    margin-top: 1em;
+    display: flex;
+  }
+  nav button {
+    width: 100%;
+  }
+  /*TOKEN:$APP__SERVER_INTERACTIONS */
 </style>
