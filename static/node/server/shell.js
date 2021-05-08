@@ -71,7 +71,6 @@ const shell = ({ params, view } = {}) => {
         }
 
         button {
-          // width: 100%;
           font-size: 1em;
           padding: 0.5em;
           display: block;

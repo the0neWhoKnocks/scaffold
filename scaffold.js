@@ -147,6 +147,12 @@ async function scaffold() {
       filter: answers => merge(answers),
       choices: [
         {
+          name: 'Will have an API?',
+          short: 'API endpoint',
+          value: { apiEnabled: true },
+          checked: false,
+        },
+        {
           name: 'Will make external requests',
           short: 'External Requests',
           value: { externalRequests: true },
@@ -261,6 +267,7 @@ async function scaffold() {
     logger,
   } = (devOptions || {});
   const {
+    apiEnabled,
     externalRequests,
     middleware,
     secure,
@@ -340,6 +347,7 @@ async function scaffold() {
         'node/server',
         'src/server',
         [
+          { token: 'SERVER__API', remove: !apiEnabled },
           { token: 'SERVER__APP_HANDLER', replacement: serverFrameworkIsPolka ? 'app.handler' : 'app' },
           { token: 'SERVER__COMPRESS', remove: !compression },
           { token: 'SERVER__COOKIES', remove: !cookies },
@@ -405,6 +413,8 @@ async function scaffold() {
           'node/client/svelte',
           'src/client',
           [
+            { token: 'APP__API', remove: !apiEnabled },
+            { token: 'APP__SERVER_INTERACTIONS', remove: !apiEnabled && !webSocket },
             { token: 'APP__WEB_SOCKET', remove: !webSocket },
           ]
         );

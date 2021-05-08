@@ -107,9 +107,12 @@ const app = polka();
 
 app
   .use(...middleware)
+  //TOKEN:^SERVER__API
   .get('/api', (req, res) => {
-    res.end('hi');
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ hello: 'dave' }));
   })
+  //TOKEN:$SERVER__API
   .get('/', (req, res) => {
     res.end(shell({
       view: 'app', // usually tied to the `entry` name in your bundler
