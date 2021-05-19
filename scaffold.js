@@ -12,11 +12,13 @@ const [
   PATH__PROJECT_ROOT,
 ] = process.argv;
 const PATH__SOURCE_ROOT = dirname(PATH__SOURCE_SCRIPT);
-const PATTERNS = [
+const GLOBS__DELETE_FILES = [
   '**/*',
   '!.git',
   '!LICENSE',
   '!node_modules',
+  '!package-lock.json',
+  '!yarn.lock',
 ];
 
 // Prevent running the script in it's repo
@@ -46,6 +48,16 @@ const copyFile = require('./utils/copyFile')({
   staticRoot: `${PATH__SOURCE_ROOT}/static`,
 });
 const cmd = require('./utils/cmd');
+
+const pendingParsedFiles = [];
+function addParsedFiles(items) {
+  pendingParsedFiles.push(...items);
+}
+
+const pendingFileCopies = [];
+function copyFiles(items) {
+  pendingFileCopies.push(...items);
+}
 
 async function scaffold() {
   // NOTE - inquirer is very slow to load, so only bring it in when needed
@@ -148,7 +160,7 @@ async function scaffold() {
       choices: [
         {
           name: 'Will have an API',
-          short: 'API endpoint',
+          short: 'API',
           value: { apiEnabled: true },
           checked: false,
         },
@@ -291,14 +303,11 @@ async function scaffold() {
   const serverFrameworkIsExpress = serverFramework === 'express';
   const serverFrameworkIsNode = serverFramework === 'node';
   const serverFrameworkIsPolka = serverFramework === 'polka';
-  const filesToCopy = [
-    copyFile(`.gitignore`, ''),
-  ];
   
   if (projectType === 'node') {
     if (removePreviousScaffold) {
       const del = require('del');
-      const filesToDelete = await del(PATTERNS, {
+      const filesToDelete = await del(GLOBS__DELETE_FILES, {
         absolute: true,
         cwd: PATH__PROJECT_ROOT,
         dot: true,
@@ -330,8 +339,6 @@ async function scaffold() {
     };
     
     if (addServer) {
-      mkdirp.sync(`${PATH__PROJECT_ROOT}/src/server`);
-      
       if (serverFrameworkIsPolka) {
         packageJSON.devDependencies['polka'] = '1.0.0-next.14';
       }
@@ -347,63 +354,78 @@ async function scaffold() {
       const fsDeps = [];
       if (multiUser) fsDeps.push('existsSync', 'readFileSync');
       if (secure) fsDeps.push('readFileSync');
-      await addParsedFile(
-        'index.js',
-        'node/server',
-        'src/server',
-        [
-          { token: 'SERVER__API', remove: !apiEnabled },
-          {
-            token: 'SERVER__APP_HANDLER',
-            replacement: serverFrameworkIsPolka ? 'app.handler' : 'app',
-          },
-          { token: 'SERVER__COMPRESS', remove: !compression },
-          { token: 'SERVER__COOKIES', remove: !cookies },
-          { token: 'SERVER__FRAMEWORK__EXPRESS', remove: !serverFrameworkIsExpress },
-          { token: 'SERVER__FRAMEWORK__NODE', remove: !serverFrameworkIsNode },
-          { token: 'SERVER__FRAMEWORK__POLKA', remove: !serverFrameworkIsPolka },
-          {
-            token: 'SERVER__FS',
-            replacement: fsDeps.length
-              ? `const { ${[...new Set(fsDeps)].join(', ')} } = require('fs');`
-              : '',
-          },
-          { token: 'SERVER__MULTI_USER', remove: !multiUser },
-          { token: 'SERVER__SECURE', remove: !secure },
-          { token: 'SERVER__STATIC', remove: !staticFiles },
-          { token: 'SERVER__UNSECURE', remove: secure },
-          { token: 'SERVER__WEBSOCKET', remove: !webSocket },
-        ]
-      );
-      await addParsedFile(
-        'shell.js',
-        'node/server',
-        'src/server',
-        [
-          { token: 'SHELL__BUNDLER__WEBPACK', remove: !bundlerIsWebpack },
-          { token: 'SHELL__HEROKU', remove: true },
-          { token: 'SHELL__MULTI_USER', remove: !multiUser },
-          { token: 'SHELL__SVELTE', remove: !clientFrameworkIsSvelte },
-        ]
-      );
+      addParsedFiles([
+        {
+          file: 'index.js',
+          from: 'node/server',
+          to: 'src/server',
+          tokens: [
+            { token: 'SERVER__API', remove: !apiEnabled },
+            {
+              token: 'SERVER__APP_HANDLER',
+              replacement: serverFrameworkIsPolka ? 'app.handler' : 'app',
+            },
+            { token: 'SERVER__COMPRESS', remove: !compression },
+            { token: 'SERVER__COOKIES', remove: !cookies },
+            { token: 'SERVER__FRAMEWORK__EXPRESS', remove: !serverFrameworkIsExpress },
+            { token: 'SERVER__FRAMEWORK__NODE', remove: !serverFrameworkIsNode },
+            { token: 'SERVER__FRAMEWORK__POLKA', remove: !serverFrameworkIsPolka },
+            {
+              token: 'SERVER__FS',
+              replacement: fsDeps.length
+                ? `const { ${[...new Set(fsDeps)].join(', ')} } = require('fs');`
+                : '',
+            },
+            { token: 'SERVER__MULTI_USER', remove: !multiUser },
+            { token: 'SERVER__SECURE', remove: !secure },
+            { token: 'SERVER__STATIC', remove: !staticFiles },
+            { token: 'SERVER__UNSECURE', remove: secure },
+            { token: 'SERVER__WEBSOCKET', remove: !webSocket },
+          ],
+        },
+        {
+          file: 'shell.js',
+          from: 'node/server',
+          to: 'src/server',
+          tokens: [
+            { token: 'SHELL__BUNDLER__WEBPACK', remove: !bundlerIsWebpack },
+            { token: 'SHELL__HEROKU', remove: true },
+            { token: 'SHELL__MULTI_USER', remove: !multiUser },
+            { token: 'SHELL__SVELTE', remove: !clientFrameworkIsSvelte },
+          ],
+        },
+      ]);
       
       if (multiUser) {
         packageJSON.dependencies['body-parser'] = '1.19.0';
         packageJSON.dependencies['mkdirp'] = '1.0.4';
         
-        filesToCopy.push(copyFile('node/server/api/config.create.js', `src/server/api`));
-        filesToCopy.push(copyFile('node/server/api/user.create.js', `src/server/api`));
-        filesToCopy.push(copyFile('node/server/api/user.getData.js', `src/server/api`));
-        filesToCopy.push(copyFile('node/server/api/user.getProfile.js', `src/server/api`));
-        filesToCopy.push(copyFile('node/server/api/user.login.js', `src/server/api`));
-        filesToCopy.push(copyFile('node/server/api/user.setData.js', `src/server/api`));
-        filesToCopy.push(copyFile('node/server/api/user.setProfile.js', `src/server/api`));
-        
-        filesToCopy.push(copyFile('node/server/utils/decrypt.js', `src/server/utils`));
-        filesToCopy.push(copyFile('node/server/utils/encrypt.js', `src/server/utils`));
-        filesToCopy.push(copyFile('node/server/utils/getUserDataPath.js', `src/server/utils`));
-        filesToCopy.push(copyFile('node/server/utils/loadUserData.js', `src/server/utils`));
-        filesToCopy.push(copyFile('node/server/utils/loadUsers.js', `src/server/utils`));
+        copyFiles([
+          {
+            files: [
+              'config.create.js',
+              'user.create.js',
+              'user.getData.js',
+              'user.getProfile.js',
+              'user.login.js',
+              'user.setData.js',
+              'user.setProfile.js',
+            ],
+            from: 'node/server/api',
+            to: 'src/server/api',
+          },
+          {
+            files: [
+              'decrypt.js',
+              'encrypt.js',
+              'getUserDataPath.js',
+              'loadUserData.js',
+              'loadUsers.js',
+            ],
+            from: 'node/server/utils',
+            to: 'src/server/utils',
+          },
+        ]);
       }
       
       if (webSocket) {
@@ -411,13 +433,15 @@ async function scaffold() {
         packageJSON.dependencies['supports-color'] = '8.1.1';
         packageJSON.dependencies['ws'] = '7.4.4';
         
-        filesToCopy.push(copyFile('node/server/socket.js', `src/server`));
+        copyFiles([{
+          files: ['socket.js'],
+          from: 'node/server',
+          to: 'src/server',
+        }]);
       }
     }
     
     if (addClient) {
-      mkdirp.sync(`${PATH__PROJECT_ROOT}/src/client`);
-      
       if (bundlerIsWebpack) {
         packageJSON.devDependencies['clean-webpack-plugin'] = '3.0.0';
         packageJSON.devDependencies['ignore-emit-webpack-plugin'] = '2.0.6';
@@ -433,82 +457,83 @@ async function scaffold() {
           packageJSON.devDependencies['svelte-loader'] = '3.1.0';
         }
         
-        await addParsedFile(
-          'webpack.config.js',
-          'node',
-          '',
-          [
+        addParsedFiles([{
+          file: 'webpack.config.js',
+          from: 'node',
+          to: '',
+          tokens: [
             { token: 'WP__FILE_POLLING', remove: !WSL2 },
             { token: 'WP__SVELTE', remove: !clientFrameworkIsSvelte },
-          ]
-        );
+          ],
+        }]);
       }
       
       if (clientFrameworkIsSvelte) {
         packageJSON.devDependencies['svelte'] = '3.37.0';
         
-        await addParsedFile(
-          'app.svelte',
-          'node/client/svelte',
-          'src/client',
-          [
-            { token: 'APP__API', remove: !apiEnabled },
-            { token: 'APP__HAS_CONSTANTS', remove: !multiUser && !webSocket },
-            { token: 'APP__MULTI_USER', remove: !multiUser },
-            { token: 'APP__SERVER_INTERACTIONS', remove: !apiEnabled && !webSocket },
-            { token: 'APP__WEB_SOCKET', remove: !webSocket },
-          ]
-        );
-        
-        await addParsedFile(
-          'index.js',
-          'node/client/svelte',
-          'src/client',
-          [
-            { token: 'CLIENT__MULTI_USER', remove: !multiUser },
-            { token: 'CLIENT__NO_MULTI_USER', remove: multiUser },
-          ]
-        );
+        addParsedFiles([
+          {
+            file: 'app.svelte',
+            from: 'node/client/svelte',
+            to: 'src/client',
+            tokens: [
+              { token: 'APP__API', remove: !apiEnabled },
+              { token: 'APP__HAS_CONSTANTS', remove: !multiUser && !webSocket },
+              { token: 'APP__MULTI_USER', remove: !multiUser },
+              { token: 'APP__SERVER_INTERACTIONS', remove: !apiEnabled && !webSocket },
+              { token: 'APP__WEB_SOCKET', remove: !webSocket },
+            ]
+          },
+          {
+            file: 'index.js',
+            from: 'node/client/svelte',
+            to: 'src/client',
+            tokens: [
+              { token: 'CLIENT__MULTI_USER', remove: !multiUser },
+              { token: 'CLIENT__NO_MULTI_USER', remove: multiUser },
+            ],
+          },
+        ]);
       }
       
       if (multiUser) {
-        filesToCopy.push(copyFile('node/client/svelte/components/ConfigDialog.svelte', `src/client/components`));
-        filesToCopy.push(copyFile('node/client/svelte/components/Dialog.svelte', `src/client/components`));
-        filesToCopy.push(copyFile('node/client/svelte/components/HRWithText.svelte', `src/client/components`));
-        filesToCopy.push(copyFile('node/client/svelte/components/Icon.svelte', `src/client/components`));
-        filesToCopy.push(copyFile('node/client/svelte/components/LabeledInput.svelte', `src/client/components`));
-        filesToCopy.push(copyFile('node/client/svelte/components/LoginDialog.svelte', `src/client/components`));
-        filesToCopy.push(copyFile('node/client/svelte/components/UserDataDialog.svelte', `src/client/components`));
-        filesToCopy.push(copyFile('node/client/svelte/components/UserProfileDialog.svelte', `src/client/components`));
-        
-        filesToCopy.push(copyFile('node/client/utils/postData.js', `src/client/utils`));
-        filesToCopy.push(copyFile('node/client/utils/serializeForm.js', `src/client/utils`));
-        filesToCopy.push(copyFile('node/client/utils/storage.js', `src/client/utils`));
+        copyFiles([
+          {
+            files: [
+              'ConfigDialog.svelte',
+              'Dialog.svelte',
+              'HRWithText.svelte',
+              'Icon.svelte',
+              'LabeledInput.svelte',
+              'LoginDialog.svelte',
+              'UserDataDialog.svelte',
+              'UserProfileDialog.svelte',
+            ],
+            from: 'node/client/svelte/components',
+            to: 'src/client/components',
+          },
+          {
+            files: [
+              'postData.js',
+              'serializeForm.js',
+              'storage.js',
+            ],
+            from: 'node/client/utils',
+            to: 'src/client/utils',
+          }
+        ]);
       }
       
       if (webSocket) {
-        filesToCopy.push(copyFile('node/client/socket.js', `src/client`));
+        copyFiles([{
+          files: ['socket.js'],
+          from: 'node/client',
+          to: 'src/client',
+        }]);
       }
     }
     
     if (addClient || addServer) {
-      await addParsedFile(
-        'constants.js',
-        'node',
-        'src',
-        [
-          { token: 'CONST__API', remove: !apiEnabled },
-          { token: 'CONST__APP_TITLE', replacement: appTitle },
-          { token: 'CONST__SVELTE_MNT', remove: !clientFrameworkIsSvelte },
-          { token: 'CONST__LOGGER_NAMESPACE', remove: !logger },
-          { token: 'CONST__LOGGER_NAMESPACE', replacement: loggerNamespace || '--' },
-          { token: 'CONST__MULTI_USER', remove: !multiUser },
-          { token: 'CONST__SERVER', remove: !addServer },
-          { token: 'CONST__WEB_SOCKETS', remove: !webSocket },
-        ]
-      );
-      
-      mkdirp.sync(`${PATH__PROJECT_ROOT}/bin`);
       const removeEmpty = i => !!i;
       const prepFolders = [
         addServer ? './dist/server' : '',
@@ -519,22 +544,39 @@ async function scaffold() {
         addServer ? './src/server' : '',
         logger ? './src/utils' : '',
       ];
-      await addParsedFile(
-        'prep-dist.sh',
-        'node/bin',
-        'bin',
-        [
-          {
-            token: 'PREP__FOLDERS',
-            replacement: prepFolders.filter(removeEmpty).join(' '),
-          },
-          {
-            token: 'PREP__SERVER_FILE_PATHS',
-            replacement: `${prepServerPaths.filter(removeEmpty).join(' \\\n  ')} \\`,
-          },
-        ],
-        true,
-      );
+      addParsedFiles([
+        {
+          file: 'constants.js',
+          from: 'node',
+          to: 'src',
+          tokens: [
+            { token: 'CONST__API', remove: !apiEnabled },
+            { token: 'CONST__APP_TITLE', replacement: appTitle },
+            { token: 'CONST__SVELTE_MNT', remove: !clientFrameworkIsSvelte },
+            { token: 'CONST__LOGGER_NAMESPACE', remove: !logger },
+            { token: 'CONST__LOGGER_NAMESPACE', replacement: loggerNamespace || '--' },
+            { token: 'CONST__MULTI_USER', remove: !multiUser },
+            { token: 'CONST__SERVER', remove: !addServer },
+            { token: 'CONST__WEB_SOCKETS', remove: !webSocket },
+          ],
+        },
+        {
+          executable: true,
+          file: 'prep-dist.sh',
+          from: 'node/bin',
+          to: 'bin',
+          tokens: [
+            {
+              token: 'PREP__FOLDERS',
+              replacement: prepFolders.filter(removeEmpty).join(' '),
+            },
+            {
+              token: 'PREP__SERVER_FILE_PATHS',
+              replacement: `${prepServerPaths.filter(removeEmpty).join(' \\\n  ')} \\`,
+            },
+          ],
+        }
+      ]);
     }
     
     if (hasWatcher) {
@@ -545,32 +587,29 @@ async function scaffold() {
       
       if (addClient) packageJSON.devDependencies['browser-sync'] = '2.26.14';
       
-      await addParsedFile(
-        'watcher.js',
-        'node',
-        '',
-        [
+      addParsedFiles([{
+        executable: true,
+        file: 'watcher.js',
+        from: 'node',
+        to: '',
+        tokens: [
           { token: 'WATCHER__CLIENT', remove: !addClient },
           { token: 'WATCHER__FILE_POLLING', replacement: WSL2 ? 'true' : 'false' },
           { token: 'WATCHER__LOGGER', remove: !logger },
           { token: 'WATCHER__SERVER', remove: !addServer },
         ],
-        true,
-      );
+      }]);
     }
     
-    mkdirp.sync(`${PATH__PROJECT_ROOT}/src/utils`);
-    
-    await addParsedFile(
-      'logger.js',
-      'node/utils',
-      'src/utils',
-      [
+    addParsedFiles([{
+      file: 'logger.js',
+      from: 'node/utils',
+      to: 'src/utils',
+      tokens: [
         { token: 'LOGGER__CUSTOM', remove: !logger },
         { token: 'LOGGER__DEFAULT', remove: logger },
-      ]
-    );
-    
+      ],
+    }]);
     if (logger) {
       let moduleVersion;
 
@@ -593,20 +632,20 @@ async function scaffold() {
         packageJSON.devDependencies['eslint-plugin-svelte3'] = '3.1.2';
       }
       
-      await addParsedFile(
-        '.eslintrc.js',
-        'node',
-        '',
-        [
+      addParsedFiles([{
+        file: '.eslintrc.js',
+        from: 'node',
+        to: '',
+        tokens: [
           { token: 'LINT__SVELTE', remove: !clientFrameworkIsSvelte },
-        ]
-      );
+        ],
+      }]);
     }
     
     packageJSON.dependencies = sortObj(packageJSON.dependencies);
     packageJSON.devDependencies = sortObj(packageJSON.devDependencies);
     packageJSON.scripts = sortObj(packageJSON.scripts);
-    writeFileSync(`${PATH__PROJECT_ROOT}/package.json`, JSON.stringify(packageJSON, null, 2), 'utf8');
+    writeFileSync(`${PATH__PROJECT_ROOT}/package.json`, `${JSON.stringify(packageJSON, null, 2)}\n`, 'utf8');
   }
 
   const containerPlatform = 'docker';
@@ -616,19 +655,54 @@ async function scaffold() {
   
   // TODO - add .github/workflows
   
-  await addParsedFile(
-    'README.md',
-    '',
-    '',
-    [
+  addParsedFiles([{
+    file: 'README.md',
+    from: '',
+    to: '',
+    tokens: [
       { token: 'README__LOGGING', remove: !logger },
       { token: 'README__TITLE', replacement: appTitle },
-    ]
-  );
+    ],
+  }]);
   
-  await Promise.all(filesToCopy.map(fn => fn()));
+  copyFiles([{
+    files: ['.gitignore'],
+    from: '',
+    to: '',
+  }]);
   
-  const fileList = await getFileList(PATH__PROJECT_ROOT);
+  const pendingPaths = [
+    // get a list of unique paths
+    ...new Set([...pendingFileCopies, ...pendingParsedFiles].map(({ to }) => to))
+  ]
+    .filter(i => !!i) // remove empty items
+    .filter((i, n, arr) => { // remove any parent paths that'll be created due to a child path existing 
+      const str = arr.join('|');
+      return !str.includes(`${i}/`);
+    })
+    .sort();
+  pendingPaths.forEach(path => {
+    const absPath = `${PATH__PROJECT_ROOT}/${path}`;
+    mkdirp.sync(absPath);
+    // console.log(`- Created "${absPath}"`);
+  });
+  
+  const pendingFiles = [
+    ...pendingFileCopies.reduce((arr, { files, from, to }) => {
+      arr.push(...files.map(file => copyFile(`${from}/${file}`, to)));
+      return arr;
+    }, []),
+    ...pendingParsedFiles.map(({ executable, file, from, to, tokens }) => {
+      return addParsedFile(file, from, to, tokens, executable);
+    }),
+  ];
+  
+  await Promise.all(pendingFiles);
+  
+  const fileList = await getFileList({
+    ignore: ['.git', 'node_modules'],
+    path: PATH__PROJECT_ROOT,
+  });
   console.log([
     '\n ╭────────╮',
     '\n │ RESULT │',
