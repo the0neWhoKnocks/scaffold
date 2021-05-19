@@ -1,5 +1,5 @@
 require('ulog');
-const { LOGGER__NAMESPACE } = require('../constants');
+const { NAMESPACE__LOGGER } = require('../constants');
 
 //TOKEN:^LOGGER__DEFAULT
 function l(namespace) {
@@ -22,10 +22,10 @@ const logger = l;
 //TOKEN:$LOGGER__DEFAULT
 //TOKEN:^LOGGER__CUSTOM
 const aL = require('anylogger');
-const rootLogger = aL(LOGGER__NAMESPACE);
+const rootLogger = aL(NAMESPACE__LOGGER);
 
 const logger = (namespace = '') => (namespace)
-  ? aL(`${LOGGER__NAMESPACE}:${namespace}`)
+  ? aL(`${NAMESPACE__LOGGER}:${namespace}`)
   : rootLogger;
 //TOKEN:$LOGGER__CUSTOM
 

@@ -1,8 +1,8 @@
 //TOKEN:^SERVER__UNSECURE
 const httpModule = require('http');
 //TOKEN:$SERVER__UNSECURE
+//TOKEN:#SERVER__FS
 //TOKEN:^SERVER__SECURE
-const { readFileSync } = require('fs');
 const httpModule = require('https');
 //TOKEN:$SERVER__SECURE
 //TOKEN:^SERVER__COMPRESS
@@ -20,13 +20,42 @@ const polka = require('polka');
 //TOKEN:^SERVER__STATIC
 const sirv = require('sirv');
 //TOKEN:$SERVER__STATIC
+//TOKEN:^SERVER__MULTI_USER
+const bodyParser = require('body-parser');
+const mkdirp = require('mkdirp');
+//TOKEN:$SERVER__MULTI_USER
 const {
+  //TOKEN:^SERVER__MULTI_USER
+  PATH__CONFIG,
+  PATH__DATA,
+  ROUTE__API__CONFIG_CREATE,
+  //TOKEN:$SERVER__MULTI_USER
+  //TOKEN:^SERVER__API
+  ROUTE__API__HELLO,
+  //TOKEN:$SERVER__API
+  //TOKEN:^SERVER__MULTI_USER
+  ROUTE__API__USER_CREATE,
+  ROUTE__API__USER_GET_DATA,
+  ROUTE__API__USER_GET_PROFILE,
+  ROUTE__API__USER_LOGIN,
+  ROUTE__API__USER_SET_DATA,
+  ROUTE__API__USER_SET_PROFILE,
+  //TOKEN:$SERVER__MULTI_USER
   SERVER__PORT,
   //TOKEN:^SERVER__WEBSOCKET
   WS__MSG__SERVER_DOWN,
   //TOKEN:$SERVER__WEBSOCKET
 } = require('../constants');
 const log = require('../utils/logger')('server');
+//TOKEN:^SERVER__MULTI_USER
+const createConfig = require('./api/config.create');
+const getUserData = require('./api/user.getData');
+const getUserProfile = require('./api/user.getProfile');
+const createUser = require('./api/user.create');
+const userLogin = require('./api/user.login');
+const setUserData = require('./api/user.setData');
+const setUserProfile = require('./api/user.setProfile');
+//TOKEN:$SERVER__MULTI_USER
 //TOKEN:^SERVER__WEBSOCKET
 const socket = require('./socket');
 //TOKEN:$SERVER__WEBSOCKET
@@ -58,10 +87,10 @@ const app = express();
 
 function app(req, res) {
   const handlers = [...app.reqHandlers.middleware];
-  const pathHandler = app.reqHandlers.methods[req.method][req.url];
+  const pathHandlers = app.reqHandlers.methods[req.method][req.url];
   let funcNdx = 0;
   
-  if (pathHandler) handlers.push(pathHandler); 
+  if (pathHandlers) handlers.push(...pathHandlers);
   handlers.push(app.notFoundHandler);
   
   const next = () => {
@@ -77,8 +106,8 @@ app.reqHandlers = {
   },
   middleware: [],
 };
-app.pathHandler = (method) => function pathHandler(path, handler) {
-  app.reqHandlers.methods[method][path] = handler;
+app.pathHandler = (method) => function pathHandler(path, ...handlers) {
+  app.reqHandlers.methods[method][path] = handlers;
   return app;
 };
 app.notFoundHandler = function notFound(req, res) {
@@ -105,16 +134,52 @@ app.use = function use(...middleware) {
 const app = polka();
 //TOKEN:$SERVER__FRAMEWORK__POLKA
 
+const jsonParser = bodyParser.json();
+//TOKEN:^SERVER__MULTI_USER
+
+if (!existsSync(PATH__DATA)) mkdirp.sync(PATH__DATA);
+//TOKEN:$SERVER__MULTI_USER
+
 app
   .use(...middleware)
+  .use((req, res, next) => {
+    if (existsSync(PATH__CONFIG)) req.appConfig = JSON.parse(readFileSync(PATH__CONFIG, 'utf8'));
+    
+    res.sendJSON = (data) => {
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify(data));
+    };
+    
+    res.sendError = (statusCode, error) => {
+      log.error(`[${statusCode}] | ${error}`);
+      res.statusCode = statusCode;
+      // NOTE - utilizing `message` so that if an Error is thrown on the Client
+      // within a `then`, there's no extra logic to get error data within the
+      // `catch`.
+      res.sendJSON({ message: error });
+    };
+    
+    next();
+  })
+  //TOKEN:^SERVER__MULTI_USER
+  .post(ROUTE__API__CONFIG_CREATE, jsonParser, createConfig)
+  .post(ROUTE__API__USER_GET_DATA, jsonParser, getUserData)
+  .post(ROUTE__API__USER_GET_PROFILE, jsonParser, getUserProfile)
+  .post(ROUTE__API__USER_CREATE, jsonParser, createUser)
+  .post(ROUTE__API__USER_LOGIN, jsonParser, userLogin)
+  .post(ROUTE__API__USER_SET_DATA, jsonParser, setUserData)
+  .post(ROUTE__API__USER_SET_PROFILE, jsonParser, setUserProfile)
+  //TOKEN:$SERVER__MULTI_USER
   //TOKEN:^SERVER__API
-  .get('/api', (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({ hello: 'dave' }));
+  .get(ROUTE__API__HELLO, (req, res) => {
+    res.sendJSON({ hello: 'dave' });
   })
   //TOKEN:$SERVER__API
   .get('/', (req, res) => {
     res.end(shell({
+      //TOKEN:^SERVER__MULTI_USER
+      props: { configExists: !!req.appConfig },
+      //TOKEN:$SERVER__MULTI_USER
       view: 'app', // usually tied to the `entry` name in your bundler
     }));
   });
