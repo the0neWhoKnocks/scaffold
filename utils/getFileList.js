@@ -1,7 +1,11 @@
 const { promises: { readdir, stat } } = require('fs');
 const { basename, dirname } = require('path');
 
-module.exports = async function getFileList(dirPath, filesArr = [], subDir) {
+module.exports = async function getFileList(
+  { ignore = [], path: dirPath },
+  filesArr = [],
+  subDir
+) {
   const folderPaths = [];
   const filePaths = [];
   const rawPaths = (await readdir(dirPath, { withFileTypes: true }))
@@ -20,11 +24,11 @@ module.exports = async function getFileList(dirPath, filesArr = [], subDir) {
     const currPath = rawPaths.folders[i];
     _filesArr.push(currPath);
     
-    if (!currPath.includes('node_modules')) {  
-      await getFileList(currPath, _filesArr, true);
+    if ( new RegExp(`(${ignore.join('|')})`).test(currPath) ) {
+      _filesArr.push(`${currPath}[ Not Expanded ]`);
     }
     else {
-      _filesArr.push(`${currPath}[ Not Expanded ]`);
+      await getFileList({ ignore, path: currPath }, _filesArr, true);
     }
   }
   // add files
