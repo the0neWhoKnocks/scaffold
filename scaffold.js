@@ -147,7 +147,7 @@ async function scaffold() {
       filter: answers => merge(answers),
       choices: [
         {
-          name: 'Will have an API?',
+          name: 'Will have an API',
           short: 'API endpoint',
           value: { apiEnabled: true },
           checked: false,
@@ -162,6 +162,12 @@ async function scaffold() {
           name: 'Will serve static assets',
           short: '[middleware] Static',
           value: { middleware: { staticFiles: true } },
+          checked: false,
+        },
+        {
+          name: 'Should support User accounts',
+          short: 'Users',
+          value: { multiUser: true },
           checked: false,
         },
         {
@@ -270,6 +276,7 @@ async function scaffold() {
     apiEnabled,
     externalRequests,
     middleware,
+    multiUser,
     secure,
     webSocket,
   } = (serverOptions || {});
@@ -336,24 +343,32 @@ async function scaffold() {
       if (compression) packageJSON.dependencies['compression'] = '1.7.4';
       if (cookies) packageJSON.dependencies['cookie-parser'] = '1.4.5';
       if (staticFiles) packageJSON.dependencies['sirv'] = '1.0.11';
-      if (webSocket) {
-        packageJSON.dependencies['bufferutil'] = '4.0.3';
-        packageJSON.dependencies['supports-color'] = '8.1.1';
-        packageJSON.dependencies['ws'] = '7.4.4';
-      }
       
+      const fsDeps = [];
+      if (multiUser) fsDeps.push('existsSync', 'readFileSync');
+      if (secure) fsDeps.push('readFileSync');
       await addParsedFile(
         'index.js',
         'node/server',
         'src/server',
         [
           { token: 'SERVER__API', remove: !apiEnabled },
-          { token: 'SERVER__APP_HANDLER', replacement: serverFrameworkIsPolka ? 'app.handler' : 'app' },
+          {
+            token: 'SERVER__APP_HANDLER',
+            replacement: serverFrameworkIsPolka ? 'app.handler' : 'app',
+          },
           { token: 'SERVER__COMPRESS', remove: !compression },
           { token: 'SERVER__COOKIES', remove: !cookies },
           { token: 'SERVER__FRAMEWORK__EXPRESS', remove: !serverFrameworkIsExpress },
           { token: 'SERVER__FRAMEWORK__NODE', remove: !serverFrameworkIsNode },
           { token: 'SERVER__FRAMEWORK__POLKA', remove: !serverFrameworkIsPolka },
+          {
+            token: 'SERVER__FS',
+            replacement: fsDeps.length
+              ? `const { ${[...new Set(fsDeps)].join(', ')} } = require('fs');`
+              : '',
+          },
+          { token: 'SERVER__MULTI_USER', remove: !multiUser },
           { token: 'SERVER__SECURE', remove: !secure },
           { token: 'SERVER__STATIC', remove: !staticFiles },
           { token: 'SERVER__UNSECURE', remove: secure },
@@ -367,11 +382,35 @@ async function scaffold() {
         [
           { token: 'SHELL__BUNDLER__WEBPACK', remove: !bundlerIsWebpack },
           { token: 'SHELL__HEROKU', remove: true },
+          { token: 'SHELL__MULTI_USER', remove: !multiUser },
           { token: 'SHELL__SVELTE', remove: !clientFrameworkIsSvelte },
         ]
       );
       
+      if (multiUser) {
+        packageJSON.dependencies['body-parser'] = '1.19.0';
+        packageJSON.dependencies['mkdirp'] = '1.0.4';
+        
+        filesToCopy.push(copyFile('node/server/api/config.create.js', `src/server/api`));
+        filesToCopy.push(copyFile('node/server/api/user.create.js', `src/server/api`));
+        filesToCopy.push(copyFile('node/server/api/user.getData.js', `src/server/api`));
+        filesToCopy.push(copyFile('node/server/api/user.getProfile.js', `src/server/api`));
+        filesToCopy.push(copyFile('node/server/api/user.login.js', `src/server/api`));
+        filesToCopy.push(copyFile('node/server/api/user.setData.js', `src/server/api`));
+        filesToCopy.push(copyFile('node/server/api/user.setProfile.js', `src/server/api`));
+        
+        filesToCopy.push(copyFile('node/server/utils/decrypt.js', `src/server/utils`));
+        filesToCopy.push(copyFile('node/server/utils/encrypt.js', `src/server/utils`));
+        filesToCopy.push(copyFile('node/server/utils/getUserDataPath.js', `src/server/utils`));
+        filesToCopy.push(copyFile('node/server/utils/loadUserData.js', `src/server/utils`));
+        filesToCopy.push(copyFile('node/server/utils/loadUsers.js', `src/server/utils`));
+      }
+      
       if (webSocket) {
+        packageJSON.dependencies['bufferutil'] = '4.0.3';
+        packageJSON.dependencies['supports-color'] = '8.1.1';
+        packageJSON.dependencies['ws'] = '7.4.4';
+        
         filesToCopy.push(copyFile('node/server/socket.js', `src/server`));
       }
     }
@@ -414,14 +453,37 @@ async function scaffold() {
           'src/client',
           [
             { token: 'APP__API', remove: !apiEnabled },
+            { token: 'APP__HAS_CONSTANTS', remove: !multiUser && !webSocket },
+            { token: 'APP__MULTI_USER', remove: !multiUser },
             { token: 'APP__SERVER_INTERACTIONS', remove: !apiEnabled && !webSocket },
             { token: 'APP__WEB_SOCKET', remove: !webSocket },
           ]
         );
         
-        filesToCopy.push(
-          copyFile('node/client/svelte/index.js', `src/client`),
+        await addParsedFile(
+          'index.js',
+          'node/client/svelte',
+          'src/client',
+          [
+            { token: 'CLIENT__MULTI_USER', remove: !multiUser },
+            { token: 'CLIENT__NO_MULTI_USER', remove: multiUser },
+          ]
         );
+      }
+      
+      if (multiUser) {
+        filesToCopy.push(copyFile('node/client/svelte/components/ConfigDialog.svelte', `src/client/components`));
+        filesToCopy.push(copyFile('node/client/svelte/components/Dialog.svelte', `src/client/components`));
+        filesToCopy.push(copyFile('node/client/svelte/components/HRWithText.svelte', `src/client/components`));
+        filesToCopy.push(copyFile('node/client/svelte/components/Icon.svelte', `src/client/components`));
+        filesToCopy.push(copyFile('node/client/svelte/components/LabeledInput.svelte', `src/client/components`));
+        filesToCopy.push(copyFile('node/client/svelte/components/LoginDialog.svelte', `src/client/components`));
+        filesToCopy.push(copyFile('node/client/svelte/components/UserDataDialog.svelte', `src/client/components`));
+        filesToCopy.push(copyFile('node/client/svelte/components/UserProfileDialog.svelte', `src/client/components`));
+        
+        filesToCopy.push(copyFile('node/client/utils/postData.js', `src/client/utils`));
+        filesToCopy.push(copyFile('node/client/utils/serializeForm.js', `src/client/utils`));
+        filesToCopy.push(copyFile('node/client/utils/storage.js', `src/client/utils`));
       }
       
       if (webSocket) {
@@ -435,17 +497,19 @@ async function scaffold() {
         'node',
         'src',
         [
+          { token: 'CONST__API', remove: !apiEnabled },
           { token: 'CONST__APP_TITLE', replacement: appTitle },
           { token: 'CONST__SVELTE_MNT', remove: !clientFrameworkIsSvelte },
           { token: 'CONST__LOGGER_NAMESPACE', remove: !logger },
           { token: 'CONST__LOGGER_NAMESPACE', replacement: loggerNamespace || '--' },
+          { token: 'CONST__MULTI_USER', remove: !multiUser },
           { token: 'CONST__SERVER', remove: !addServer },
           { token: 'CONST__WEB_SOCKETS', remove: !webSocket },
         ]
       );
       
       mkdirp.sync(`${PATH__PROJECT_ROOT}/bin`);
-      const removeEmpty = i => !!i; 
+      const removeEmpty = i => !!i;
       const prepFolders = [
         addServer ? './dist/server' : '',
         addClient ? './dist/public' : '',

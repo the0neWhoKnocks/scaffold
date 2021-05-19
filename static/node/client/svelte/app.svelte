@@ -1,13 +1,35 @@
 <script>
   //TOKEN:^APP__SERVER_INTERACTIONS
-  import { afterUpdate } from 'svelte';
+  import { afterUpdate, onMount } from 'svelte';
   //TOKEN:$APP__SERVER_INTERACTIONS
   import logger from '../utils/logger';
-  //TOKEN:^APP__WEB_SOCKET
+  //TOKEN:^APP__HAS_CONSTANTS
   import {
+    //TOKEN:^APP__MULTI_USER
+    NAMESPACE__STORAGE__USER,
+    ROUTE__API__HELLO,
+    //TOKEN:$APP__MULTI_USER
+    //TOKEN:^APP__WEB_SOCKET
     WS__CLOSE_CODE__USER_REMOVED,
     WS__MSG__EXAMPLE,
+    //TOKEN:$APP__WEB_SOCKET
   } from '../constants';
+  //TOKEN:$APP__HAS_CONSTANTS
+  //TOKEN:^APP__MULTI_USER
+  import Icon, {
+    ICON__ANGLE_DOWN,
+    ICON__ANGLE_UP,
+    ICON__USER,
+  } from './components/Icon.svelte';
+  import LoginDialog from './components/LoginDialog.svelte';
+  import UserDataDialog from './components/UserDataDialog.svelte';
+  import UserProfileDialog from './components/UserProfileDialog.svelte';
+  import {
+    getStorageType,
+    setStorage,
+  } from './utils/storage';
+  //TOKEN:$APP__MULTI_USER
+  //TOKEN:^APP__WEB_SOCKET
   import { connectToSocket } from './socket';
   //TOKEN:$APP__WEB_SOCKET
   
@@ -15,15 +37,27 @@
   //TOKEN:^APP__SERVER_INTERACTIONS
   let serverData = [];
   let serverDataRef;
-  let updateScroll = false;
   //TOKEN:$APP__SERVER_INTERACTIONS
   //TOKEN:^APP__WEB_SOCKET
   let socketAPI;
   //TOKEN:$APP__WEB_SOCKET
+  //TOKEN:^APP__MULTI_USER
+  let loginCompOpened = false;
+  let loginDialogOpened = false;
+  let createDialogOpened = false;
+  let logsLength = 0;
+  let userStorageType;
+  let mounted = false;
+  let username;
+  let userNavOpen = false;
+  let userDataOpened = false;
+  let userInfo;
+  let userProfileOpened = false;
+  //TOKEN:$APP__MULTI_USER
   //TOKEN:^APP__API
   
   function callAPI() {
-    fetch('/api')
+    fetch(ROUTE__API__HELLO)
       .then(resp => resp.json())
       .then(data => {
         serverData = [...serverData, `[API] ${JSON.stringify(data)}`];
@@ -40,8 +74,76 @@
     socketAPI.emit(WS__MSG__EXAMPLE, { d: Date.now() });
   }
   //TOKEN:$APP__WEB_SOCKET
+  //TOKEN:^APP__MULTI_USER
   
-  async function init() {
+  function openLogin() {
+    loginCompOpened = true;
+  }
+  function closeLogin() {
+    loginCompOpened = false;
+    userStorageType = getStorageType(NAMESPACE__STORAGE__USER);
+  }
+  function handleLogin() {
+    setUserInfo();
+    closeLogin();
+  }
+  
+  function logoutUser() {
+    window[userStorageType].removeItem(NAMESPACE__STORAGE__USER);
+    userStorageType = undefined;
+    userNavOpen = false;
+  }
+  
+  function setUserInfo() {
+    userStorageType = getStorageType(NAMESPACE__STORAGE__USER);
+    
+    if (userStorageType) {
+      userInfo = JSON.parse(window[userStorageType].getItem(NAMESPACE__STORAGE__USER));
+      username = userInfo.username;
+    }
+  }
+  
+  function toggleUserNav() {
+    userNavOpen = !userNavOpen;
+  }
+  
+  function openUserData() {
+    userDataOpened = true;
+  }
+  function closeUserData() {
+    userDataOpened = false;
+  }
+  
+  function openUserProfile() {
+    userProfileOpened = true;
+  }
+  function closeUserProfile() {
+    userProfileOpened = false;
+  }
+  function handleProfileUpdate(data) {
+    const persistent = getStorageType(NAMESPACE__STORAGE__USER) === 'localStorage';
+    setStorage({
+      data,
+      key: NAMESPACE__STORAGE__USER,
+      persistent,
+    });
+    
+    userInfo = data;
+    username = data.username;
+    
+    closeUserProfile();
+  }
+  //TOKEN:$APP__MULTI_USER
+  //TOKEN:^APP__SERVER_INTERACTIONS
+  
+  afterUpdate(() => {
+    if (logsLength !== serverData.length && serverDataRef) {
+      serverDataRef.scrollTop = serverDataRef.scrollHeight;
+    }
+    logsLength = serverData.length;
+  });
+  
+  onMount(async () => {
     log.info('App starting');
     //TOKEN:^APP__API
     
@@ -64,19 +166,14 @@
     }
     catch(err) { log.error(err); }
     //TOKEN:$APP__WEB_SOCKET
-  }
-  //TOKEN:^APP__SERVER_INTERACTIONS
-  
-  $: serverData, updateScroll = true;
-  afterUpdate(() => {
-    if (updateScroll) {
-      serverDataRef.scrollTop = serverDataRef.scrollHeight;
-      updateScroll = false;
-    }
+    //TOKEN:^APP__MULTI_USER
+    
+    setUserInfo();
+    
+    mounted = true;
+    //TOKEN:$APP__MULTI_USER
   });
   //TOKEN:^APP__SERVER_INTERACTIONS
-  
-  init();
 </script>
 
 <div class="app">
@@ -94,9 +191,55 @@
       <!--TOKEN:^APP__WEB_SOCKET -->
       <button on:click={callSocket}>Trigger Socket</button>
       <!--TOKEN:$APP__WEB_SOCKET -->
+      <!--TOKEN:^APP__MULTI_USER -->
+      {#if userStorageType}
+        <div class="user-menu">
+          <button on:click={toggleUserNav}>
+            <Icon type={ICON__USER} />
+            {username}
+            {#if userNavOpen}
+              <Icon type={ICON__ANGLE_DOWN} />
+            {:else}
+              <Icon type={ICON__ANGLE_UP} />
+            {/if}
+          </button>
+          <nav class:open={userNavOpen}>
+            <button on:click={openUserProfile}>Edit Profile</button>
+            <button on:click={openUserData}>Set Data</button>
+            <button on:click={logoutUser}>Logout</button>
+          </nav>
+        </div>
+      {:else}
+        <button on:click={openLogin} class:checking={!mounted}>Login</button>
+      {/if}
+      <!--TOKEN:$APP__MULTI_USER -->
     </nav>
     <!--TOKEN:$APP__SERVER_INTERACTIONS -->
   </div>
+  <!--TOKEN:^APP__MULTI_USER -->
+  {#if loginCompOpened}
+    <LoginDialog
+      onClose={closeLogin}
+      onSuccess={handleLogin}
+    />
+  {/if}
+  {#if userDataOpened}
+    <UserDataDialog
+      onClose={closeUserData}
+      onError={closeUserData}
+      onSuccess={closeUserData}
+      {userInfo}
+    />
+  {/if}
+  {#if userProfileOpened}
+    <UserProfileDialog
+      onClose={closeUserProfile}
+      onError={closeUserProfile}
+      onSuccess={handleProfileUpdate}
+      {userInfo}
+    />
+  {/if}
+  <!--TOKEN:$APP__MULTI_USER -->
 </div>
 
 <style>
@@ -133,8 +276,48 @@
     margin-top: 1em;
     display: flex;
   }
+  nav > *,
   nav button {
     width: 100%;
   }
+  nav button {
+    border: solid 1px;
+  }
+  /*TOKEN:^APP__MULTI_USER */
+  nav button.checking {
+    color: transparent;
+  }
+  
+  .user-menu {
+    margin-left: 0.25em;
+    position: relative;
+  }
+  .user-menu > button {
+    border-radius: 0.5em;
+    display: flex;
+    justify-content: space-between;
+  }
+  :global(.user-menu > button svg) {
+    color: #000;
+    font-size: 1.1em;
+  }
+  .user-menu nav {
+    width: 100%;
+    padding: 0.25em;
+    margin: 0;
+    flex-direction: column;
+    position: absolute;
+    bottom: 100%;
+    opacity: 0;
+    transform: translateY(20%);
+    transition: opacity 200ms, transform 200ms;
+    visibility: hidden;
+  }
+  .user-menu nav.open {
+    opacity: 1;
+    transform: translateY(0%);
+    visibility: visible;
+  }
+  /*TOKEN:$APP__MULTI_USER */
   /*TOKEN:$APP__SERVER_INTERACTIONS */
 </style>

@@ -1,5 +1,6 @@
 # Folders
 .git
+data
 dist
 node_modules
 
