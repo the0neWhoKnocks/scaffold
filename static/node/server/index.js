@@ -190,7 +190,7 @@ const server = httpModule.createServer({
   cert: readFileSync('/path/to/cert.pem'),
   key: readFileSync('/path/to/key.pem'),
   //TOKEN:$SERVER__SECURE
-}, //TOKEN:#SERVER__APP_HANDLER);
+}, /* TOKEN:#SERVER__APP_HANDLER */);
 
 server.listen(SERVER__PORT, err => {
   if (err) log.error('Error', err);

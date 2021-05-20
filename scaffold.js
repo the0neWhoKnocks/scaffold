@@ -34,7 +34,6 @@ if (PATH__PROJECT_ROOT.startsWith(PATH__SOURCE_ROOT)) {
   process.exit(0);
 }
 
-const replaceTokens = require('./utils/replaceTokens');
 const addParsedFile = require('./utils/addParsedFile')({
   outputRoot: PATH__PROJECT_ROOT,
   srcRoot: `${PATH__SOURCE_ROOT}/static`,
