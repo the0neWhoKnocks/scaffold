@@ -219,7 +219,7 @@ function destroyConnections() {
 }
 
 function handleServerDeath(signal) {
-  log.info(`\n[${signal}] Server closing`);
+  log.info(`[${signal}] Server closing`);
 
   // NOTE - I've seen this NOT work if there are some zombie WS processes
   // floating around from a previous bad run. So try killing all `node`

@@ -107,7 +107,7 @@ const fileCheck = (file, timeout = 30) => new Promise((resolveCheck, rejectCheck
       
       if (exists()) {
         //TOKEN:^WATCHER__LOGGER
-        logger.info('\nFile found, starting...\n');
+        logger.info('File found, starting...\n');
         //TOKEN:$WATCHER__LOGGER
         clearInterval(int);
         resolveCheck();
