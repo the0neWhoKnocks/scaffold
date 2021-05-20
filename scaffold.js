@@ -97,6 +97,9 @@ async function scaffold() {
         console.log('[UN-STASH] changes');
         await cmd('git stash apply', { cwd: PATH__SOURCE_ROOT });
       }
+      
+      console.log('Update complete. Re-run script to scaffold project.');
+      process.exit();
     }
   }
   
