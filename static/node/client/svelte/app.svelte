@@ -259,7 +259,7 @@
     border-radius: 0.25em;
     background: linear-gradient(#ccc, #aaa);
   }
-  /*TOKEN:^APP__SERVER_INTERACTIONS */
+  /* TOKEN:^APP__SERVER_INTERACTIONS */
   
   .server-data {
     height: 10em;
@@ -283,7 +283,7 @@
   nav button {
     border: solid 1px;
   }
-  /*TOKEN:^APP__MULTI_USER */
+  /* TOKEN:^APP__MULTI_USER */
   nav button.checking {
     color: transparent;
   }
@@ -318,6 +318,6 @@
     transform: translateY(0%);
     visibility: visible;
   }
-  /*TOKEN:$APP__MULTI_USER */
-  /*TOKEN:$APP__SERVER_INTERACTIONS */
+  /* TOKEN:$APP__MULTI_USER */
+  /* TOKEN:$APP__SERVER_INTERACTIONS */
 </style>
