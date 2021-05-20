@@ -35,7 +35,7 @@ const mainFields = [
 const mode = process.env.NODE_ENV || 'development';
 const dev = mode === 'development';
 
-module.exports = {
+const conf = {
   devtool: dev && 'source-map',
   entry: {
     'js/app': resolve(__dirname, './src/client/index.js'),
@@ -147,11 +147,19 @@ module.exports = {
     children: false,
     entrypoints: false,
   },
+  //TOKEN:^WP__WATCH
   watch: dev,
-  //TOKEN:^WP__FILE_POLLING
-  watchOptions: {
+  //TOKEN:$WP__WATCH
+};
+//TOKEN:^WP__WATCH
+
+// related to WSL2: https://github.com/microsoft/WSL/issues/4739
+if (dev && !!process.env.WSL_INTEROP) {
+  conf.watchOptions = {
     aggregateTimeout: 200,
     poll: 1000,
-  },
-  //TOKEN:$WP__FILE_POLLING
-};
+  };
+}
+//TOKEN:$WP__WATCH
+
+module.exports = conf;

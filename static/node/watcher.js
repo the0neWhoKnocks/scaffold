@@ -133,7 +133,8 @@ const watchedServerFiles = [
   './src/constants.js',
 ];
 //TOKEN:$WATCHER__SERVER
-const pollForFileChanges = //TOKEN:#WATCHER__FILE_POLLING; // needed for WSL2 systems
+
+const pollForFileChanges = !!process.env.WSL_INTEROP; // related to WSL2: https://github.com/microsoft/WSL/issues/4739
 const chokidarOpts = {
   ignoreInitial: true,
   usePolling: pollForFileChanges,
