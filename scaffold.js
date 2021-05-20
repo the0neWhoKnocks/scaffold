@@ -34,7 +34,6 @@ if (PATH__PROJECT_ROOT.startsWith(PATH__SOURCE_ROOT)) {
   process.exit(0);
 }
 
-const WSL2 = process.env.WSL_INTEROP;
 const replaceTokens = require('./utils/replaceTokens');
 const addParsedFile = require('./utils/addParsedFile')({
   outputRoot: PATH__PROJECT_ROOT,
@@ -465,8 +464,8 @@ async function scaffold() {
           from: 'node',
           to: '',
           tokens: [
-            { token: 'WP__FILE_POLLING', remove: !WSL2 },
             { token: 'WP__SVELTE', remove: !clientFrameworkIsSvelte },
+            { token: 'WP__WATCH', remove: !hasWatcher },
           ],
         }]);
       }
@@ -597,7 +596,6 @@ async function scaffold() {
         to: '',
         tokens: [
           { token: 'WATCHER__CLIENT', remove: !addClient },
-          { token: 'WATCHER__FILE_POLLING', replacement: WSL2 ? 'true' : 'false' },
           { token: 'WATCHER__LOGGER', remove: !logger },
           { token: 'WATCHER__SERVER', remove: !addServer },
         ],
