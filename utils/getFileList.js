@@ -48,18 +48,18 @@ module.exports = async function getFileList(
         const nested = (_p.match(/\/(?=[^/])/g) || []).length;
         const nextNest = (_nextP.match(/\/(?=[^/])/g) || []).length;
         const indent = Math.max(nested, 0);
-        const indentArr = Array(indent ? indent - 1 : indent).fill(padding);
-        const leadingBranches = Array(indent).fill('  │').join('');
-        let str;
+        const leadingBranches = Array(indent).fill(`${padding}│`).join('');
+        let indentArr = Array(indent ? indent - 1 : indent).fill(padding);
         let lowerDirSpacing = '';
+        let str;
         
-        if (indent) indentArr[0] = leadingBranches;
+        if (indent) indentArr = [leadingBranches];
     
         const _f = isDir 
           ? `${parts[parts.length - 2]}/`
           : parts[parts.length - 1];
         const branch = _f && _f !== '/'
-          ? (nextNest < nested || !_nextP) ? '  └─ ' : '  ├─ '
+          ? (nextNest < nested || !_nextP) ? `${padding}└─ ` : `${padding}├─ `
           : ` ${basename(p)}/`;
         
         if (branch.includes('└─')) lowerDirSpacing = `\n${leadingBranches}`;
