@@ -1,4 +1,4 @@
-const log = require('../../utils/logger')('api.user.getData');
+const log = require('../../utils/logger')('api.user.data.get');
 const decrypt = require('../utils/decrypt');
 const encrypt = require('../utils/encrypt');
 const getUserDataPath = require('../utils/getUserDataPath');

@@ -49,12 +49,12 @@ const {
 const log = require('../utils/logger')('server');
 //TOKEN:^SERVER__MULTI_USER
 const createConfig = require('./api/config.create');
-const getUserData = require('./api/user.getData');
-const getUserProfile = require('./api/user.getProfile');
 const createUser = require('./api/user.create');
+const getUserData = require('./api/user.data.get');
+const setUserData = require('./api/user.data.set');
 const userLogin = require('./api/user.login');
-const setUserData = require('./api/user.setData');
-const setUserProfile = require('./api/user.setProfile');
+const getUserProfile = require('./api/user.profile.get');
+const setUserProfile = require('./api/user.profile.set');
 //TOKEN:$SERVER__MULTI_USER
 //TOKEN:^SERVER__WEBSOCKET
 const socket = require('./socket');

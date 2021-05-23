@@ -1,5 +1,5 @@
 const { writeFile } = require('fs');
-const log = require('../../utils/logger')('api.user.setData');
+const log = require('../../utils/logger')('api.user.data.set');
 const encrypt = require('../utils/encrypt');
 const getUserDataPath = require('../utils/getUserDataPath');
 
