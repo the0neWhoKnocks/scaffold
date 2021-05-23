@@ -15,6 +15,8 @@ const PATH__SOURCE_ROOT = dirname(PATH__SOURCE_SCRIPT);
 const GLOBS__DELETE_FILES = [
   '**/*',
   '!.git',
+  '!certs.*',
+  '!certs.*/**',
   '!LICENSE',
   '!node_modules',
   '!package-lock.json',
@@ -188,7 +190,6 @@ async function scaffold() {
           short: 'Secure',
           value: { secure: true },
           checked: false,
-          disabled: true,
         },
         {
           name: 'Should support Web Sockets',
@@ -378,9 +379,7 @@ async function scaffold() {
                 : '',
             },
             { token: 'SERVER__MULTI_USER', remove: !multiUser },
-            { token: 'SERVER__SECURE', remove: !secure },
             { token: 'SERVER__STATIC', remove: !staticFiles },
-            { token: 'SERVER__UNSECURE', remove: secure },
             { token: 'SERVER__WEBSOCKET', remove: !webSocket },
           ],
         },
@@ -438,6 +437,15 @@ async function scaffold() {
           files: ['socket.js'],
           from: 'node/server',
           to: 'src/server',
+        }]);
+      }
+      
+      if (secure) {
+        copyFiles([{
+          executable: true,
+          files: ['gen-certs.sh'],
+          from: 'bin',
+          to: 'bin',
         }]);
       }
     }
@@ -655,21 +663,26 @@ async function scaffold() {
   
   // TODO - add .github/workflows
   
-  addParsedFiles([{
-    file: 'README.md',
-    from: '',
-    to: '',
-    tokens: [
-      { token: 'README__LOGGING', remove: !logger },
-      { token: 'README__TITLE', replacement: appTitle },
-    ],
-  }]);
-  
-  copyFiles([{
-    files: ['.gitignore'],
-    from: '',
-    to: '',
-  }]);
+  addParsedFiles([
+    {
+      file: '.gitignore',
+      from: '',
+      to: '',
+      tokens: [
+        { token: 'IGNORE__HTTPS', remove: !secure },
+      ],
+    },
+    {
+      file: 'README.md',
+      from: '',
+      to: '',
+      tokens: [
+        { token: 'README__HTTPS', remove: !secure },
+        { token: 'README__LOGGING', remove: !logger },
+        { token: 'README__TITLE', replacement: appTitle },
+      ],
+    },
+  ]);
   
   const pendingPaths = [
     // get a list of unique paths

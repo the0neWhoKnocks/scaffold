@@ -1,10 +1,5 @@
-//TOKEN:^SERVER__UNSECURE
-const httpModule = require('http');
-//TOKEN:$SERVER__UNSECURE
+const { STATUS_CODES } = require('http');
 //TOKEN:#SERVER__FS
-//TOKEN:^SERVER__SECURE
-const httpModule = require('https');
-//TOKEN:$SERVER__SECURE
 //TOKEN:^SERVER__COMPRESS
 const compression = require('compression');
 //TOKEN:$SERVER__COMPRESS
@@ -62,12 +57,6 @@ const socket = require('./socket');
 const shell = require('./shell');
 
 const { NODE_ENV } = process.env;
-//TOKEN:^SERVER__SECURE
-const PROTOCOL = 'https';
-//TOKEN:$SERVER__SECURE
-//TOKEN:^SERVER__UNSECURE
-const PROTOCOL = 'http';
-//TOKEN:$SERVER__UNSECURE
 const dev = NODE_ENV !== 'production';
 const middleware = [
   //TOKEN:^SERVER__COMPRESS
@@ -112,7 +101,7 @@ app.pathHandler = (method) => function pathHandler(path, ...handlers) {
 };
 app.notFoundHandler = function notFound(req, res) {
   const CODE = 404;
-  const body = httpModule.STATUS_CODES[CODE];
+  const body = STATUS_CODES[CODE];
   
   log.debug(`Nothing found for "${req.url}"`);
   
@@ -184,17 +173,22 @@ app
     }));
   });
 
-const server = httpModule.createServer({
-  //TOKEN:^SERVER__SECURE
-  // TODO - add script to generate certs or ask for path of certs
-  cert: readFileSync('/path/to/cert.pem'),
-  key: readFileSync('/path/to/key.pem'),
-  //TOKEN:$SERVER__SECURE
-}, /* TOKEN:#SERVER__APP_HANDLER */);
+let httpModule;
+let protocol = 'http';
+let serverOpts = {};
+if (process.env.NODE_EXTRA_CA_CERTS) {
+  serverOpts.cert = readFileSync(process.env.NODE_EXTRA_CA_CERTS, 'utf8');
+  serverOpts.key = readFileSync(process.env.NODE_EXTRA_CA_CERTS.replace('.crt', '.key'), 'utf8');
+  httpModule = require('https');
+  protocol = 'https';
+}
+else httpModule = require('http');
+
+const server = httpModule.createServer(serverOpts, /* TOKEN:#SERVER__APP_HANDLER */);
 
 server.listen(SERVER__PORT, err => {
   if (err) log.error('Error', err);
-  log.info(`Server running at: ${PROTOCOL}://localhost:${SERVER__PORT}`);
+  log.info(`Server running at: ${protocol}://localhost:${SERVER__PORT}`);
 });
 
 //TOKEN:^SERVER__WEBSOCKET
