@@ -1,6 +1,6 @@
 const { rename, writeFile } = require('fs');
 const { PATH__USERS } = require('../../constants');
-const log = require('../../utils/logger')('api.user.setProfile');
+const log = require('../../utils/logger')('api.user.profile.set');
 const decrypt = require('../utils/decrypt');
 const encrypt = require('../utils/encrypt');
 const getUserDataPath = require('../utils/getUserDataPath');
