@@ -1,5 +1,8 @@
 # Folders
 .git
+#TOKEN:^IGNORE__HTTPS
+certs.*
+#TOKEN:$IGNORE__HTTPS
 data
 dist
 node_modules
