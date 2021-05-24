@@ -1,11 +1,5 @@
-const {
-  promises: {
-    access,
-    chmod,
-    readFile,
-    writeFile,
-  },
-} = require('fs');
+const { promises: { readFile, writeFile } } = require('fs');
+const makeExecutable = require('./makeExecutable');
 const replaceTokens = require('./replaceTokens');
 
 module.exports = ({
@@ -16,19 +10,13 @@ module.exports = ({
   srcPath,
   outputPath,
   tokens = [],
-  shouldBeExecutable,
+  executable,
 ) {
   const rawText = await readFile(`${srcRoot}/${srcPath}/${fileName}`, 'utf8');
   const updatedText = replaceTokens(rawText, tokens);
   const outputFilePath = `${outputRoot}/${outputPath}/${fileName}`;
+  
   await writeFile(outputFilePath, updatedText, 'utf8');
-  if (shouldBeExecutable) {
-    // https://chmod-calculator.com/
-    // perm values
-    // - (r)ead = 4
-    // - (w)rite = 2
-    // - e(x)ecute = 1
-    try { await access(outputFilePath, X_OK); }
-    catch (err) { await chmod(outputFilePath, '766'); }
-  }
+  
+  if (executable) await makeExecutable(outputFilePath);
 }
