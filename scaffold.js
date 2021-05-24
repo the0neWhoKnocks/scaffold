@@ -703,8 +703,8 @@ async function scaffold() {
   });
   
   const pendingFiles = [
-    ...pendingFileCopies.reduce((arr, { files, from, to }) => {
-      arr.push(...files.map(file => copyFile(`${from}/${file}`, to)));
+    ...pendingFileCopies.reduce((arr, { executable, files, from, to }) => {
+      arr.push(...files.map(file => copyFile(`${from}/${file}`, to, executable)));
       return arr;
     }, []),
     ...pendingParsedFiles.map(({ executable, file, from, to, tokens }) => {
