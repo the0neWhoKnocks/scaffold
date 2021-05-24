@@ -4,8 +4,6 @@ const {
 } = require('fs');
 const { dirname, resolve } = require('path');
 const mkdirp = require('mkdirp');
-const globby = require('globby');
-
 const [
   nodeBinary,
   PATH__SOURCE_SCRIPT,
@@ -64,6 +62,7 @@ async function scaffold() {
   const { prompt } = require('inquirer');
   
   // Check for updates before running
+  console.log('\n  Checking for updates');
   const repoStatus = await cmd('git fetch && git status -sb', { cwd: PATH__SOURCE_ROOT });
   const behindAhead = repoStatus.split('\n')[0].match(/\[[^\]]+]$/); // get the bracketed content at the end
   // NOTE - The status could be both `ahead` and `behind` if changes to the remote
@@ -101,6 +100,9 @@ async function scaffold() {
       console.log('Update complete. Re-run script to scaffold project.');
       process.exit();
     }
+  }
+  else {
+    console.log('  No updates\n');
   }
   
   const projectType = 'node';
