@@ -51,6 +51,9 @@ if (!process.env.FOR_CLIENT_BUNDLE) {
   //TOKEN:^CONST__MULTI_USER
   constants.PATH__CONFIG = `${DATA_PATH}/config.json`;
   constants.PATH__DATA = DATA_PATH;
+  //TOKEN:$CONST__MULTI_USER
+  constants.PATH__PUBLIC = `${ROOT_PATH}/public`;
+  //TOKEN:^CONST__MULTI_USER
   constants.PATH__USERS = `${DATA_PATH}/users.json`;
   //TOKEN:$CONST__MULTI_USER
   constants.SERVER__PORT = +process.env.SERVER_PORT || 3000;

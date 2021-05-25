@@ -1,6 +1,9 @@
 # //TOKEN:#README__TITLE
 
 - [Development](development)
+//TOKEN:^README__DOCKER
+- [Docker](docker)
+//TOKEN:$README__DOCKER
 //TOKEN:^README__HTTPS
 - [Local HTTPS](local-https)
    - [Generate Certs for localhost](generate-certs-for-localhost)
@@ -18,6 +21,15 @@
 
 ## Development
 
+**NOTE** - Aliases to speed up workflow:
+| Alias | Command          |
+| ----- | ---------------- |
+//TOKEN:^README__DOCKER
+| `d`   | `docker`         |
+| `dc`  | `docker-compose` |
+//TOKEN:$README__DOCKER
+| `nr`  | `npm run`        |
+
 Install dependencies
 ```sh
 npm i
@@ -26,11 +38,25 @@ npm i
 Run the App
 ```sh
 # Prod mode
-npm run start
+nr start
 
 # Dev mode
-npm run start:dev
+nr start:dev
 ```
+//TOKEN:^README__DOCKER
+---
+
+## Docker
+
+```sh
+# compile Production code (required since the assets are copied over)
+nr build
+# build the image
+dc build
+# start the container
+dc up
+```
+//TOKEN:$README__DOCKER
 //TOKEN:^README__HTTPS
 ---
 
@@ -102,10 +128,10 @@ This App utilizes [ulog](https://www.npmjs.com/package/ulog).
 
 On the Server you can enable logging via:
 ```sh
-# setting an env var of `log` with a loglevel value
-log=debug npm run start:dev
-log=error npm run start:dev
-log=info npm run start:dev
+# setting an env var of `log` with a log level value
+log=debug nr start:dev
+log=error nr start:dev
+log=info nr start:dev
 ```
 
 On the Client you can enable logging via:
