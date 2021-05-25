@@ -23,6 +23,9 @@ const {
   //TOKEN:^SERVER__MULTI_USER
   PATH__CONFIG,
   PATH__DATA,
+  //TOKEN:$SERVER__MULTI_USER
+  PATH__PUBLIC,
+  //TOKEN:^SERVER__MULTI_USER
   ROUTE__API__CONFIG_CREATE,
   //TOKEN:$SERVER__MULTI_USER
   //TOKEN:^SERVER__API
@@ -63,7 +66,7 @@ const middleware = [
   compression({ threshold: 0 }),
   //TOKEN:$SERVER__COMPRESS
   //TOKEN:^SERVER__STATIC
-  sirv('./dist/public', { dev, etag: true }),
+  sirv(PATH__PUBLIC, { dev, etag: true }),
   //TOKEN:$SERVER__STATIC
   //TOKEN:^SERVER__COOKIES
   cookieParser(),

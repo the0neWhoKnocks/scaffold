@@ -38,6 +38,7 @@ const addParsedFile = require('./utils/addParsedFile')({
   outputRoot: PATH__PROJECT_ROOT,
   srcRoot: `${PATH__SOURCE_ROOT}/static`,
 });
+const kebabCase = require('./utils/kebabCase');
 const merge = require('./utils/merge');
 const sortObj = require('./utils/sortObj');
 const getFileList = require('./utils/getFileList');
@@ -73,7 +74,7 @@ async function scaffold() {
         message: 'Update available. Update now?',
         type: 'list',
         name: 'update',
-        default: 'now',
+        default: 0,
         choices: [
           { name: 'Yes', value: 'now' },
           { name: 'Later', value: 'later' },
@@ -145,10 +146,10 @@ async function scaffold() {
       name: 'addServer',
     },
     {
-      message: 'Server Framework',
+      message: '  Server Framework',
       type: 'list',
       name: 'serverFramework',
-      default: 'polka',
+      default: 2,
       when: ({ addServer }) => addServer,
       choices: [
         { name: 'Node', value: 'node' },
@@ -157,7 +158,7 @@ async function scaffold() {
       ],
     },
     {
-      message: 'Server Options',
+      message: '  Server Options',
       type: 'checkbox',
       name: 'serverOptions',
       when: ({ addServer }) => addServer,
@@ -219,18 +220,18 @@ async function scaffold() {
       name: 'addClient',
     },
     {
-      message: 'Client Framework',
+      message: '  Client Framework',
       type: 'list',
       name: 'clientFramework',
       when: ({ addClient }) => addClient,
-      default: 'svelte',
+      default: 1,
       choices: [
         { name: 'None', value: 'none' },
         { name: 'Svelte', value: 'svelte' },
       ],
     },
     {
-      message: 'Bundler',
+      message: '  Bundler',
       type: 'list',
       name: 'bundler',
       when: ({ addClient }) => addClient,
@@ -269,6 +270,30 @@ async function scaffold() {
       default: 'app',
       when: ({ devOptions }) => devOptions && devOptions.logger,
     },
+    {
+      message: 'Container Platform',
+      type: 'list',
+      name: 'containerPlatform',
+      default: 0,
+      choices: [
+        { name: 'None', value: '' },
+        { name: 'Docker', value: 'docker' },
+      ],
+    },
+    {
+      message: 'Docker Username',
+      type: 'input',
+      name: 'docker.username',
+      default: 'theonewhoknocks',
+      when: ({ containerPlatform }) => containerPlatform === 'docker',
+    },
+    {
+      message: 'Docker Password',
+      type: 'password',
+      mask: '*',
+      name: 'docker.password',
+      when: ({ containerPlatform }) => containerPlatform === 'docker',
+    },
   ]);
   
   const {
@@ -278,6 +303,7 @@ async function scaffold() {
     bundler,
     clientFramework,
     devOptions,
+    docker,
     loggerNamespace,
     removePreviousScaffold,
     serverFramework,
@@ -302,6 +328,7 @@ async function scaffold() {
     staticFiles,
   } = (middleware || {});
   
+  const kebabAppName = kebabCase(appTitle);
   const clientFrameworkIsSvelte = clientFramework === 'svelte';
   const bundlerIsWebpack = bundler === 'webpack';
   const serverFrameworkIsExpress = serverFramework === 'express';
@@ -657,13 +684,34 @@ async function scaffold() {
     packageJSON.scripts = sortObj(packageJSON.scripts);
     writeFileSync(`${PATH__PROJECT_ROOT}/package.json`, `${JSON.stringify(packageJSON, null, 2)}\n`, 'utf8');
   }
-
-  const containerPlatform = 'docker';
-  if (containerPlatform === 'docker') {
-    // TODO copy over docker stuff
+  
+  if (docker) {
+    const { username } = docker;
+    
+    addParsedFiles([
+      {
+        file: 'Dockerfile',
+        from: 'docker/.docker',
+        to: '.docker',
+        tokens: [
+          { token: 'DOCKER__APP_NAME', replacement: kebabAppName },
+        ],
+      },
+      {
+        file: 'docker-compose.yml',
+        from: 'docker',
+        to: '',
+        tokens: [
+          { token: 'DC__APP_NAME', replacement: kebabAppName },
+          { token: 'DC__HTTPS', remove: !secure },
+          { token: 'DC__USERNAME', replacement: username },
+        ],
+      },
+    ]);
   }
   
   // TODO - add .github/workflows
+  // TODO - add e2e testing
   
   addParsedFiles([
     {
@@ -679,6 +727,7 @@ async function scaffold() {
       from: '',
       to: '',
       tokens: [
+        { token: 'README__DOCKER', remove: !docker },
         { token: 'README__HTTPS', remove: !secure },
         { token: 'README__LOGGING', remove: !logger },
         { token: 'README__TITLE', replacement: appTitle },

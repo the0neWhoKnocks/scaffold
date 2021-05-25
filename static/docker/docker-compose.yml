@@ -1,0 +1,24 @@
+version: "2" # using 2 because 3 doesn't support extending
+
+services:
+  #TOKEN:#DC__APP_NAME:
+    build:
+      context: ./
+      dockerfile: .docker/Dockerfile
+    container_name: #TOKEN:#DC__APP_NAME
+    environment:
+      #TOKEN:^DC__HTTPS
+      NODE_EXTRA_CA_CERTS: /home/node/app/server/certs/localhost.crt
+      #TOKEN:$DC__HTTPS
+      NODE_ENV: production
+      TZ: America/Los_Angeles
+    image: #TOKEN:#DC__USERNAME/#TOKEN:#DC__APP_NAME
+    ports:
+      # Map Local port to the Container's exposed port
+      - "3000:3000"
+    #TOKEN:^DC__HTTPS
+    volumes:
+      - "${PWD}/certs.localhost:/home/node/app/server/certs"
+      # Uncomment to map Local non-Prod assets
+      # - "${PWD}/dist:/home/node/app"
+    #TOKEN:$DC__HTTPS
