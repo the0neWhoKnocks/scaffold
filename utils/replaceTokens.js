@@ -5,7 +5,7 @@ module.exports = function replaceTokens(src, tokens = []) {
   
   tokens.forEach(({ remove, replacement, token }) => {
     if (replacement) {
-      _src = _src.replace(new RegExp(`${commentStart}TOKEN:#${token}${commentEnd}`), replacement);
+      _src = _src.replace(new RegExp(`${commentStart}TOKEN:#${token}${commentEnd}`, 'g'), replacement);
     }
     else {
       const regToken = `(?:^\\s+)?${commentStart}TOKEN:(?:\\^|\\$)${token}${commentEnd}\\n`;
