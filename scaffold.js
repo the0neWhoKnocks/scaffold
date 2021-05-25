@@ -129,18 +129,6 @@ async function scaffold() {
       },
     },
     {
-      message: 'Standards',
-      type: 'checkbox',
-      name: 'standards',
-      filter: answers => answers.reduce((obj, a) => {
-        obj[a] = true;
-        return obj;
-      }, {}),
-      choices: [
-        { name: 'ESLint', value: 'eslint', checked: true }
-      ],
-    },
-    {
       message: 'Add Server',
       type: 'confirm',
       name: 'addServer',
@@ -255,6 +243,7 @@ async function scaffold() {
       choices: [
         { name: 'Watch for changes', value: { hasWatcher: true }, checked: true },
         { name: 'Add logging util', value: { logger: 'ulog' }, checked: true },
+        { name: 'ESLint', value: { eslint: true }, checked: true },
       ],
     },
     {
@@ -308,9 +297,9 @@ async function scaffold() {
     removePreviousScaffold,
     serverFramework,
     serverOptions,
-    standards,
   } = scaffoldOpts;
   const {
+    eslint,
     hasWatcher,
     logger,
   } = (devOptions || {});
@@ -662,7 +651,7 @@ async function scaffold() {
       packageJSON.dependencies[logger] = moduleVersion;
     }
     
-    if (standards.eslint) {
+    if (eslint) {
       packageJSON.devDependencies['eslint'] = '7.23.0';
       
       if (clientFrameworkIsSvelte) {
