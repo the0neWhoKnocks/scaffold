@@ -59,7 +59,7 @@ nr start:dev
 # compile Production code (required since the assets are copied over)
 nr build
 # build the image
-dc build
+dc build app
 # start the container
 dc up
 ```
@@ -85,6 +85,8 @@ This repo utilizes GitHub workflows to auto-deploy a GitHub page.
 ## Local HTTPS
 
 Some experiences will complain if your App isn't run over `https`. To allow for secure Local development (and LAN Apps over IP), follow the below instructions to generate and install certs.
+
+**NOTE**: If you've already generated and added certs for a specific domain or IP, there's no need to generate and add a new cert. Either delete the old one, or reuse it in your new App.
 
 Run `./bin/gen-certs.sh --help` if you want to see the full list of options.
 
@@ -135,8 +137,10 @@ On OSX you may run into an issue where you've added a cert, needed to add update
 
 **OSX**
 - One-liner: `sudo security add-trusted-cert -d -r trustRoot -k "/Library/Keychains/System.keychain" "./certs.localhost/localhost-CA.crt"`
+- One-liner (vhost): `sudo security add-trusted-cert -d -r trustRoot -k "/Library/Keychains/System.keychain" "./certs.app.local/app.local.crt"`
    - Open Spotlight (`CMD + SPACE`), select Keychain, go to System. You should see `localhost (CA)` listed, and with a blue plus icon.
-   - If the above doesn't work, follow the manual instructions below.
+   
+If the above doesn't work, follow the manual instructions below.
 - In a terminal, run `open certs.localhost`
 - Double-click on `localhost-CA.crt`
 - An Add Certificates dialog should open.
@@ -164,12 +168,23 @@ On OSX you may run into an issue where you've added a cert, needed to add update
 
 ### Run your App with the certs
 
+**Non-VHost**
+
 The non-`-CA` files will be used for the App. When starting the App via Node or Docker, you'll need to set this environment variable:
 ```sh
 `NODE_EXTRA_CA_CERTS="$PWD/<CERTS>/localhost.crt"`
 ```
 - Note that `$PWD` expands to an absolute file path.
 - The App automatically determines the `.key` file so long as the `.key` & `.crt` files have the same name.
+
+**With a VHost**
+
+```sh
+# Start the Proxy and the App
+dc up
+```
+
+Then go to https://app.local:3000/
 //TOKEN:$README__HTTPS
 //TOKEN:^README__LOGGING
 

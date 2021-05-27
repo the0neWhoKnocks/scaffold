@@ -191,7 +191,22 @@ const server = httpModule.createServer(serverOpts, /* TOKEN:#SERVER__APP_HANDLER
 
 server.listen(SERVER__PORT, err => {
   if (err) log.error('Error', err);
+  //TOKEN:^SERVER__VHOST
+  
+  let domain = 'localhost';
+  let port = SERVER__PORT;
+  
+  if (process.env.VIRTUAL_HOST) {
+    domain = process.env.VIRTUAL_HOST;
+    port = process.env.VHOST_PROXY_PORT;
+    protocol = 'https';
+  }
+  
+  log.info(`Server running at: ${protocol}://${domain}:${port}`);
+  //TOKEN:$SERVER__VHOST
+  //TOKEN:^SERVER__NO_VHOST
   log.info(`Server running at: ${protocol}://localhost:${SERVER__PORT}`);
+  //TOKEN:$SERVER__NO_VHOST
 });
 
 //TOKEN:^SERVER__WEBSOCKET

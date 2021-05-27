@@ -425,7 +425,9 @@ async function scaffold() {
                 : '',
             },
             { token: 'SERVER__MULTI_USER', remove: !multiUser },
+            { token: 'SERVER__NO_VHOST', remove: vHost },
             { token: 'SERVER__STATIC', remove: !staticFiles },
+            { token: 'SERVER__VHOST', remove: !vHost },
             { token: 'SERVER__WEBSOCKET', remove: !webSocket },
           ],
         },
@@ -705,8 +707,7 @@ async function scaffold() {
   if (docker) {
     const { username } = docker;
     const addCerts = secure && !vHost;
-    
-    addParsedFiles([
+    const files = [
       {
         file: 'Dockerfile',
         from: 'docker/.docker',
@@ -726,11 +727,23 @@ async function scaffold() {
           { token: 'DC__PORTS', remove: vHost },
           { token: 'DC__USERNAME', replacement: username },
           { token: 'DC__VHOST', remove: !vHost },
-          { token: 'DC__VHOST', replacement: `${kebabAppName}.local` },
           { token: 'DC__VOLUMES', remove: !multiUser && !addCerts },
         ],
       },
-    ]);
+    ];
+    
+    if (vHost) {
+      files.push({
+        file: '.env',
+        from: 'docker',
+        to: '',
+        tokens: [
+          { token: 'ENV__VHOST_DOMAIN', replacement: `${kebabAppName}.local` },
+        ],
+      });
+    }
+    
+    addParsedFiles(files);
   }
   
   if (ghPage) {
