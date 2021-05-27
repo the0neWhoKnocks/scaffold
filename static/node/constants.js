@@ -37,9 +37,9 @@ const constants = {
 if (!process.env.FOR_CLIENT_BUNDLE) {
   // Server only (will be stripped out via WP)
   const { resolve } = require('path');
-  //TOKEN:^CONST__MULTI_USER
   
   const ROOT_PATH = resolve(__dirname, './');
+  //TOKEN:^CONST__MULTI_USER
   const DATA_PATH = process.env.DATA_PATH || `${ROOT_PATH}/../data`;
   
   constants.CRYPT__ALGORITHM = 'aes-256-gcm';
