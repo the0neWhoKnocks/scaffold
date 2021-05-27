@@ -601,6 +601,7 @@ async function scaffold() {
         addServer ? './src/server' : '',
         logger ? './src/utils' : '',
       ];
+      const hasAPI = apiEnabled || multiUser;
       addParsedFiles([
         {
           file: 'constants.js',
@@ -609,6 +610,7 @@ async function scaffold() {
           tokens: [
             { token: 'CONST__API', remove: !apiEnabled },
             { token: 'CONST__APP_TITLE', replacement: appTitle },
+            { token: 'CONST__HAS_API', remove: !hasAPI },
             { token: 'CONST__SVELTE_MNT', remove: !clientFrameworkIsSvelte },
             { token: 'CONST__LOGGER_NAMESPACE', remove: !logger },
             { token: 'CONST__LOGGER_NAMESPACE', replacement: loggerNamespace || '--' },
