@@ -7,8 +7,10 @@
   import {
     //TOKEN:^APP__MULTI_USER
     NAMESPACE__STORAGE__USER,
-    ROUTE__API__HELLO,
     //TOKEN:$APP__MULTI_USER
+    //TOKEN:^APP__API
+    ROUTE__API__HELLO,
+    //TOKEN:$APP__API
     //TOKEN:^APP__WEB_SOCKET
     WS__CLOSE_CODE__USER_REMOVED,
     WS__MSG__EXAMPLE,
@@ -35,6 +37,7 @@
   
   const log = logger('app');
   //TOKEN:^APP__SERVER_INTERACTIONS
+  let logsLength = 0;
   let serverData = [];
   let serverDataRef;
   //TOKEN:$APP__SERVER_INTERACTIONS
@@ -43,9 +46,6 @@
   //TOKEN:$APP__WEB_SOCKET
   //TOKEN:^APP__MULTI_USER
   let loginCompOpened = false;
-  let loginDialogOpened = false;
-  let createDialogOpened = false;
-  let logsLength = 0;
   let userStorageType;
   let mounted = false;
   let username;

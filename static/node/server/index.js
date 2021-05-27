@@ -125,9 +125,8 @@ app.use = function use(...middleware) {
 //TOKEN:^SERVER__FRAMEWORK__POLKA
 const app = polka();
 //TOKEN:$SERVER__FRAMEWORK__POLKA
-
-const jsonParser = bodyParser.json();
 //TOKEN:^SERVER__MULTI_USER
+const jsonParser = bodyParser.json();
 
 if (!existsSync(PATH__DATA)) mkdirp.sync(PATH__DATA);
 //TOKEN:$SERVER__MULTI_USER
@@ -135,7 +134,9 @@ if (!existsSync(PATH__DATA)) mkdirp.sync(PATH__DATA);
 app
   .use(...middleware)
   .use((req, res, next) => {
+    //TOKEN:^SERVER__MULTI_USER
     if (existsSync(PATH__CONFIG)) req.appConfig = JSON.parse(readFileSync(PATH__CONFIG, 'utf8'));
+    //TOKEN:$SERVER__MULTI_USER
     
     res.sendJSON = (data) => {
       res.setHeader('Content-Type', 'application/json');
