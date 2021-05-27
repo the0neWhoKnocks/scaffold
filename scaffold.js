@@ -106,6 +106,15 @@ async function scaffold() {
     console.log('  No updates\n');
   }
   
+  const deployOpts = ({ addClient }) => {
+    return [
+      { name: 'GitHub Page', value: { ghPage: true }, checked: false },
+    ].filter(({ value: { ghPage } }) => {
+      if (!addClient && ghPage) return false;
+      return true;
+    });
+  };
+  
   const projectType = 'node';
   const scaffoldOpts = await prompt([
     // {
@@ -270,18 +279,26 @@ async function scaffold() {
       ],
     },
     {
-      message: 'Docker Username',
+      message: '  Docker Username',
       type: 'input',
       name: 'docker.username',
       default: 'theonewhoknocks',
       when: ({ containerPlatform }) => containerPlatform === 'docker',
     },
     {
-      message: 'Docker Password',
+      message: '  Docker Password',
       type: 'password',
       mask: '*',
       name: 'docker.password',
       when: ({ containerPlatform }) => containerPlatform === 'docker',
+    },
+    {
+      message: 'Deployment Options',
+      type: 'checkbox',
+      name: 'deploymentOptions',
+      filter: answers => merge(answers),
+      when: answers => !!deployOpts(answers).length,
+      choices: answers => deployOpts(answers),
     },
   ]);
   
@@ -291,6 +308,7 @@ async function scaffold() {
     appTitle,
     bundler,
     clientFramework,
+    deploymentOptions,
     devOptions,
     docker,
     loggerNamespace,
@@ -298,6 +316,9 @@ async function scaffold() {
     serverFramework,
     serverOptions,
   } = scaffoldOpts;
+  const {
+    ghPage,
+  } = (deploymentOptions || {});
   const {
     eslint,
     hasWatcher,
@@ -699,6 +720,14 @@ async function scaffold() {
     ]);
   }
   
+  if (ghPage) {
+    copyFiles([{
+      files: ['gh-pages.yml'],
+      from: '.github/workflows',
+      to: '.github/workflows',
+    }]);
+  }
+  
   // TODO - add .github/workflows
   // TODO - add e2e testing
   
@@ -717,6 +746,7 @@ async function scaffold() {
       to: '',
       tokens: [
         { token: 'README__DOCKER', remove: !docker },
+        { token: 'README__GH_PAGE', remove: !ghPage },
         { token: 'README__HTTPS', remove: !secure },
         { token: 'README__LOGGING', remove: !logger },
         { token: 'README__TITLE', replacement: appTitle },
