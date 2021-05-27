@@ -4,6 +4,9 @@
 //TOKEN:^README__DOCKER
 - [Docker](docker)
 //TOKEN:$README__DOCKER
+//TOKEN:^README__GH_PAGE
+- [GitHub Page](github-page)
+//TOKEN:$README__GH_PAGE
 //TOKEN:^README__HTTPS
 - [Local HTTPS](local-https)
    - [Generate Certs for localhost](generate-certs-for-localhost)
@@ -57,7 +60,22 @@ dc build
 dc up
 ```
 //TOKEN:$README__DOCKER
+//TOKEN:^README__GH_PAGE
+
+---
+
+## GitHub Page
+
+This repo utilizes GitHub workflows to auto-deploy a GitHub page.
+
+- **Deployments**: `https://github.com/<USER>/<REPO>/deployments`
+- **Settings**: `https://github.com/<USER>/<REPO>/settings/pages`
+   - Ensure the `gh-pages` branch is set as the `Source`.
+   - You can copy the URL for the published page at the top.
+
+//TOKEN:$README__GH_PAGE
 //TOKEN:^README__HTTPS
+
 ---
 
 ## Local HTTPS
