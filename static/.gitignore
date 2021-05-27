@@ -3,6 +3,9 @@
 #TOKEN:^IGNORE__HTTPS
 certs.*
 #TOKEN:$IGNORE__HTTPS
+#TOKEN:^IGNORE__VHOST
+conf.d
+#TOKEN:$IGNORE__VHOST
 data
 dist
 node_modules

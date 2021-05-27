@@ -11,10 +11,13 @@
 - [Local HTTPS](local-https)
    - [Generate Certs for localhost](generate-certs-for-localhost)
    - [Generate Certs for Apps running on your LAN](generate-certs-for-apps-running-on-your-lan)
-   - [Run your App with the certs](run-your-app-with-the-certs)
+   //TOKEN:^README__VHOST
+   - [Generate Certs for a VHost](generate-certs-for-a-vhost)
+   //TOKEN:$README__VHOST
    - [Install the Certificate Authority in Chrome](install-the-certificate-authority-in-chrome)
    - [Install the Certificate Authority in Firefox](install-the-certificate-authority-in-firefox)
    - [Install the Certificate Authority on Android](install-the-certificate-authority-on-android)
+   - [Run your App with the certs](run-your-app-with-the-certs)
 //TOKEN:$README__HTTPS
 //TOKEN:^README__LOGGING
 - [Logging](logging)
@@ -47,6 +50,7 @@ nr start
 nr start:dev
 ```
 //TOKEN:^README__DOCKER
+
 ---
 
 ## Docker
@@ -103,24 +107,45 @@ You can then copy, move, or rename the generated folder. Wherever the folder end
 Creating certs for Apps running on an IP instead of a domain is pretty much the same as above, except you'll use the `-i` flag instead of `-d`, and provide an IP instead of a domain.
 
 Run `./bin/gen-certs.sh -f "lan-apps" -i "192.168.1.337"`
+//TOKEN:^README__VHOST
 
-### Run your App with the certs
+### Generate Certs for a VHost
 
-The non-`-CA` files will be used for the App. When starting the App via Node or Docker, you'll need to set this environment variable:
+You may face a development scenario where you need SSL, but you're on a system where:
+- There's already a CA set up for `localhost`, `127.0.0.1`, or both.
+- There's one, or multiple proxies set up.
+
+In order to get around such scenarios, Docker is utilized with `nginx-proxy` to wire up a vhost. A certificate is created that points to the vhost domain to get around top-level certs or proxies that are wired up to `localhost`/`127.0.0.1`.
+
+On OSX you may run into an issue where you've added a cert, needed to add update or create a new cert, but your Browser is still referencing the old cert. A restart may resolve that issue, but if you don't want to restart, you can just update your vhost entry and create/add a new cert.
+
 ```sh
-`NODE_EXTRA_CA_CERTS="$PWD/<CERTS>/localhost.crt"`
+./bin/gen-certs.sh -v "app.local" -c "Local App"
 ```
-- Note that `$PWD` expands to an absolute file path.
-- The App automatically determines the `.key` file so long as the `.key` & `.crt` files have the same name.
+//TOKEN:$README__VHOST
 
 ### Install the Certificate Authority in Chrome
 
+**Windows**
 - Settings > In the top input, filter by `cert` > Click `Security`
 - Click on `Manage certificates`
 - Go the `Trusted Root Certification Authorities` tab
 - Choose `Import`
 - Find the `<CERTS>/localhost-CA.crt` file, and add it.
-- If the cert doesn't seem to be working, try in Incognito first. If it's working there, then just restart Chrome to get it to work in non-Incognito.
+
+**OSX**
+- One-liner: `sudo security add-trusted-cert -d -r trustRoot -k "/Library/Keychains/System.keychain" "./certs.localhost/localhost-CA.crt"`
+   - Open Spotlight (`CMD + SPACE`), select Keychain, go to System. You should see `localhost (CA)` listed, and with a blue plus icon.
+   - If the above doesn't work, follow the manual instructions below.
+- In a terminal, run `open certs.localhost`
+- Double-click on `localhost-CA.crt`
+- An Add Certificates dialog should open.
+   - Select `System` in the Keychain dropdown and click Add.
+- Double-click `localhost (CA)` under Keychains > System
+   - Expand the Trust section
+   - Choose `Always Trust` for the `When using this certificate` dropdown. Close the pop-up.
+
+**NOTE**: If the cert doesn't seem to be working, try in Incognito first. If it's working there, then just restart Chrome to get it to work in non-Incognito.
 
 ### Install the Certificate Authority in Firefox
 
@@ -136,8 +161,18 @@ The non-`-CA` files will be used for the App. When starting the App via Node or 
 - Go to `Settings` > `Security` > Click on `Install from storage`
 - Select the `.crt` file
 - Give it a name
+
+### Run your App with the certs
+
+The non-`-CA` files will be used for the App. When starting the App via Node or Docker, you'll need to set this environment variable:
+```sh
+`NODE_EXTRA_CA_CERTS="$PWD/<CERTS>/localhost.crt"`
+```
+- Note that `$PWD` expands to an absolute file path.
+- The App automatically determines the `.key` file so long as the `.key` & `.crt` files have the same name.
 //TOKEN:$README__HTTPS
 //TOKEN:^README__LOGGING
+
 ---
 
 ## Logging

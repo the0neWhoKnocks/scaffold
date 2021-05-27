@@ -192,6 +192,12 @@ async function scaffold() {
           checked: false,
         },
         {
+          name: 'Should support virtual hosts',
+          short: 'VHosts',
+          value: { vHost: true },
+          checked: false,
+        },
+        {
           name: 'Should support Web Sockets',
           short: 'Web Socket',
           value: { webSocket: true },
@@ -330,6 +336,7 @@ async function scaffold() {
     middleware,
     multiUser,
     secure,
+    vHost,
     webSocket,
   } = (serverOptions || {});
   const {
@@ -479,7 +486,7 @@ async function scaffold() {
         }]);
       }
       
-      if (secure) {
+      if (secure || vHost) {
         copyFiles([{
           executable: true,
           files: ['gen-certs.sh'],
@@ -697,6 +704,7 @@ async function scaffold() {
   
   if (docker) {
     const { username } = docker;
+    const addCerts = secure && !vHost;
     
     addParsedFiles([
       {
@@ -713,8 +721,13 @@ async function scaffold() {
         to: '',
         tokens: [
           { token: 'DC__APP_NAME', replacement: kebabAppName },
-          { token: 'DC__HTTPS', remove: !secure },
+          { token: 'DC__CERTS', remove: !addCerts },
+          { token: 'DC__MULTI_USER', remove: !multiUser },
+          { token: 'DC__PORTS', remove: vHost },
           { token: 'DC__USERNAME', replacement: username },
+          { token: 'DC__VHOST', remove: !vHost },
+          { token: 'DC__VHOST', replacement: `${kebabAppName}.local` },
+          { token: 'DC__VOLUMES', remove: !multiUser && !addCerts },
         ],
       },
     ]);
@@ -738,6 +751,7 @@ async function scaffold() {
       to: '',
       tokens: [
         { token: 'IGNORE__HTTPS', remove: !secure },
+        { token: 'IGNORE__VHOST', remove: !vHost },
       ],
     },
     {
@@ -750,6 +764,7 @@ async function scaffold() {
         { token: 'README__HTTPS', remove: !secure },
         { token: 'README__LOGGING', remove: !logger },
         { token: 'README__TITLE', replacement: appTitle },
+        { token: 'README__VHOST', remove: !vHost },
       ],
     },
   ]);

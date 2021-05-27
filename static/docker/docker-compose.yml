@@ -6,19 +6,53 @@ services:
       context: ./
       dockerfile: .docker/Dockerfile
     container_name: #TOKEN:#DC__APP_NAME
+    #TOKEN:^DC__VHOST
+    depends_on:
+      - "nginx-proxy"
+    #TOKEN:$DC__VHOST
     environment:
-      #TOKEN:^DC__HTTPS
+      #TOKEN:^DC__MULTI_USER
+      DATA_PATH: /home/node/app/data
+      #TOKEN:$DC__MULTI_USER
+      #TOKEN:^DC__CERTS
       NODE_EXTRA_CA_CERTS: /home/node/app/server/certs/localhost.crt
-      #TOKEN:$DC__HTTPS
+      #TOKEN:$DC__CERTS
       NODE_ENV: production
+      #TOKEN:^DC__VHOST
+      SERVER_PORT: 5000
+      #TOKEN:$DC__VHOST
       TZ: America/Los_Angeles
+    #TOKEN:^DC__VHOST
+      VIRTUAL_HOST: #TOKEN:#DC__VHOST
+      VIRTUAL_PORT: 5000
+    expose:
+      - "5000"
+    #TOKEN:$DC__VHOST
     image: #TOKEN:#DC__USERNAME/#TOKEN:#DC__APP_NAME
+    #TOKEN:^DC__PORTS
     ports:
       # Map Local port to the Container's exposed port
       - "3000:3000"
-    #TOKEN:^DC__HTTPS
+    #TOKEN:$DC__PORTS
+    #TOKEN:^DC__VOLUMES
     volumes:
+      #TOKEN:^DC__CERTS
       - "${PWD}/certs.localhost:/home/node/app/server/certs"
+      #TOKEN:$DC__CERTS
+      #TOKEN:^DC__MULTI_USER
+      - "${PWD}/data:/home/node/app/data"
+      #TOKEN:$DC__MULTI_USER
       # Uncomment to map Local non-Prod assets
       # - "${PWD}/dist:/home/node/app"
-    #TOKEN:$DC__HTTPS
+    #TOKEN:$DC__VOLUMES
+  #TOKEN:^DC__VHOST
+  
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy:alpine
+    ports:
+      - "3000:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - "${PWD}/certs.#TOKEN:#DC__VHOST:/etc/nginx/certs"
+      - "${PWD}/conf.d:/etc/nginx/conf.d"
+  #TOKEN:$DC__VHOST
