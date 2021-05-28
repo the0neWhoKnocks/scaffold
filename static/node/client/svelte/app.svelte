@@ -57,7 +57,7 @@
   //TOKEN:^APP__API
   
   function callAPI() {
-    fetch(ROUTE__API__HELLO)
+    fetch(`${ROUTE__API__HELLO}?name=hal`)
       .then(resp => resp.json())
       .then(data => {
         serverData = [...serverData, `[API] ${JSON.stringify(data)}`];

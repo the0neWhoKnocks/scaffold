@@ -140,8 +140,8 @@ app
   .use((req, res, next) => {
     //TOKEN:^SERVER__MULTI_USER
     if (existsSync(PATH__CONFIG)) req.appConfig = JSON.parse(readFileSync(PATH__CONFIG, 'utf8'));
-    //TOKEN:$SERVER__MULTI_USER
     
+    //TOKEN:$SERVER__MULTI_USER
     res.sendJSON = (data) => {
       res.setHeader('Content-Type', 'application/json');
       res.end(JSON.stringify(data));
@@ -169,6 +169,10 @@ app
   //TOKEN:$SERVER__MULTI_USER
   //TOKEN:^SERVER__API
   .get(ROUTE__API__HELLO, (req, res) => {
+    const { parse: parseQuery } = require('querystring');
+    const { parse: parseURL } = require('url');
+    const params = { ...parseQuery(parseURL(req.url).query) };
+    log.info(`[API] Recieved params: ${JSON.stringify(params)}`);
     res.sendJSON({ hello: 'dave' });
   })
   //TOKEN:$SERVER__API
