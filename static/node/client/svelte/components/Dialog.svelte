@@ -1,5 +1,4 @@
 <script>
-  import { onMount } from 'svelte';
   import { cubicOut } from 'svelte/easing'; // visualizations https://svelte.dev/repl/6904f0306d6f4985b55f5f9673f762ef?version=3.4.1
   
   export let animDuration = 300;
@@ -35,10 +34,10 @@
         `;
       },
       easing: cubicOut,
-	  };
+    };
   };
   
-  const toggleMask = (node) => ({
+  const toggleMask = () => ({
     duration: animDuration,
     css: t => `opacity: ${t};`,
     easing: cubicOut,
@@ -48,7 +47,7 @@
     if (onCloseEnd) onCloseEnd();
   }
   
-  function handleCloseClick(ev) {
+  function handleCloseClick() {
     if (!modal && onCloseClick) onCloseClick();
   }
   
