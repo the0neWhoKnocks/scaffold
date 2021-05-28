@@ -388,10 +388,10 @@ async function scaffold() {
     
     if (addServer) {
       if (serverFrameworkIsPolka) {
-        packageJSON.devDependencies['polka'] = '1.0.0-next.14';
+        packageJSON.dependencies['polka'] = '1.0.0-next.14';
       }
       else if (serverFrameworkIsExpress) {
-        packageJSON.devDependencies['express'] = '4.17.1';
+        packageJSON.dependencies['express'] = '4.17.1';
       }
       
       if (externalRequests) packageJSON.dependencies['teeny-request'] = '7.0.1';
