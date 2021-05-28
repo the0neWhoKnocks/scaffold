@@ -399,9 +399,8 @@ async function scaffold() {
       if (cookies) packageJSON.dependencies['cookie-parser'] = '1.4.5';
       if (staticFiles) packageJSON.dependencies['sirv'] = '1.0.11';
       
-      const fsDeps = [];
-      if (multiUser) fsDeps.push('existsSync', 'readFileSync');
-      if (secure) fsDeps.push('readFileSync');
+      const fsDeps = ['readFileSync'];
+      if (multiUser) fsDeps.push('existsSync');
       addParsedFiles([
         {
           file: 'index.js',
@@ -537,7 +536,7 @@ async function scaffold() {
               { token: 'APP__API', remove: !apiEnabled },
               { token: 'APP__HAS_CONSTANTS', remove: !multiUser && !webSocket },
               { token: 'APP__MULTI_USER', remove: !multiUser },
-              { token: 'APP__SERVER_INTERACTIONS', remove: !apiEnabled && !webSocket },
+              { token: 'APP__SERVER_INTERACTIONS', remove: !apiEnabled && !webSocket && !multiUser },
               { token: 'APP__WEB_SOCKET', remove: !webSocket },
             ]
           },
