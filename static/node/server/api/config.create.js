@@ -13,7 +13,7 @@ module.exports = function createConfig(req, res) {
   if (!cipherKey || !salt) {
     const msg = `Looks like you're missing some data.\n  Cipher Key: "${cipherKey}"\n  Salt: "${salt}"`;
     log.error(msg);
-    return res.sendError(400, msg);
+    return res.error(400, msg);
   }
   
   const data = {
@@ -25,11 +25,11 @@ module.exports = function createConfig(req, res) {
     if (err) {
       const msg = `Create Config write failed | ${err}`;
       log.error(msg);
-      return res.sendError(500, msg);
+      return res.error(500, msg);
     }
     
     const message = 'Config created';
     log.info(message);
-    res.sendJSON({ message });
+    res.json({ message });
   });
 }

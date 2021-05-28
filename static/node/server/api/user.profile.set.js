@@ -31,7 +31,7 @@ module.exports = async function setProfile(req, res) {
     ) {
       const msg = `User "${username}" already exists`;
       log.error(msg);
-      return res.sendError(405, msg);
+      return res.error(405, msg);
     }
     
     let encryptedUserData = users[encryptedOldUsername];
@@ -108,7 +108,7 @@ module.exports = async function setProfile(req, res) {
     
     Promise.all(pending)
       .then(() => {
-        res.sendJSON({
+        res.json({
           username: USERNAME,
           password: PASSWORD,
         });
@@ -116,12 +116,12 @@ module.exports = async function setProfile(req, res) {
       .catch((err) => {
         const msg = `Failed while setting data\n${err.stack}`;
         log.error(msg);
-        res.sendError(500, msg);
+        res.error(500, msg);
       });
   }
   catch(err) {
     const msg = `Failed to set profile data \n ${err.stack}`;
     log.error(msg);
-    res.sendError(500, msg);
+    res.error(500, msg);
   }
 }
