@@ -87,7 +87,10 @@ function app(req, res) {
   handlers.push(app.notFoundHandler);
   
   const next = () => {
-    if (handlers[funcNdx++]) handlers[funcNdx](req, res, next);
+    if (handlers[funcNdx]) {
+      funcNdx++;
+      handlers[funcNdx-1](req, res, next);
+    }
   };
   
   next();
