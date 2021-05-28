@@ -86,16 +86,6 @@ function app(req, res) {
   if (pathHandlers) handlers.push(...pathHandlers);
   handlers.push(app.notFoundHandler);
   
-  res.status = (statusCode) => {
-    res.statusCode = statusCode;
-    return res;
-  };
-  
-  res.json = (data) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(data));
-  };
-  
   const next = () => {
     if (handlers[funcNdx]) {
       funcNdx++;
@@ -147,13 +137,29 @@ if (!existsSync(PATH__DATA)) mkdirp.sync(PATH__DATA);
 
 app
   .use((req, res, next) => {
-    res.error = (statusCode, error) => {
-      log.error(`[${statusCode}] | ${error}`);
-      // NOTE - utilizing `message` so that if an Error is thrown on the Client
-      // within a `then`, there's no extra logic to get error data within the
-      // `catch`.
-      res.status(statusCode).json({ message: error });
-    };
+    if (!res.error) {
+      res.error = (statusCode, error) => {
+        log.error(`[${statusCode}] | ${error}`);
+        // NOTE - utilizing `message` so that if an Error is thrown on the Client
+        // within a `then`, there's no extra logic to get error data within the
+        // `catch`.
+        res.status(statusCode).json({ message: error });
+      };
+    }
+    
+    if (!res.json) {
+      res.json = (data) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(data));
+      };
+    }
+    
+    if (!res.status) {
+      res.status = (statusCode) => {
+        res.statusCode = statusCode;
+        return res;
+      };
+    }
   
     next();
   })
