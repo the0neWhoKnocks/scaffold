@@ -54,13 +54,19 @@
   let userInfo;
   let userProfileOpened = false;
   //TOKEN:$APP__MULTI_USER
+  //TOKEN:^APP__SERVER_INTERACTIONS
+  
+  function printMessage(msg) {
+    serverData = [...serverData, msg];
+  }
+  //TOKEN:$APP__SERVER_INTERACTIONS
   //TOKEN:^APP__API
   
   function callAPI() {
     fetch(`${ROUTE__API__HELLO}?name=hal`)
       .then(resp => resp.json())
       .then(data => {
-        serverData = [...serverData, `[API] ${JSON.stringify(data)}`];
+        printMessage(`[API] ${JSON.stringify(data)}`);
       })
       .catch(err => {
         log.error(err);
@@ -86,12 +92,14 @@
   function handleLogin() {
     setUserInfo();
     closeLogin();
+    printMessage('[USER] logged in');
   }
   
   function logoutUser() {
     window[userStorageType].removeItem(NAMESPACE__STORAGE__USER);
     userStorageType = undefined;
     userNavOpen = false;
+    printMessage('[USER] logged out');
   }
   
   function setUserInfo() {
@@ -113,6 +121,10 @@
   function closeUserData() {
     userDataOpened = false;
   }
+  function handleUserDataUpdate() {
+    closeUserData();
+    printMessage('[USER] data updated');
+  }
   
   function openUserProfile() {
     userProfileOpened = true;
@@ -132,6 +144,12 @@
     username = data.username;
     
     closeUserProfile();
+    
+    printMessage(`[USER] profile updated: ${JSON.stringify(data)}`);
+  }
+  
+  $: if (userProfileOpened || userDataOpened) {
+    userNavOpen = false;
   }
   //TOKEN:$APP__MULTI_USER
   //TOKEN:^APP__SERVER_INTERACTIONS
@@ -158,10 +176,10 @@
         log.info('User disconnected');
       });
       socketAPI.on(WS__MSG__EXAMPLE, ({ msg }) => {
-        serverData = [...serverData, `[WS] ${msg}`];
+        printMessage(`[WS] ${msg}`);
       });
       
-      serverData = [...serverData, '[WS] Connected to Web Socket'];
+      printMessage('[WS] Connected to Web Socket');
       callSocket();
     }
     catch(err) { log.error(err); }
@@ -227,7 +245,7 @@
     <UserDataDialog
       onClose={closeUserData}
       onError={closeUserData}
-      onSuccess={closeUserData}
+      onSuccess={handleUserDataUpdate}
       {userInfo}
     />
   {/if}
