@@ -4,7 +4,7 @@ module.exports = function replaceTokens(src, tokens = []) {
   let _src = src;
   
   tokens.forEach(({ remove, replacement, token }) => {
-    if (replacement) {
+    if (replacement !== undefined) {
       _src = _src.replace(new RegExp(`${commentStart}TOKEN:#${token}${commentEnd}`, 'g'), replacement);
     }
     else {
