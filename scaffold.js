@@ -278,7 +278,10 @@ async function scaffold() {
       message: 'Container Platform',
       type: 'list',
       name: 'containerPlatform',
-      default: 0,
+      default: ({ serverOptions: { vHost } }) => {
+        if (vHost) return 1;
+        return 0;
+      },
       choices: [
         { name: 'None', value: '' },
         { name: 'Docker', value: 'docker' },
