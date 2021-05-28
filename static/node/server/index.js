@@ -78,8 +78,9 @@ const app = express();
 //TOKEN:^SERVER__FRAMEWORK__NODE
 
 function app(req, res) {
+  const [url] = req.url.split('?');
   const handlers = [...app.reqHandlers.middleware];
-  const pathHandlers = app.reqHandlers.methods[req.method][req.url];
+  const pathHandlers = app.reqHandlers.methods[req.method][url];
   let funcNdx = 0;
   
   if (pathHandlers) handlers.push(...pathHandlers);
