@@ -812,7 +812,7 @@ async function scaffold() {
   await Promise.all(pendingFiles);
   
   const fileList = await getFileList({
-    ignore: ['.git', 'node_modules'],
+    ignore: ['.git/', 'node_modules/'],
     path: PATH__PROJECT_ROOT,
   });
   console.log([
