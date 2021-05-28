@@ -22,4 +22,7 @@ module.exports = {
     'svelte3',
     //TOKEN:$LINT__SVELTE
   ],
+  rules: {
+    'no-unused-vars': ['error', { args: 'after-used' }],
+  },
 };
