@@ -17,10 +17,10 @@ module.exports = async function setData(req, res) {
     if (err) {
       const msg = `Error writing data to "${filePath}"\n${err.stack}`;
       log.error(msg);
-      return res.sendError(500, msg);
+      return res.error(500, msg);
     }
     
     log.info(`Set data:\n${encryptedData}`);
-    res.sendJSON({ message: 'Data set' });
+    res.json({ message: 'Data set' });
   });
 }

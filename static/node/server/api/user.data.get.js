@@ -19,11 +19,11 @@ module.exports = async function getData(req, res) {
       : userData;
     
     log.info(`Got data: \n"${decryptedData}"`);
-    res.sendJSON({ data: decryptedData });
+    res.json({ data: decryptedData });
   }
   catch(err) {
     const msg = `Error getting data\n${err.stack}`;
     log.error(msg);
-    res.sendError(500, msg);
+    res.error(500, msg);
   }
 }

@@ -86,6 +86,16 @@ function app(req, res) {
   if (pathHandlers) handlers.push(...pathHandlers);
   handlers.push(app.notFoundHandler);
   
+  res.status = (statusCode) => {
+    res.statusCode = statusCode;
+    return res;
+  };
+  
+  res.json = (data) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(data));
+  };
+  
   const next = () => {
     if (handlers[funcNdx]) {
       funcNdx++;
@@ -122,7 +132,7 @@ app.notFoundHandler = function notFound(req, res) {
 app.get = app.pathHandler('GET');
 app.post = app.pathHandler('POST');
 app.use = function use(...middleware) {
-  app.reqHandlers.middleware.push(...middleware);
+  if (middleware.length) app.reqHandlers.middleware.push(...middleware);
   return app;
 };
 //TOKEN:$SERVER__FRAMEWORK__NODE
@@ -136,29 +146,23 @@ if (!existsSync(PATH__DATA)) mkdirp.sync(PATH__DATA);
 //TOKEN:$SERVER__MULTI_USER
 
 app
-  .use(...middleware)
   .use((req, res, next) => {
-    //TOKEN:^SERVER__MULTI_USER
-    if (existsSync(PATH__CONFIG)) req.appConfig = JSON.parse(readFileSync(PATH__CONFIG, 'utf8'));
-    
-    //TOKEN:$SERVER__MULTI_USER
-    res.sendJSON = (data) => {
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify(data));
-    };
-    
-    res.sendError = (statusCode, error) => {
+    res.error = (statusCode, error) => {
       log.error(`[${statusCode}] | ${error}`);
-      res.statusCode = statusCode;
       // NOTE - utilizing `message` so that if an Error is thrown on the Client
       // within a `then`, there's no extra logic to get error data within the
       // `catch`.
-      res.sendJSON({ message: error });
+      res.status(statusCode).json({ message: error });
     };
-    
+  
     next();
   })
+  .use(...middleware)
   //TOKEN:^SERVER__MULTI_USER
+  .use((req, res, next) => {
+    if (existsSync(PATH__CONFIG)) req.appConfig = JSON.parse(readFileSync(PATH__CONFIG, 'utf8'));
+    next();
+  })
   .post(ROUTE__API__CONFIG_CREATE, jsonParser, createConfig)
   .post(ROUTE__API__USER_GET_DATA, jsonParser, getUserData)
   .post(ROUTE__API__USER_GET_PROFILE, jsonParser, getUserProfile)
@@ -173,7 +177,7 @@ app
     const { parse: parseURL } = require('url');
     const params = { ...parseQuery(parseURL(req.url).query) };
     log.info(`[API] Recieved params: ${JSON.stringify(params)}`);
-    res.sendJSON({ hello: 'dave' });
+    res.json({ hello: 'dave' });
   })
   //TOKEN:$SERVER__API
   .get('/', (req, res) => {

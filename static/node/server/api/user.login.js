@@ -12,7 +12,7 @@ module.exports = function userLogin(req, res) {
   if (!password || !username) {
     const msg = `Looks like you're missing some data.\n  Username: "${username}"\n  Password: "${password}"`;
     log.error(msg);
-    return res.sendError(400, msg);
+    return res.error(400, msg);
   }
   
   Promise.all([
@@ -26,7 +26,7 @@ module.exports = function userLogin(req, res) {
       if (!users[encryptedUsername]) {
         const msg = `An account for "${username}" doesn't exist.`;
         log.error(msg);
-        return res.sendError(404, msg);
+        return res.error(404, msg);
       }
       
       decrypt(appConfig, users[encryptedUsername], password)
@@ -34,7 +34,7 @@ module.exports = function userLogin(req, res) {
           const userData = JSON.parse(decryptedUserData);
           
           log.info(`User "${userData.username}" logged in`);
-          res.sendJSON(userData);
+          res.json(userData);
         })
         .catch((err) => {
           if (
@@ -43,12 +43,12 @@ module.exports = function userLogin(req, res) {
           ) {
             const msg = `Credentials were invalid for Username: "${username}" | Password: "${password}"`;
             log.error(msg);
-            return res.sendError(500, msg);
+            return res.error(500, msg);
           }
           
           const msg = `The Server encountered a problem while trying to log you in:\n${err.stack}`;
           log.error(msg);
-          res.sendError(500, msg);
+          res.error(500, msg);
         });
     });
 }

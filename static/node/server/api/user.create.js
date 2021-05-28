@@ -13,7 +13,7 @@ module.exports = function createUser(req, res) {
   if (!password || !username) {
     const msg = `Looks like you're missing some data.\n  Username: "${username}"\n  Password: "${password}"`;
     log.error(msg);
-    return res.sendError(400, msg);
+    return res.error(400, msg);
   }
   
   Promise.all([
@@ -29,7 +29,7 @@ module.exports = function createUser(req, res) {
       if (users[encryptedUsername]) {
         const msg = `User "${username}" already exists`;
         log.error(msg);
-        return res.sendError(405, msg);
+        return res.error(405, msg);
       }
       
       users[encryptedUsername] = encryptedUserData;
@@ -37,12 +37,12 @@ module.exports = function createUser(req, res) {
         if (err) {
           const msg = `Failed to write file while creating User | ${err}`;
           log.error(msg);
-          return res.sendError(500, msg);
+          return res.error(500, msg);
         }
         
         const message = `Created User for "${username}"`;
         log.info(message);
-        res.sendJSON({ message });
+        res.json({ message });
       });
     });
 }
