@@ -1,4 +1,4 @@
-const { rename, writeFile } = require('fs');
+const { existsSync, rename, writeFile } = require('fs');
 const { PATH__USERS } = require('../../constants');
 const log = require('../../utils/logger')('api.user.profile.set');
 const decrypt = require('../utils/decrypt');
@@ -84,7 +84,10 @@ module.exports = async function setProfile(req, res) {
       pending.push(pendingReEncryption);
     }
     
-    if (CURRENT_DATA_PATH !== oldDataPath) {
+    if (
+      CURRENT_DATA_PATH !== oldDataPath
+      && existsSync(oldDataPath)
+    ) {
       const pendingRename = pendingReEncryption.then(() => {
         return new Promise((resolve, reject) => {
           rename(oldDataPath, CURRENT_DATA_PATH, (err) => {
