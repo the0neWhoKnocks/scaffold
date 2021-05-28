@@ -51,7 +51,17 @@
   function handleCloseClick(ev) {
     if (!modal && onCloseClick) onCloseClick();
   }
+  
+  function handleKeyDown({ key }) {
+    switch(key) {
+      case 'Escape':
+        handleCloseClick();
+        break;
+    }
+  }
 </script>
+
+<svelte:window on:keydown={handleKeyDown}/>
 
 <div 
   class="dialog-wrapper"
