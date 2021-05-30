@@ -146,7 +146,7 @@ async function scaffold() {
       message: '  Server Framework',
       type: 'list',
       name: 'serverFramework',
-      default: 2,
+      default: 0,
       when: ({ addServer }) => addServer,
       choices: [
         { name: 'Node', value: 'node' },
@@ -256,9 +256,10 @@ async function scaffold() {
       when: ({ addClient, addServer }) => addClient || addServer,
       filter: answers => merge(answers),
       choices: [
-        { name: 'Watch for changes', value: { hasWatcher: true }, checked: true },
+        { name: 'Add e2e tests', value: { e2eTests: true }, checked: false },
         { name: 'Add logging util', value: { logger: 'ulog' }, checked: true },
         { name: 'ESLint', value: { eslint: true }, checked: true },
+        { name: 'Watch for changes', value: { hasWatcher: true }, checked: true },
       ],
     },
     {
@@ -278,8 +279,11 @@ async function scaffold() {
       message: 'Container Platform',
       type: 'list',
       name: 'containerPlatform',
-      default: ({ serverOptions: { vHost } }) => {
-        if (vHost) return 1;
+      default: ({
+        devOptions: { e2eTests },
+        serverOptions: { vHost },
+      }) => {
+        if (e2eTests || vHost) return 1;
         return 0;
       },
       choices: [
@@ -329,6 +333,7 @@ async function scaffold() {
     ghPage,
   } = (deploymentOptions || {});
   const {
+    e2eTests,
     eslint,
     hasWatcher,
     logger,
@@ -702,6 +707,52 @@ async function scaffold() {
       }]);
     }
     
+    if (e2eTests) {
+      packageJSON.scripts['test'] = './e2e/bin/test-runner.sh';
+      packageJSON.scripts['test:watch'] = 'npm run test -- --watch';
+      
+      copyFiles([
+        {
+          executable: true,
+          files: ['test-runner.sh', 'XServer.xlaunch'],
+          from: 'node/e2e/bin',
+          to: 'e2e/bin',
+        },
+        {
+          files: ['1x1.png'],
+          from: 'node/e2e/cypress/fixtures',
+          to: 'e2e/cypress/fixtures',
+        },
+        {
+          files: ['index.js'],
+          from: 'node/e2e/cypress/plugins',
+          to: 'e2e/cypress/plugins',
+        },
+        {
+          files: ['commands.js', 'index.js'],
+          from: 'node/e2e/cypress/support',
+          to: 'e2e/cypress/support',
+        },
+        {
+          files: ['.eslintrc.js', 'cypress.json', 'Dockerfile'],
+          from: 'node/e2e',
+          to: 'e2e',
+        },
+      ]);
+      
+      addParsedFiles([{
+        file: 'app.test.js',
+        from: 'node/e2e/tests',
+        to: 'e2e/tests',
+        tokens: [
+          { token: 'TEST__API', remove: !apiEnabled },
+          { token: 'TEST__APP_TITLE', replacement: appTitle },
+          { token: 'TEST__MULTI_USER', remove: !multiUser },
+          { token: 'TEST__WEB_SOCKETS', remove: !webSocket },
+        ],
+      }]);
+    }
+    
     packageJSON.dependencies = sortObj(packageJSON.dependencies);
     packageJSON.devDependencies = sortObj(packageJSON.devDependencies);
     packageJSON.scripts = sortObj(packageJSON.scripts);
@@ -727,6 +778,7 @@ async function scaffold() {
         tokens: [
           { token: 'DC__APP_NAME', replacement: kebabAppName },
           { token: 'DC__CERTS', remove: !addCerts },
+          { token: 'DC__E2E', remove: !e2eTests },
           { token: 'DC__MULTI_USER', remove: !multiUser },
           { token: 'DC__PORTS', remove: vHost },
           { token: 'DC__USERNAME', replacement: username },
@@ -758,15 +810,13 @@ async function scaffold() {
     }]);
   }
   
-  // TODO - add .github/workflows
-  // TODO - add e2e testing
-  
   addParsedFiles([
     {
       file: '.gitignore',
       from: '',
       to: '',
       tokens: [
+        { token: 'IGNORE__E2E', remove: !e2eTests },
         { token: 'IGNORE__HTTPS', remove: !secure },
         { token: 'IGNORE__VHOST', remove: !vHost },
       ],
@@ -777,6 +827,7 @@ async function scaffold() {
       to: '',
       tokens: [
         { token: 'README__DOCKER', remove: !docker },
+        { token: 'README__E2E', remove: !e2eTests },
         { token: 'README__GH_PAGE', remove: !ghPage },
         { token: 'README__HTTPS', remove: !secure },
         { token: 'README__LOGGING', remove: !logger },
@@ -785,6 +836,8 @@ async function scaffold() {
       ],
     },
   ]);
+  
+  // TODO - Add releaser
   
   const pendingPaths = [
     // get a list of unique paths
