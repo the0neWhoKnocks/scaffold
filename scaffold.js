@@ -837,8 +837,6 @@ async function scaffold() {
     },
   ]);
   
-  // TODO - Add releaser
-  
   const pendingPaths = [
     // get a list of unique paths
     ...new Set([...pendingFileCopies, ...pendingParsedFiles].map(({ to }) => to))
