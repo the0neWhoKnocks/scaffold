@@ -6,6 +6,9 @@ certs.*
 #TOKEN:^IGNORE__VHOST
 conf.d
 #TOKEN:$IGNORE__VHOST
+#TOKEN:^IGNORE__E2E
+e2e/cypress/screenshots
+#TOKEN:$IGNORE__E2E
 data
 dist
 node_modules
