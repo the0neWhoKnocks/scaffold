@@ -298,13 +298,13 @@ async function scaffold() {
       default: 'theonewhoknocks',
       when: ({ containerPlatform }) => containerPlatform === 'docker',
     },
-    {
-      message: '  Docker Password',
-      type: 'password',
-      mask: '*',
-      name: 'docker.password',
-      when: ({ containerPlatform }) => containerPlatform === 'docker',
-    },
+    // {
+    //   message: '  Docker Password',
+    //   type: 'password',
+    //   mask: '*',
+    //   name: 'docker.password',
+    //   when: ({ containerPlatform }) => containerPlatform === 'docker',
+    // },
     {
       message: 'Deployment Options',
       type: 'checkbox',
