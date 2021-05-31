@@ -406,7 +406,7 @@ async function scaffold() {
       if (externalRequests) packageJSON.dependencies['teeny-request'] = '7.0.1';
       if (compression) packageJSON.dependencies['compression'] = '1.7.4';
       if (cookies) packageJSON.dependencies['cookie-parser'] = '1.4.5';
-      if (staticFiles) packageJSON.dependencies['sirv'] = '1.0.11';
+      if (staticFiles) packageJSON.dependencies['sirv'] = '1.0.12';
       
       const fsDeps = ['readFileSync'];
       if (multiUser) fsDeps.push('existsSync');
