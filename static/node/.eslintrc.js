@@ -23,6 +23,15 @@ module.exports = {
     //TOKEN:$LINT__SVELTE
   ],
   rules: {
+    'comma-dangle': ['error', {
+      arrays: 'always-multiline',
+      exports: 'always-multiline',
+      functions: 'only-multiline',
+      imports: 'always-multiline',
+      objects: 'always-multiline',
+    }],
+    'keyword-spacing': ['error', { after: true, before: true }],
     'no-unused-vars': ['error', { args: 'after-used' }],
+    'space-before-blocks': ['error', 'always'],
   },
 };
