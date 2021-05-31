@@ -21,18 +21,21 @@ module.exports = function decrypt(cryptConfig, valueHex, userPassword) {
       if (userPassword) [authTag, iv, value] = value.split(':');
       
       scrypt(password, salt, CRYPT__LENGTH__KEY, (err, key) => {
-        const _iv = Buffer.from(iv, CRYPT__ENCODING);
-        const encrypted = Buffer.from(value, CRYPT__ENCODING);
-        const decipher = createDecipheriv(CRYPT__ALGORITHM, key, _iv);
-      
-        decipher.setAuthTag(Buffer.from(authTag, CRYPT__ENCODING));
+        try {
+          const _iv = Buffer.from(iv, CRYPT__ENCODING);
+          const encrypted = Buffer.from(value, CRYPT__ENCODING);
+          const decipher = createDecipheriv(CRYPT__ALGORITHM, key, _iv);
         
-        const decrypted = Buffer.concat([
-          decipher.update(encrypted),
-          decipher.final(),
-        ]);
+          decipher.setAuthTag(Buffer.from(authTag, CRYPT__ENCODING));
+          
+          const decrypted = Buffer.concat([
+            decipher.update(encrypted),
+            decipher.final(),
+          ]);
 
-        resolve(decrypted.toString());
+          resolve(decrypted.toString());
+        }
+        catch (err) { reject(err); }
       });
     }
     catch (err) { reject(err); }
