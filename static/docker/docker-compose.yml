@@ -14,9 +14,9 @@ services:
       #TOKEN:^DC__MULTI_USER
       DATA_PATH: /home/node/app/data
       #TOKEN:$DC__MULTI_USER
-      #TOKEN:^DC__CERTS
+      #TOKEN:^DC__NODE_CERTS
       NODE_EXTRA_CA_CERTS: /home/node/app/server/certs/localhost.crt
-      #TOKEN:$DC__CERTS
+      #TOKEN:$DC__NODE_CERTS
       NODE_ENV: production
       #TOKEN:^DC__VHOST
       SERVER_PORT: ${VHOST__PORT__APP}
@@ -37,9 +37,9 @@ services:
     #TOKEN:$DC__PORTS
     #TOKEN:^DC__VOLUMES
     volumes:
-      #TOKEN:^DC__CERTS
+      #TOKEN:^DC__NODE_CERTS
       - "${PWD}/certs.localhost:/home/node/app/server/certs"
-      #TOKEN:$DC__CERTS
+      #TOKEN:$DC__NODE_CERTS
       #TOKEN:^DC__MULTI_USER
       - "${PWD}/data:/home/node/app/data"
       #TOKEN:$DC__MULTI_USER
@@ -73,9 +73,16 @@ services:
   nginx-proxy:
     image: nginxproxy/nginx-proxy:alpine
     ports:
+      #TOKEN:^DC__VHOST_NON_SECURE
+      - "${VHOST__PORT__PROXY}:80"
+      #TOKEN:$DC__VHOST_NON_SECURE
+      #TOKEN:^DC__VHOST_SECURE
       - "${VHOST__PORT__PROXY}:443"
+      #TOKEN:$DC__VHOST_SECURE
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
+      #TOKEN:^DC__VHOST_SECURE
       - "${PWD}/certs.${VHOST__DOMAIN}:/etc/nginx/certs"
+      #TOKEN:$DC__VHOST_SECURE
       - "${PWD}/conf.d:/etc/nginx/conf.d"
   #TOKEN:$DC__VHOST
