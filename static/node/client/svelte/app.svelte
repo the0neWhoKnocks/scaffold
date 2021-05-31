@@ -8,6 +8,9 @@
     //TOKEN:^APP__MULTI_USER
     NAMESPACE__STORAGE__USER,
     //TOKEN:$APP__MULTI_USER
+    //TOKEN:^APP__EXT_API
+    ROUTE__API__EXT,
+    //TOKEN:$APP__EXT_API
     //TOKEN:^APP__API
     ROUTE__API__HELLO,
     //TOKEN:$APP__API
@@ -54,10 +57,16 @@
   let userInfo;
   let userProfileOpened = false;
   //TOKEN:$APP__MULTI_USER
+  //TOKEN:^APP__EXT_API
+  let extAPIPending = false;
+  //TOKEN:$APP__EXT_API
   //TOKEN:^APP__SERVER_INTERACTIONS
   
-  function printMessage(msg) {
-    serverData = [...serverData, msg];
+  function printMessage(prefix, msg) {
+    serverData = [...serverData, `<div><span>${prefix}</span> ${msg}</div>`];
+  }
+  function clearLogs() {
+    serverData = [];
   }
   //TOKEN:$APP__SERVER_INTERACTIONS
   //TOKEN:^APP__API
@@ -66,7 +75,7 @@
     fetch(`${ROUTE__API__HELLO}?name=hal`)
       .then(resp => resp.json())
       .then(data => {
-        printMessage(`[API] ${JSON.stringify(data)}`);
+        printMessage('API', JSON.stringify(data));
       })
       .catch(err => {
         log.error(err);
@@ -74,6 +83,36 @@
       });
   }
   //TOKEN:$APP__API
+  //TOKEN:^APP__EXT_API
+  
+  function decodeHTMLEntities (str) {
+    if(str && typeof str === 'string') {
+      const element = document.createElement('div');
+      // strip script/html tags
+      str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
+      str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
+      element.innerHTML = str;
+      str = element.textContent;
+      element.textContent = '';
+    }
+
+    return str;
+  }
+  function callExtAPI() {
+    extAPIPending = true;
+    
+    fetch(`${ROUTE__API__EXT}`)
+      .then(resp => resp.json())
+      .then(({ answer, question }) => {      
+        printMessage('EXT_API', `${decodeHTMLEntities(question)} | ${decodeHTMLEntities(answer)}`);
+        extAPIPending = false;
+      })
+      .catch(err => {
+        log.error(err);
+        alert(err);
+      });
+  }
+  //TOKEN:$APP__EXT_API
   //TOKEN:^APP__WEB_SOCKET
   
   function callSocket() {
@@ -92,14 +131,14 @@
   function handleLogin() {
     setUserInfo();
     closeLogin();
-    printMessage('[USER] logged in');
+    printMessage('USER', 'logged in');
   }
   
   function logoutUser() {
     window[userStorageType].removeItem(NAMESPACE__STORAGE__USER);
     userStorageType = undefined;
     userNavOpen = false;
-    printMessage('[USER] logged out');
+    printMessage('USER', 'logged out');
   }
   
   function setUserInfo() {
@@ -123,7 +162,7 @@
   }
   function handleUserDataUpdate() {
     closeUserData();
-    printMessage('[USER] data updated');
+    printMessage('USER', 'data updated');
   }
   
   function openUserProfile() {
@@ -145,7 +184,7 @@
     
     closeUserProfile();
     
-    printMessage(`[USER] profile updated: ${JSON.stringify(data)}`);
+    printMessage('USER', `profile updated: ${JSON.stringify(data)}`);
   }
   
   $: if (userProfileOpened || userDataOpened) {
@@ -176,10 +215,10 @@
         log.info('User disconnected');
       });
       socketAPI.on(WS__MSG__EXAMPLE, ({ msg }) => {
-        printMessage(`[WS] ${msg}`);
+        printMessage('WS', msg);
       });
       
-      printMessage('[WS] Connected to Web Socket');
+      printMessage('WS', 'Connected to Web Socket');
       callSocket();
     }
     catch(err) { log.error(err); }
@@ -198,14 +237,27 @@
   <div class="frame">
     Hello World
     <!--TOKEN:^APP__SERVER_INTERACTIONS -->
-    <pre
-      class="server-data"
-      bind:this={serverDataRef}
-    >{serverData.join('\n')}</pre>
-    <nav>
+    <div class="server-data">
+      <nav class="server-data__nav">
+        <button on:click={clearLogs}>Clear</button>
+      </nav>
+      <pre
+        class="server-data__logs"
+        bind:this={serverDataRef}
+      >
+        {@html serverData.join('')}
+      </pre>
+    </div>
+    <nav class="api-nav">
       <!--TOKEN:^APP__API -->
       <button on:click={callAPI}>Trigger API</button>
       <!--TOKEN:$APP__API -->
+      <!--TOKEN:^APP__EXT_API -->
+      <button
+        class:pending={extAPIPending}
+        on:click={callExtAPI}
+      >Trigger Ext. API</button>
+      <!--TOKEN:$APP__EXT_API -->
       <!--TOKEN:^APP__WEB_SOCKET -->
       <button on:click={callSocket}>Trigger Socket</button>
       <!--TOKEN:$APP__WEB_SOCKET -->
@@ -279,30 +331,74 @@
   }
   /* TOKEN:^APP__SERVER_INTERACTIONS */
   
-  .server-data {
+  .server-data__nav {
+    padding: 6px;
+    border-bottom: dashed 1px #666;
+    background: #222;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .server-data__nav button {
+    color: #666;
+    padding: 4px 14px;
+    border: solid 1px;
+    border-radius: 4px;
+    background: transparent;
+  }
+  .server-data__nav button:hover {
+    color: #ccc;
+  }
+  .server-data__logs {
     height: 10em;
     color: #00e100;
     text-align: left;
+    white-space: pre-wrap;
     overflow: auto;
     padding: 0.25em 0.5em;
-    margin-bottom: 0;
+    padding-top: 0.5em;
+    margin: 0;
     background: #222;
     display: block;
   }
+  :global(.server-data__logs div) {
+    margin-bottom: 6px;
+  }
+  :global(.server-data__logs span) {
+    padding: 2px 8px;
+    border: solid 1px;
+    border-radius: 0.25em;
+    background: transparent;
+    display: inline-block;
+  }
   
-  nav {
+  .api-nav {
     margin-top: 1em;
     display: flex;
   }
-  nav > *,
-  nav button {
+  .api-nav > *,
+  .api-nav button {
     width: 100%;
+    position: relative;
   }
-  nav button {
+  .api-nav button {
     border: solid 1px;
   }
+  /* TOKEN:^APP__EXT_API */
+  .api-nav button.pending::before {
+    content: '\231B';
+    width: 100%;
+    height: 100%;
+    background: #efefef;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  /* TOKEN:$APP__EXT_API */
   /* TOKEN:^APP__MULTI_USER */
-  nav button.checking {
+  .api-nav button.checking {
     color: transparent;
   }
   
@@ -311,8 +407,10 @@
     position: relative;
   }
   .user-menu > button {
+    height: 100%;
     border-radius: 0.5em;
     display: flex;
+    align-items: center;
     justify-content: space-between;
   }
   :global(.user-menu > button svg) {

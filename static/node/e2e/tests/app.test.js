@@ -6,7 +6,9 @@ context('App', () => {
   //TOKEN:^TEST__MULTI_USER
   const SELECTOR__LOGIN_FORM = '.login-form';
   //TOKEN:$TEST__MULTI_USER
-  const SELECTOR__SERVER_DATA = '.server-data';
+  //TOKEN:^TEST__SERVER_INTERACTIONS
+  const SELECTOR__SERVER_DATA_LOGS = '.server-data__logs';
+  //TOKEN:$TEST__SERVER_INTERACTIONS
   //TOKEN:^TEST__MULTI_USER
   const SELECTOR__USER_MENU = '.user-menu';
   const SELECTOR__USER_DATA_FORM = '.user-data-form';
@@ -90,20 +92,40 @@ context('App', () => {
     cy.intercept('GET', '/api/hello').as('API__HELLO');
     cy.get('.app nav').contains('Trigger API').click();
     cy.wait('@API__HELLO');
-    cy.get(SELECTOR__SERVER_DATA).then(($el) => {
-      const logs = $el.text().split('\n').filter(log => log.startsWith('[API]'));
+    cy.get(`${SELECTOR__SERVER_DATA_LOGS} div`).then(($logs) => {
+      let logs = [];
+      $logs.each((ndx, log) => { logs.push(log.textContent); });
+      logs = logs.filter(log => log.startsWith('API'));
       expect(logs.length).to.equal(2);
     });
     
     screenshot('API triggered');
   });
   //TOKEN:$TEST__API
+  //TOKEN:^TEST__EXT_API
+  
+  it('should make a request to an external API', () => {
+    cy.intercept('GET', '/api/ext').as('API__EXT');
+    cy.get('.app nav').contains('Trigger Ext. API').click();
+    cy.wait('@API__EXT');
+    cy.get(`${SELECTOR__SERVER_DATA_LOGS} div`).then(($logs) => {
+      let logs = [];
+      $logs.each((ndx, log) => { logs.push(log.textContent); });
+      logs = logs.filter(log => log.startsWith('EXT_API'));
+      expect(logs.length).to.equal(1);
+    });
+    
+    screenshot('ext API triggered');
+  });
+  //TOKEN:$TEST__EXT_API
   //TOKEN:^TEST__WEB_SOCKETS
   
   it('should trigger the WebSocket', () => {
     cy.get('.app nav').contains('Trigger Socket').click();
-    cy.get(SELECTOR__SERVER_DATA).then(($el) => {
-      const logs = $el.text().split('\n').filter(log => log.startsWith('[WS]'));
+    cy.get(`${SELECTOR__SERVER_DATA_LOGS} div`).then(($logs) => {
+      let logs = [];
+      $logs.each((ndx, log) => { logs.push(log.textContent); });
+      logs = logs.filter(log => log.startsWith('WS'));
       expect(logs.length).to.equal(3);
     });
     
