@@ -28,6 +28,9 @@ const {
   //TOKEN:^SERVER__MULTI_USER
   ROUTE__API__CONFIG_CREATE,
   //TOKEN:$SERVER__MULTI_USER
+  //TOKEN:^SERVER__EXT_API
+  ROUTE__API__EXT,
+  //TOKEN:$SERVER__EXT_API
   //TOKEN:^SERVER__API
   ROUTE__API__HELLO,
   //TOKEN:$SERVER__API
@@ -186,6 +189,18 @@ app
     res.json({ hello: 'dave' });
   })
   //TOKEN:$SERVER__API
+  //TOKEN:^SERVER__EXT_API
+  .get(ROUTE__API__EXT, (req, res) => {
+    const { teenyRequest: request } = require('teeny-request');
+    
+    request({ uri: 'https://opentdb.com/api.php?amount=1' }, (err, resp, body) => {
+      if (err) return res.error(resp.statusCode);
+      
+      const { results: [{ correct_answer, question }] } = body;
+      res.json({ answer: correct_answer, question });
+    });
+  })
+  //TOKEN:$SERVER__EXT_API
   .get('/', (req, res) => {
     res.end(shell({
       //TOKEN:^SERVER__MULTI_USER

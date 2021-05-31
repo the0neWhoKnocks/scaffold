@@ -359,6 +359,7 @@ async function scaffold() {
   const serverFrameworkIsExpress = serverFramework === 'express';
   const serverFrameworkIsNode = serverFramework === 'node';
   const serverFrameworkIsPolka = serverFramework === 'polka';
+  const hasServerInteractions = apiEnabled || externalRequests || webSocket || multiUser;
   
   if (projectType === 'node') {
     if (removePreviousScaffold) {
@@ -422,6 +423,7 @@ async function scaffold() {
             },
             { token: 'SERVER__COMPRESS', remove: !compression },
             { token: 'SERVER__COOKIES', remove: !cookies },
+            { token: 'SERVER__EXT_API', remove: !externalRequests },
             { token: 'SERVER__FRAMEWORK__EXPRESS', remove: !serverFrameworkIsExpress },
             { token: 'SERVER__FRAMEWORK__NODE', remove: !serverFrameworkIsNode },
             { token: 'SERVER__FRAMEWORK__POLKA', remove: !serverFrameworkIsPolka },
@@ -542,9 +544,10 @@ async function scaffold() {
             to: 'src/client',
             tokens: [
               { token: 'APP__API', remove: !apiEnabled },
+              { token: 'APP__EXT_API', remove: !externalRequests },
               { token: 'APP__HAS_CONSTANTS', remove: !multiUser && !webSocket },
               { token: 'APP__MULTI_USER', remove: !multiUser },
-              { token: 'APP__SERVER_INTERACTIONS', remove: !apiEnabled && !webSocket && !multiUser },
+              { token: 'APP__SERVER_INTERACTIONS', remove: !hasServerInteractions },
               { token: 'APP__WEB_SOCKET', remove: !webSocket },
             ]
           },
@@ -617,6 +620,7 @@ async function scaffold() {
           tokens: [
             { token: 'CONST__API', remove: !apiEnabled },
             { token: 'CONST__APP_TITLE', replacement: appTitle },
+            { token: 'CONST__EXT_API', remove: !externalRequests },
             { token: 'CONST__HAS_API', remove: !hasAPI },
             { token: 'CONST__SVELTE_MNT', remove: !clientFrameworkIsSvelte },
             { token: 'CONST__LOGGER_NAMESPACE', remove: !logger },
@@ -747,7 +751,9 @@ async function scaffold() {
         tokens: [
           { token: 'TEST__API', remove: !apiEnabled },
           { token: 'TEST__APP_TITLE', replacement: appTitle },
+          { token: 'TEST__EXT_API', remove: !externalRequests },
           { token: 'TEST__MULTI_USER', remove: !multiUser },
+          { token: 'TEST__SERVER_INTERACTIONS', remove: !hasServerInteractions },
           { token: 'TEST__WEB_SOCKETS', remove: !webSocket },
         ],
       }]);
