@@ -56,12 +56,13 @@ nr start:dev
 ## Docker
 
 ```sh
-# compile Production code (required since the assets are copied over)
+# Compile Production code (required since the assets are copied over)
 nr build
-# build the image
-dc build app
-# start the container
-dc up
+# Build and start the container
+dc up --build app
+
+# Or just start the container if you have 'dist' mapped or you just want to use the old build
+dc up app
 ```
 //TOKEN:$README__DOCKER
 //TOKEN:^README__E2E
