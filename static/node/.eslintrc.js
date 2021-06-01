@@ -10,7 +10,7 @@ module.exports = {
     {
       files: ['*.svelte'],
       processor: 'svelte3/svelte3',
-    }
+    },
     //TOKEN:$LINT__SVELTE
   ],
   parserOptions: {

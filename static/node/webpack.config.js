@@ -52,9 +52,9 @@ const conf = {
           options: {
             dev,
             emitCss: true,
-            hotReload: false // pending https://github.com/sveltejs/svelte/issues/2377
-          }
-        }
+            hotReload: false, // pending https://github.com/sveltejs/svelte/issues/2377
+          },
+        },
       },
       {
         test: /\.css$/, // For any CSS files that are extracted and inlined by Svelte
@@ -68,7 +68,7 @@ const conf = {
         ],
       },
       //TOKEN:$WP__SVELTE
-    ]
+    ],
   },
   optimization: {
     minimizer: [

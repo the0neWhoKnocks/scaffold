@@ -21,8 +21,6 @@
   let loginFormRef;
   let rememberCredentialsRef;
   let createFormRef;
-  let createPassword;
-  let createPasswordConfirmed;
   let loginUsername;
   let loginPassword;
   let rememberCredentials = false;

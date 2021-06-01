@@ -52,7 +52,7 @@
   }
   
   function handleKeyDown({ key }) {
-    switch(key) {
+    switch (key) {
       case 'Escape':
         handleCloseClick();
         break;

@@ -16,7 +16,7 @@
   let formRef;
   let inputRef;
 
-  function handleSubmit(ev) {
+  function handleSubmit() {
     postData(formRef.action, formRef)
       .then((data) => {
         

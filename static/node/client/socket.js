@@ -19,15 +19,15 @@ const socketAPI = {
   },
   listeners: {},
   off(type, cb) {
-    for(let i = socketAPI.listeners[type].length - 1; i >= 0; i--) {
+    for (let i = socketAPI.listeners[type].length - 1; i >= 0; i--) {
       const handler = socketAPI.listeners[type][i];
-      if(handler === cb) {
+      if (handler === cb) {
         socketAPI.listeners[type].splice(i, 1);
       }
     }
   },
   on(type, cb) {
-    if(!socketAPI.listeners[type]) socketAPI.listeners[type] = [];
+    if (!socketAPI.listeners[type]) socketAPI.listeners[type] = [];
     socketAPI.listeners[type].push(cb);
   },
   reconnectInProgress: false,
@@ -75,7 +75,7 @@ export function connectToSocket() {
         
         log.debug(`Message from Server: "${ type }"`, data);
         
-        if(socketAPI.listeners[type]) {
+        if (socketAPI.listeners[type]) {
           socketAPI.listeners[type].forEach(cb => { cb(data); });
         }
       };
@@ -89,7 +89,7 @@ export function connectToSocket() {
     socket.onerror = function onWSError(ev) {
       let err = 'An unknown error has occurred with your WebSocket';
 
-      if(
+      if (
         !socketAPI.connected
         && ev.currentTarget.readyState === WebSocket.CLOSED
       ) err = `WebSocket error, could not connect to ${ WS_URL }`;

@@ -119,7 +119,7 @@ module.exports = async function setProfile(req, res) {
         res.error(500, msg);
       });
   }
-  catch(err) {
+  catch (err) {
     const msg = `Failed to set profile data \n ${err.stack}`;
     log.error(msg);
     res.error(500, msg);

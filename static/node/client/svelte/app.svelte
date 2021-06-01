@@ -86,7 +86,7 @@
   //TOKEN:^APP__EXT_API
   
   function decodeHTMLEntities (str) {
-    if(str && typeof str === 'string') {
+    if (str && typeof str === 'string') {
       const element = document.createElement('div');
       // strip script/html tags
       str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
@@ -221,7 +221,7 @@
       printMessage('WS', 'Connected to Web Socket');
       callSocket();
     }
-    catch(err) { log.error(err); }
+    catch (err) { log.error(err); }
     //TOKEN:$APP__WEB_SOCKET
     //TOKEN:^APP__MULTI_USER
     

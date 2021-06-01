@@ -14,7 +14,7 @@ module.exports = function socket(server) {
     
       log.info(`[HANDLE] "${ type }"`);
       
-      switch(type) {
+      switch (type) {
         case WS__MSG__EXAMPLE: {
           socket.send(JSON.stringify({
             data: { msg: `Client: ${data.d} | Server: ${Date.now()}` },
