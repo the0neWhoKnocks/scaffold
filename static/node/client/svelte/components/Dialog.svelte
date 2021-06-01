@@ -133,6 +133,20 @@
     border: none;
     border-radius: 0.25em;
     background: #000;
+    position: relative;
+  }
+  :global(.dialog__body button:focus) {
+    outline: none;
+  }
+  :global(.dialog__body button:focus::after) {
+    content: '';
+    position: absolute;
+    border: solid 2px currentColor;
+    border-radius: 0.25em;
+    top: 2px;
+    left: 2px;
+    bottom: 2px;
+    right: 2px;
   }
   
   .dialog {
