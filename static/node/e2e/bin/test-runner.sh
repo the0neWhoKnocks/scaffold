@@ -84,10 +84,7 @@ if $WATCH_MODE; then
     elif [[ "$xquartzBinary" != "" ]] && [ -f "$xquartzBinary" ]; then
       echo;
       echo "[START] XServer"
-      export DISPLAY=$display
-      open -a xquartz
-      sleep 2
-      xhost + $IP
+      xhost + "$IP"
     else
       echo "[ERROR] The XServer binary could not be located. Follow the instructions in the README to get it installed."
       echo;

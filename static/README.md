@@ -83,6 +83,7 @@ To get the GUI to work, follow the instructions for your OS.
    - Go to Preferences > Security.
       - Make sure `Allow connections from network clients` is checked
 - Once the settings have been updated you can close XQuartz
+- If you run `echo $DISPLAY` and it's blank, restart your system. The variable should equal something like `/private/tmp/com.apple.launchd.7X4k55BnyT/org.xquartz:0`.
 
 Once things are wired up you can run any of the below.
 
