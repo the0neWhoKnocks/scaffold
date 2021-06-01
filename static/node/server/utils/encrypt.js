@@ -27,7 +27,7 @@ module.exports = function encrypt(cryptConfig, value, userPassword) {
         const cipher = createCipheriv(CRYPT__ALGORITHM, key, iv);
         const encryptedData = Buffer.concat([
           cipher.update((typeof value === 'object') ? JSON.stringify(value) : value),
-          cipher.final()
+          cipher.final(),
         ]);
         const authTagHex = cipher.getAuthTag().toString(CRYPT__ENCODING);
         const ivHex = iv.toString(CRYPT__ENCODING);

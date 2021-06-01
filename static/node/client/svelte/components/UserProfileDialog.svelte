@@ -1,5 +1,5 @@
 <script>
-  import { onMount, tick } from 'svelte';
+  import { onMount } from 'svelte';
   import {
     ROUTE__API__USER_GET_PROFILE,
     ROUTE__API__USER_SET_PROFILE,
@@ -22,7 +22,7 @@
   let dataUpdated = false;
   let initialFormData;
 
-  function handleSubmit(ev) {
+  function handleSubmit() {
     postData(formRef.action, formRef)
       .then((data) => {
         if (onSuccess) onSuccess(data);

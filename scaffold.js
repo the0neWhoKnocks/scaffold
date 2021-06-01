@@ -697,9 +697,17 @@ async function scaffold() {
     if (eslint) {
       packageJSON.devDependencies['eslint'] = '7.23.0';
       
+      const lintExts = ['js'];
+      const sourceFolders = ['bin', 'src'];
+      
       if (clientFrameworkIsSvelte) {
         packageJSON.devDependencies['eslint-plugin-svelte3'] = '3.1.2';
+        lintExts.push('svelte');
       }
+      
+      if (e2eTests) sourceFolders.push('e2e');
+      
+      packageJSON.scripts['lint'] = `eslint ./*.js "{${sourceFolders.sort().join(',')}}/**/*.{${lintExts.sort().join(',')}}"`;
       
       addParsedFiles([{
         file: '.eslintrc.js',
@@ -712,6 +720,7 @@ async function scaffold() {
     }
     
     if (e2eTests) {
+      packageJSON.devDependencies['eslint-plugin-cypress'] = '2.11.3';
       packageJSON.scripts['test'] = './e2e/bin/test-runner.sh';
       packageJSON.scripts['test:watch'] = 'npm run test -- --watch';
       

@@ -21,7 +21,7 @@ module.exports = async function getData(req, res) {
     log.info(`Got data: \n"${decryptedData}"`);
     res.json({ data: decryptedData });
   }
-  catch(err) {
+  catch (err) {
     const msg = `Error getting data\n${err.stack}`;
     log.error(msg);
     res.error(500, msg);
