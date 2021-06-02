@@ -233,7 +233,9 @@ server.listen(SERVER__PORT, err => {
   if (process.env.VIRTUAL_HOST) {
     domain = process.env.VIRTUAL_HOST;
     port = process.env.VHOST_PROXY_PORT;
+    //TOKEN:^SERVER__HTTPS
     protocol = 'https';
+    //TOKEN:$SERVER__HTTPS
   }
   
   log.info(`Server running at: ${protocol}://${domain}:${port}`);

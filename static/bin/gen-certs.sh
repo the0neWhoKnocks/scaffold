@@ -106,19 +106,7 @@ if [[ "$VHOST" != "" ]]; then
   printMsg "[VERIFY] The cert"
   openssl x509 -in "${DIR}/${VHOST}.crt" -noout -text
   
-  HOSTS_FILE_LOCATION="/etc/hosts"
-  if [[ "${WSL_DISTRO_NAME}" != "" ]]; then
-    HOSTS_FILE_LOCATION="/c/Windows/System32/drivers/etc/hosts"
-  fi
-  
-  HOST_ENTRY="127.0.0.1 ${VHOST}"
-  result=$(cat "${HOSTS_FILE_LOCATION}" | grep "${HOST_ENTRY}")
-  if [[ "${result}" == "" ]]; then
-    printMsg "[ADD] New vhost entry to your hosts file"
-    echo "${HOST_ENTRY}" | sudo tee -a "${HOSTS_FILE_LOCATION}"
-  fi
-  printMsg "[VIEW] Current hosts entries"
-  cat "${HOSTS_FILE_LOCATION}"
+  source "$(dirname $0)/update-hosts.sh" -d "${VHOST}"
 else
   if [[ "$ALT_NAME" == "" ]]; then
     printMsg "[ERROR] No Alt Name provided\n   example: ${SCRIPT_NAME} -d \"localhost\"\n   example: ${SCRIPT_NAME} -i \"192.168.1.10\"" $RED

@@ -433,6 +433,7 @@ async function scaffold() {
                 ? `const { ${[...new Set(fsDeps)].join(', ')} } = require('fs');`
                 : '',
             },
+            { token: 'SERVER__HTTPS', remove: !secure },
             { token: 'SERVER__MULTI_USER', remove: !multiUser },
             { token: 'SERVER__NO_VHOST', remove: vHost },
             { token: 'SERVER__STATIC', remove: !staticFiles },
@@ -498,12 +499,20 @@ async function scaffold() {
       }
       
       if (secure || vHost) {
-        copyFiles([{
-          executable: true,
-          files: ['gen-certs.sh'],
-          from: 'bin',
-          to: 'bin',
-        }]);
+        copyFiles([
+          {
+            executable: true,
+            files: ['gen-certs.sh'],
+            from: 'bin',
+            to: 'bin',
+          },
+          {
+            executable: true,
+            files: ['update-hosts.sh'],
+            from: 'bin',
+            to: 'bin',
+          },
+        ]);
       }
     }
     
@@ -827,6 +836,9 @@ async function scaffold() {
     }]);
   }
   
+  let dcCmd = kebabAppName;
+  if (!secure && vHost) dcCmd = '';
+  
   addParsedFiles([
     {
       file: '.gitignore',
@@ -843,6 +855,7 @@ async function scaffold() {
       from: '',
       to: '',
       tokens: [
+        { token: 'README__DC_CMD', replacement: dcCmd },
         { token: 'README__DOCKER', remove: !docker },
         { token: 'README__E2E', remove: !e2eTests },
         { token: 'README__GH_PAGE', remove: !ghPage },
@@ -850,6 +863,8 @@ async function scaffold() {
         { token: 'README__LOGGING', remove: !logger },
         { token: 'README__TITLE', replacement: appTitle },
         { token: 'README__VHOST', remove: !vHost },
+        { token: 'README__VHOST_DOMAIN', replacement: kebabAppName },
+        { token: 'README__VHOST_NO_HTTPS', remove: secure || !vHost },
       ],
     },
   ]);

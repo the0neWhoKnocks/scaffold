@@ -1,26 +1,26 @@
 # //TOKEN:#README__TITLE
 
-- [Development](development)
+- [Development](#development)
 //TOKEN:^README__DOCKER
-- [Docker](docker)
+- [Docker](#docker)
 //TOKEN:$README__DOCKER
 //TOKEN:^README__GH_PAGE
-- [GitHub Page](github-page)
+- [GitHub Page](#github-page)
 //TOKEN:$README__GH_PAGE
 //TOKEN:^README__HTTPS
-- [Local HTTPS](local-https)
-   - [Generate Certs for localhost](generate-certs-for-localhost)
-   - [Generate Certs for Apps running on your LAN](generate-certs-for-apps-running-on-your-lan)
+- [Local HTTPS](#local-https)
+   - [Generate Certs for localhost](#generate-certs-for-localhost)
+   - [Generate Certs for Apps running on your LAN](#generate-certs-for-apps-running-on-your-lan)
    //TOKEN:^README__VHOST
-   - [Generate Certs for a VHost](generate-certs-for-a-vhost)
+   - [Generate Certs for a VHost](#generate-certs-for-a-vhost)
    //TOKEN:$README__VHOST
-   - [Install the Certificate Authority in Chrome](install-the-certificate-authority-in-chrome)
-   - [Install the Certificate Authority in Firefox](install-the-certificate-authority-in-firefox)
-   - [Install the Certificate Authority on Android](install-the-certificate-authority-on-android)
-   - [Run your App with the certs](run-your-app-with-the-certs)
+   - [Install the Certificate Authority in Chrome](#install-the-certificate-authority-in-chrome)
+   - [Install the Certificate Authority in Firefox](#install-the-certificate-authority-in-firefox)
+   - [Install the Certificate Authority on Android](#install-the-certificate-authority-on-android)
+   - [Run your App with the certs](#run-your-app-with-the-certs)
 //TOKEN:$README__HTTPS
 //TOKEN:^README__LOGGING
-- [Logging](logging)
+- [Logging](#logging)
 //TOKEN:$README__LOGGING
 
 ---
@@ -54,15 +54,22 @@ nr start:dev
 ---
 
 ## Docker
+//TOKEN:^README__VHOST_NO_HTTPS
+
+You'll need to update your hosts file first, so run the below.
+```sh
+./bin/update-hosts.sh -d "//TOKEN:#README__VHOST_DOMAIN.local"
+```
+//TOKEN:$README__VHOST_NO_HTTPS
 
 ```sh
 # Compile Production code (required since the assets are copied over)
 nr build
 # Build and start the container
-dc up --build app
+dc up --build //TOKEN:#README__DC_CMD
 
 # Or just start the container if you have 'dist' mapped or you just want to use the old build
-dc up app
+dc up //TOKEN:#README__DC_CMD
 ```
 //TOKEN:$README__DOCKER
 //TOKEN:^README__E2E
