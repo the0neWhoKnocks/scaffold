@@ -228,17 +228,22 @@ server.listen(SERVER__PORT, err => {
   //TOKEN:^SERVER__VHOST
   
   let domain = 'localhost';
-  let port = SERVER__PORT;
+  let port = `:${SERVER__PORT}`;
   
   if (process.env.VIRTUAL_HOST) {
     domain = process.env.VIRTUAL_HOST;
-    port = process.env.VHOST_PROXY_PORT;
+    port = (
+      process.env.VHOST_PROXY_PORT === '80'
+      || process.env.VHOST_PROXY_PORT === '443'
+    )
+      ? ''
+      : `:${process.env.VHOST_PROXY_PORT}`;
     //TOKEN:^SERVER__HTTPS
     protocol = 'https';
     //TOKEN:$SERVER__HTTPS
   }
   
-  log.info(`Server running at: ${protocol}://${domain}:${port}`);
+  log.info(`Server running at: ${protocol}://${domain}${port}`);
   //TOKEN:$SERVER__VHOST
   //TOKEN:^SERVER__NO_VHOST
   log.info(`Server running at: ${protocol}://localhost:${SERVER__PORT}`);
