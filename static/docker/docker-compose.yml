@@ -71,6 +71,8 @@ services:
   #TOKEN:^DC__VHOST
   
   nginx-proxy:
+    environment:
+      DISABLE_ACCESS_LOGS: "true"
     image: nginxproxy/nginx-proxy:alpine
     ports:
       #TOKEN:^DC__VHOST_NON_SECURE
@@ -84,5 +86,5 @@ services:
       #TOKEN:^DC__VHOST_SECURE
       - "${PWD}/certs.${VHOST__DOMAIN}:/etc/nginx/certs"
       #TOKEN:$DC__VHOST_SECURE
-      - "${PWD}/conf.d:/etc/nginx/conf.d"
+      - "${PWD}/.docker/vhost/conf.d:/etc/nginx/conf.d"
   #TOKEN:$DC__VHOST
