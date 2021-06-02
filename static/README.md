@@ -56,7 +56,10 @@ nr start:dev
 ## Docker
 //TOKEN:^README__VHOST_NO_HTTPS
 
-You'll need to update your hosts file first, so run the below.
+You'll need to update your hosts file first, so run the below script.
+
+On Windows (via WSL), you'll need to run the below script with Admin privileges. Otherwise the Windows `hosts` file won't get updated.
+
 ```sh
 ./bin/update-hosts.sh -d "//TOKEN:#README__VHOST_DOMAIN.local"
 ```
@@ -159,7 +162,9 @@ You may face a development scenario where you need SSL, but you're on a system w
 
 In order to get around such scenarios, Docker is utilized with `nginx-proxy` to wire up a vhost. A certificate is created that points to the vhost domain to get around top-level certs or proxies that are wired up to `localhost`/`127.0.0.1`.
 
-On OSX you may run into an issue where you've added a cert, needed to add update or create a new cert, but your Browser is still referencing the old cert. A restart may resolve that issue, but if you don't want to restart, you can just update your vhost entry and create/add a new cert.
+On OSX you may run into an issue where you've added a cert, needed to add, update, or create a new cert, but your Browser is still referencing the old cert. A restart may resolve that issue, but if you don't want to restart, you can just update your vhost entry and create/add a new cert.
+
+On Windows (via WSL), you'll need to run the below script with Admin privileges. Otherwise the Windows `hosts` file won't get updated.
 
 ```sh
 ./bin/gen-certs.sh -v "app.local" -c "Local App"
