@@ -498,22 +498,24 @@ async function scaffold() {
         }]);
       }
       
-      if (secure || vHost) {
-        copyFiles([
-          {
-            executable: true,
-            files: ['gen-certs.sh'],
-            from: 'bin',
-            to: 'bin',
-          },
-          {
-            executable: true,
-            files: ['update-hosts.sh'],
-            from: 'bin',
-            to: 'bin',
-          },
-        ]);
+      const binFiles = [];
+      if (secure) {
+        binFiles.push({
+          executable: true,
+          files: ['gen-certs.sh'],
+          from: 'bin',
+          to: 'bin',
+        });
       }
+      if (secure || (!secure && vHost)) {
+        binFiles.push({
+          executable: true,
+          files: ['update-hosts.sh'],
+          from: 'bin',
+          to: 'bin',
+        });
+      }
+      if (binFiles.length) copyFiles(binFiles);
     }
     
     if (addClient) {
