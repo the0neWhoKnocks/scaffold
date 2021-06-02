@@ -43,8 +43,11 @@ services:
       #TOKEN:^DC__MULTI_USER
       - "${PWD}/data:/home/node/app/data"
       #TOKEN:$DC__MULTI_USER
-      # Uncomment to map Local non-Prod assets
-      # - "${PWD}/dist:/home/node/app"
+      # Uncomment to map Local assets
+      # - "${PWD}/dist/public:/home/node/app/public"
+      # - "${PWD}/dist/server:/home/node/app/server"
+      # - "${PWD}/dist/utils:/home/node/app/utils"
+      # - "${PWD}/dist/constants.js:/home/node/app/constants.js"
     #TOKEN:$DC__VOLUMES
   #TOKEN:^DC__E2E
   
