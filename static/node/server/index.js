@@ -193,9 +193,11 @@ app
   .get(ROUTE__API__EXT, (req, res) => {
     const { teenyRequest: request } = require('teeny-request');
     
+    log.info(`[EXT_API] Calling external API`);
     request({ uri: 'https://opentdb.com/api.php?amount=1' }, (err, resp, body) => {
       if (err) return res.error(resp.statusCode);
       
+      log.info(`[EXT_API] Recieved response`);
       const { results: [{ correct_answer, question }] } = body;
       res.json({ answer: correct_answer, question });
     });
