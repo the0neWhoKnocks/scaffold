@@ -33,9 +33,16 @@ const constants = {
   ROUTE__API__USER_SET_DATA: `${API_PREFIX}/user/data/set`,
   ROUTE__API__USER_SET_PROFILE: `${API_PREFIX}/user/profile/set`,
   //TOKEN:$CONST__MULTI_USER
+  //TOKEN:^CONST__VHOST
+  NGINX_WS_TIMEOUT: 60000, // WS connections will disconnect after this amount of time, unless the Server is pinged
+  //TOKEN:$CONST__VHOST
   //TOKEN:^CONST__WEB_SOCKETS
   WS__CLOSE_CODE__USER_REMOVED: 4000, // Close event numbers https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
   WS__MSG__EXAMPLE: 'test one two',
+  //TOKEN:^CONST__VHOST
+  WS__MSG__PING: 'ping',
+  WS__MSG__PONG: 'pong',
+  //TOKEN:$CONST__VHOST
   WS__MSG__SERVER_DOWN: 'server down',
   //TOKEN:$CONST__WEB_SOCKETS
 };

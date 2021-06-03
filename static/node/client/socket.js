@@ -1,8 +1,18 @@
 import logger from '../utils/logger';
+//TOKEN:^CLIENT_SOCKET__VHOST
+import {
+  NGINX_WS_TIMEOUT,
+  WS__MSG__PING,
+} from '../constants';
+//TOKEN:$CLIENT_SOCKET__VHOST
 
 const WS_URL = location.origin.replace(/^http(s)?/, 'ws$1');
 const log = logger('socket');
 let socket;
+//TOKEN:^CLIENT_SOCKET__VHOST
+let heartbeat;
+//TOKEN:$CLIENT_SOCKET__VHOST
+
 const socketAPI = {
   connected: false,
   disconnect() {
@@ -83,6 +93,14 @@ export function connectToSocket() {
       log.info('Client Socket connected to Server');
 
       socketAPI.connected = true;
+      //TOKEN:^CLIENT_SOCKET__VHOST
+      
+      if (heartbeat) clearInterval(heartbeat);
+      heartbeat = setInterval(() => {
+        socketAPI.emit(WS__MSG__PING);
+      }, NGINX_WS_TIMEOUT - 1);
+      //TOKEN:$CLIENT_SOCKET__VHOST
+      
       resolve(socketAPI);
     };
 

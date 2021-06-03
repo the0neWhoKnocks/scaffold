@@ -1,5 +1,11 @@
 const { OPEN, Server } = require('ws');
-const { WS__MSG__EXAMPLE } = require('../constants');
+const {
+  WS__MSG__EXAMPLE,
+  //TOKEN:^SERVER_SOCKET__VHOST
+  WS__MSG__PING,
+  WS__MSG__PONG,
+  //TOKEN:$SERVER_SOCKET__VHOST
+} = require('../constants');
 const log = require('../utils/logger')('server:socket');
 
 module.exports = function socket(server) {
@@ -15,14 +21,18 @@ module.exports = function socket(server) {
       log.info(`[HANDLE] "${ type }"`);
       
       switch (type) {
-        case WS__MSG__EXAMPLE: {
+        case WS__MSG__EXAMPLE:
           socket.send(JSON.stringify({
             data: { msg: `Client: ${data.d} | Server: ${Date.now()}` },
             type: WS__MSG__EXAMPLE,
           }));
-          
           break;
-        }
+        //TOKEN:^SERVER_SOCKET__VHOST
+        
+        case WS__MSG__PING:
+          socket.send(JSON.stringify({ data: {}, type: WS__MSG__PONG }));
+          break;
+        //TOKEN:$SERVER_SOCKET__VHOST
       }
     });
     
