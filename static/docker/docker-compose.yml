@@ -89,5 +89,6 @@ services:
       #TOKEN:^DC__VHOST_SECURE
       - "${PWD}/certs.${VHOST__DOMAIN}:/etc/nginx/certs"
       #TOKEN:$DC__VHOST_SECURE
-      - "${PWD}/.docker/vhost/conf.d:/etc/nginx/conf.d"
+      # Uncomment to view the generated config
+      # - "${PWD}/.docker/vhost/conf.d:/etc/nginx/conf.d"
   #TOKEN:$DC__VHOST

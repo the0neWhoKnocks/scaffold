@@ -491,10 +491,13 @@ async function scaffold() {
         packageJSON.dependencies['supports-color'] = '8.1.1';
         packageJSON.dependencies['ws'] = '7.4.4';
         
-        copyFiles([{
-          files: ['socket.js'],
+        addParsedFiles([{
+          file: 'socket.js',
           from: 'node/server',
           to: 'src/server',
+          tokens: [
+            { token: 'SERVER_SOCKET__VHOST', remove: !vHost },
+          ],
         }]);
       }
       
@@ -603,10 +606,13 @@ async function scaffold() {
       }
       
       if (webSocket) {
-        copyFiles([{
-          files: ['socket.js'],
+        addParsedFiles([{
+          file: 'socket.js',
           from: 'node/client',
           to: 'src/client',
+          tokens: [
+            { token: 'CLIENT_SOCKET__VHOST', remove: !vHost },
+          ],
         }]);
       }
     }
@@ -638,6 +644,7 @@ async function scaffold() {
             { token: 'CONST__LOGGER_NAMESPACE', replacement: loggerNamespace || '--' },
             { token: 'CONST__MULTI_USER', remove: !multiUser },
             { token: 'CONST__SERVER', remove: !addServer },
+            { token: 'CONST__VHOST', remove: !vHost },
             { token: 'CONST__WEB_SOCKETS', remove: !webSocket },
           ],
         },
