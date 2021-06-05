@@ -910,6 +910,14 @@ async function scaffold() {
     await cmd('git init', { cwd: PATH__PROJECT_ROOT });
   }
   
+  if (
+    projectType === 'node'
+    && existsSync(`${PATH__PROJECT_ROOT}/package.json`)
+    && !existsSync(`${PATH__PROJECT_ROOT}/node_modules`)
+  ) {
+    await cmd('npm i', { cwd: PATH__PROJECT_ROOT });
+  }
+  
   const fileList = await getFileList({
     ignore: ['.git/', 'node_modules/'],
     path: PATH__PROJECT_ROOT,
