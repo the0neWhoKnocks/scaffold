@@ -1,5 +1,7 @@
 # Folders
 .git
+.docker/nginx/conf.d
+.docker/nginx/logs
 #TOKEN:^IGNORE__HTTPS
 certs.*
 #TOKEN:$IGNORE__HTTPS

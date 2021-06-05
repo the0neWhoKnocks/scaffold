@@ -1,15 +1,16 @@
 version: "2" # using 2 because 3 doesn't support extending
 
 services:
+  #TOKEN:^DC__NODE_APP
   #TOKEN:#DC__APP_NAME:
     build:
       context: ./
       dockerfile: .docker/Dockerfile
     container_name: #TOKEN:#DC__APP_NAME
-    #TOKEN:^DC__VHOST
+    #TOKEN:^DC__NGINX
     depends_on:
-      - "nginx-proxy"
-    #TOKEN:$DC__VHOST
+      - "nginx"
+    #TOKEN:$DC__NGINX
     environment:
       #TOKEN:^DC__MULTI_USER
       DATA_PATH: /home/node/app/data
@@ -24,8 +25,6 @@ services:
       TZ: America/Los_Angeles
     #TOKEN:^DC__VHOST
       VHOST_PROXY_PORT: ${VHOST__PORT__PROXY}
-      VIRTUAL_HOST: ${VHOST__DOMAIN}
-      VIRTUAL_PORT: ${VHOST__PORT__APP}
     expose:
       - "${VHOST__PORT__APP}"
     #TOKEN:$DC__VHOST
@@ -49,8 +48,9 @@ services:
       # - "${PWD}/dist/utils:/home/node/app/utils"
       # - "${PWD}/dist/constants.js:/home/node/app/constants.js"
     #TOKEN:$DC__VOLUMES
-  #TOKEN:^DC__E2E
   
+  #TOKEN:$DC__NODE_APP
+  #TOKEN:^DC__E2E
   e2e:
     build:
       context: ./e2e/
@@ -70,25 +70,41 @@ services:
     volumes:
       - "${PWD}/e2e:/e2e"
       - "${PWD}/data:/app/data"
-  #TOKEN:$DC__E2E
-  #TOKEN:^DC__VHOST
   
-  nginx-proxy:
+  #TOKEN:$DC__E2E
+  #TOKEN:^DC__NGINX
+  nginx:
     environment:
-      DISABLE_ACCESS_LOGS: "true"
-    image: nginxproxy/nginx-proxy:alpine
+      # NOTE - Any template vars (prefixed with `TMP`) will be interpreted
+      # statically. For example, if you wrap a value in quotes, those quotes
+      # will be injected.
+      #TOKEN:^DC__NGINX_SERVER
+      - TMP__APP_PORT=${NGINX__PORT__APP__INTERNAL}
+      - TMP__LOG_NAME=#TOKEN:#DC__LOG_NAME
+      #TOKEN:$DC__NGINX_SERVER
+      #TOKEN:^DC__VHOST
+      - TMP__HOST_NAME=${VHOST__DOMAIN}
+      - TMP__PORT__PROXY=${VHOST__PORT__PROXY_INTERNAL}
+      #TOKEN:$DC__VHOST
+    image: nginx:1.21.0-alpine
     ports:
-      #TOKEN:^DC__VHOST_NON_SECURE
-      - "${VHOST__PORT__PROXY}:80"
-      #TOKEN:$DC__VHOST_NON_SECURE
-      #TOKEN:^DC__VHOST_SECURE
-      - "${VHOST__PORT__PROXY}:443"
-      #TOKEN:$DC__VHOST_SECURE
+      #TOKEN:^DC__NGINX_SERVER
+      - "${NGINX__PORT__SERVER__HOST}:${NGINX__PORT__SERVER__INTERNAL}"
+      - "${NGINX__PORT__APP__HOST}:${NGINX__PORT__APP__INTERNAL}"
+      #TOKEN:$DC__NGINX_SERVER
+      #TOKEN:^DC__VHOST_PORT
+      - "${VHOST__PORT__PROXY}:${VHOST__PORT__PROXY_INTERNAL}"
+      #TOKEN:$DC__VHOST_PORT
     volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./.docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./.docker/nginx/logs:/var/log/nginx
+      # NOTE - Comment out the templates mount to stop generating files.
+      - ./.docker/nginx/templates:/etc/nginx/templates
+      #TOKEN:^DC__NGINX_SERVER
+      - ./.docker/nginx/www:/var/www
+      #TOKEN:$DC__NGINX_SERVER
       #TOKEN:^DC__VHOST_SECURE
       - "${PWD}/certs.${VHOST__DOMAIN}:/etc/nginx/certs"
       #TOKEN:$DC__VHOST_SECURE
-      # Uncomment to view the generated config
-      # - "${PWD}/.docker/vhost/conf.d:/etc/nginx/conf.d"
-  #TOKEN:$DC__VHOST
+  
+  #TOKEN:$DC__NGINX

@@ -1,5 +1,6 @@
 const {
   existsSync,
+  readdirSync,
   writeFileSync,
 } = require('fs');
 const { dirname, resolve } = require('path');
@@ -126,16 +127,10 @@ async function scaffold() {
     //   ],
     // },
     {
-      message: 'Remove previously scaffolded files?',
+      message: 'Remove existing files?',
       type: 'confirm',
-      name: 'removePreviousScaffold',
-      when: () => {
-        let previouslyScaffolded = false;
-        
-        if (projectType === 'node') previouslyScaffolded = existsSync(`${PATH__PROJECT_ROOT}/src`);
-        
-        return previouslyScaffolded;
-      },
+      name: 'removeExistingFiles',
+      when: () => readdirSync(PATH__PROJECT_ROOT).length > 0,
     },
     {
       message: 'Add Server',
@@ -143,14 +138,15 @@ async function scaffold() {
       name: 'addServer',
     },
     {
-      message: '  Server Framework',
+      message: '  Server Type',
       type: 'list',
-      name: 'serverFramework',
-      default: 0,
+      name: 'serverType',
+      default: 'node',
       when: ({ addServer }) => addServer,
       choices: [
-        { name: 'Node', value: 'node' },
         { name: 'Express', value: 'express' },
+        { name: 'Nginx', value: 'nginx' },
+        { name: 'Node', value: 'node' },
         { name: 'Polka', value: 'polka' },
       ],
     },
@@ -160,67 +156,77 @@ async function scaffold() {
       name: 'serverOptions',
       when: ({ addServer }) => addServer,
       filter: answers => merge(answers),
-      choices: [
-        {
-          name: 'Will have an API',
-          short: 'API',
-          value: { apiEnabled: true },
-          checked: false,
-        },
-        {
-          name: 'Will make external requests',
-          short: 'External Requests',
-          value: { externalRequests: true },
-          checked: false,
-        },
-        {
-          name: 'Will serve static assets',
-          short: '[middleware] Static',
-          value: { middleware: { staticFiles: true } },
-          checked: false,
-        },
-        {
-          name: 'Should support User accounts',
-          short: 'Users',
-          value: { multiUser: true },
-          checked: false,
-        },
-        {
-          name: 'Should support https',
-          short: 'Secure',
-          value: { secure: true },
-          checked: false,
-        },
-        {
-          name: 'Should support virtual hosts',
-          short: 'VHosts',
-          value: { vHost: true },
-          checked: false,
-        },
-        {
-          name: 'Should support Web Sockets',
-          short: 'Web Socket',
-          value: { webSocket: true },
-          checked: false,
-        },
-        {
-          name: 'Should gzip responses',
-          short: '[middleware] GZip',
-          value: { middleware: { compression: true } },
-          checked: false,
-        },
-        {
-          name: 'Should be able to read/write cookies',
-          short: '[middleware] Cookies',
-          value: { middleware: { cookies: true } },
-          checked: false,
-        },
-      ],
+      choices: ({ serverType }) => {
+        const opts = [
+          {
+            name: 'Will serve static assets',
+            short: 'Static assets',
+            value: { staticFiles: true },
+            checked: false,
+          },
+          {
+            name: 'Should support https',
+            short: 'Secure',
+            value: { secure: true },
+            checked: false,
+          },
+          {
+            name: 'Should support virtual hosts',
+            short: 'VHosts',
+            value: { vHost: true },
+            checked: false,
+          },
+          {
+            name: 'Should gzip responses',
+            short: 'GZip',
+            value: { gZip: true },
+            checked: false,
+          },
+        ];
+        
+        if (serverType !== 'nginx') {
+          opts.push(
+            {
+              name: 'Will have an API',
+              short: 'API',
+              value: { apiEnabled: true },
+              checked: false,
+            },
+            {
+              name: 'Will make external requests',
+              short: 'External Requests',
+              value: { externalRequests: true },
+              checked: false,
+            },
+            {
+              name: 'Should support User accounts',
+              short: 'Users',
+              value: { multiUser: true },
+              checked: false,
+            },
+            {
+              name: 'Should support Web Sockets',
+              short: 'Web Socket',
+              value: { webSocket: true },
+              checked: false,
+            },
+            {
+              name: 'Should be able to read/write cookies',
+              short: 'Cookies',
+              value: { cookies: true },
+              checked: false,
+            }
+          );
+        }
+        
+        return opts;
+      },
     },
     {
       message: 'Add Client',
       type: 'confirm',
       name: 'addClient',
+      when: ({ serverType }) => serverType !== 'nginx',
     },
     {
       message: '  Client Framework',
@@ -253,7 +259,10 @@ async function scaffold() {
       message: 'Dev Options',
       type: 'checkbox',
       name: 'devOptions',
-      when: ({ addClient, addServer }) => addClient || addServer,
+      when: ({ addClient, addServer, serverType }) => (
+        (addClient || addServer)
+        && serverType !== 'nginx'
+      ),
       filter: answers => merge(answers),
       choices: [
         { name: 'Add e2e tests', value: { e2eTests: true }, checked: false },
@@ -280,16 +289,20 @@ async function scaffold() {
       type: 'list',
       name: 'containerPlatform',
       default: ({
-        devOptions: { e2eTests },
+        devOptions: { e2eTests } = {},
         serverOptions: { vHost },
+        serverType,
       }) => {
-        if (e2eTests || vHost) return 1;
+        if (serverType === 'nginx' || e2eTests || vHost) return 'docker';
         return 0;
       },
-      choices: [
-        { name: 'None', value: '' },
-        { name: 'Docker', value: 'docker' },
-      ],
+      choices: ({ serverType }) => {
+        const opts = [{ name: 'Docker', value: 'docker' }];
+      
+        if (serverType !== 'nginx') opts.push({ name: 'None', value: '' });
+      
+        return opts;
+      },
     },
     {
       message: '  Docker Username',
@@ -325,8 +338,8 @@ async function scaffold() {
     devOptions,
     docker,
     loggerNamespace,
-    removePreviousScaffold,
-    serverFramework,
+    removeExistingFiles,
+    serverType,
     serverOptions,
   } = scaffoldOpts;
   const {
@@ -340,52 +353,52 @@ async function scaffold() {
   } = (devOptions || {});
   const {
     apiEnabled,
+    cookies,
     externalRequests,
-    middleware,
+    gZip,
     multiUser,
     secure,
+    staticFiles,
     vHost,
     webSocket,
   } = (serverOptions || {});
-  const {
-    compression,
-    cookies,
-    staticFiles,
-  } = (middleware || {});
   
   const kebabAppName = kebabCase(appTitle);
   const clientFrameworkIsSvelte = clientFramework === 'svelte';
   const bundlerIsWebpack = bundler === 'webpack';
-  const serverFrameworkIsExpress = serverFramework === 'express';
-  const serverFrameworkIsNode = serverFramework === 'node';
-  const serverFrameworkIsPolka = serverFramework === 'polka';
+  const serverTypeIsExpress = serverType === 'express';
+  const serverTypeIsNode = serverType === 'node';
+  const serverTypeIsPolka = serverType === 'polka';
+  const serverTypeIsNginx = serverType === 'nginx';
+  const isNodeServer = serverTypeIsExpress || serverTypeIsNode || serverTypeIsPolka;
   const hasServerInteractions = apiEnabled || externalRequests || webSocket || multiUser;
   
-  if (projectType === 'node') {
-    if (removePreviousScaffold) {
-      const del = require('del');
-      const filesToDelete = await del(GLOBS__DELETE_FILES, {
-        absolute: true,
-        cwd: PATH__PROJECT_ROOT,
-        dot: true,
-        dryRun: true, // del specific
-        onlyFiles: false, // globby specific
-        root: PATH__PROJECT_ROOT,
-      });
-      const { deleteList } = await prompt({
-        message: 'These files will be removed',
-        type: 'checkbox',
-        name: 'deleteList',
-        choices: filesToDelete.map(f => ({
-          name: f,
-          checked: true,
-        }))
-      });
-      
-      await del(deleteList, { cwd: PATH__PROJECT_ROOT });
-    }
+  if (removeExistingFiles) {
+    const del = require('del');
+    const filesToDelete = await del(GLOBS__DELETE_FILES, {
+      absolute: true,
+      cwd: PATH__PROJECT_ROOT,
+      dot: true,
+      dryRun: true, // del specific
+      onlyFiles: false, // globby specific
+      root: PATH__PROJECT_ROOT,
+    });
+    const { deleteList } = await prompt({
+      message: 'These files will be removed',
+      type: 'checkbox',
+      name: 'deleteList',
+      choices: filesToDelete.map(f => ({
+        name: f,
+        checked: true,
+      }))
+    });
     
-    const packageJSON = {
+    await del(deleteList, { cwd: PATH__PROJECT_ROOT });
+  }
+  
+  let packageJSON;
+  if (projectType === 'node') {
+    packageJSON = {
       scripts: {
         build: './bin/prep-dist.sh && NODE_ENV=production webpack',
         start: 'node ./dist/server',
@@ -394,17 +407,19 @@ async function scaffold() {
       dependencies: {},
       devDependencies: {},
     };
-    
-    if (addServer) {
-      if (serverFrameworkIsPolka) {
+  }
+  
+  if (addServer) {
+    if (isNodeServer) {
+      if (serverTypeIsPolka) {
         packageJSON.dependencies['polka'] = '1.0.0-next.14';
       }
-      else if (serverFrameworkIsExpress) {
+      else if (serverTypeIsExpress) {
         packageJSON.dependencies['express'] = '4.17.1';
       }
       
       if (externalRequests) packageJSON.dependencies['teeny-request'] = '7.0.1';
-      if (compression) packageJSON.dependencies['compression'] = '1.7.4';
+      if (gZip) packageJSON.dependencies['compression'] = '1.7.4';
       if (cookies) packageJSON.dependencies['cookie-parser'] = '1.4.5';
       if (staticFiles) packageJSON.dependencies['sirv'] = '1.0.12';
       
@@ -419,20 +434,20 @@ async function scaffold() {
             { token: 'SERVER__API', remove: !apiEnabled },
             {
               token: 'SERVER__APP_HANDLER',
-              replacement: serverFrameworkIsPolka ? 'app.handler' : 'app',
+              replacement: serverTypeIsPolka ? 'app.handler' : 'app',
             },
-            { token: 'SERVER__COMPRESS', remove: !compression },
             { token: 'SERVER__COOKIES', remove: !cookies },
             { token: 'SERVER__EXT_API', remove: !externalRequests },
-            { token: 'SERVER__FRAMEWORK__EXPRESS', remove: !serverFrameworkIsExpress },
-            { token: 'SERVER__FRAMEWORK__NODE', remove: !serverFrameworkIsNode },
-            { token: 'SERVER__FRAMEWORK__POLKA', remove: !serverFrameworkIsPolka },
+            { token: 'SERVER__FRAMEWORK__EXPRESS', remove: !serverTypeIsExpress },
+            { token: 'SERVER__FRAMEWORK__NODE', remove: !serverTypeIsNode },
+            { token: 'SERVER__FRAMEWORK__POLKA', remove: !serverTypeIsPolka },
             {
               token: 'SERVER__FS',
               replacement: fsDeps.length
                 ? `const { ${[...new Set(fsDeps)].join(', ')} } = require('fs');`
                 : '',
             },
+            { token: 'SERVER__GZIP', remove: !gZip },
             { token: 'SERVER__HTTPS', remove: !secure },
             { token: 'SERVER__MULTI_USER', remove: !multiUser },
             { token: 'SERVER__NO_VHOST', remove: vHost },
@@ -520,8 +535,10 @@ async function scaffold() {
       }
       if (binFiles.length) copyFiles(binFiles);
     }
-    
-    if (addClient) {
+  }
+  
+  if (addClient) {
+    if (projectType === 'node') {
       if (bundlerIsWebpack) {
         packageJSON.devDependencies['clean-webpack-plugin'] = '3.0.0';
         packageJSON.devDependencies['ignore-emit-webpack-plugin'] = '2.0.6';
@@ -616,7 +633,9 @@ async function scaffold() {
         }]);
       }
     }
-    
+  }
+  
+  if (projectType === 'node') {
     if (addClient || addServer) {
       const removeEmpty = i => !!i;
       const prepFolders = [
@@ -789,21 +808,18 @@ async function scaffold() {
     packageJSON.dependencies = sortObj(packageJSON.dependencies);
     packageJSON.devDependencies = sortObj(packageJSON.devDependencies);
     packageJSON.scripts = sortObj(packageJSON.scripts);
-    writeFileSync(`${PATH__PROJECT_ROOT}/package.json`, `${JSON.stringify(packageJSON, null, 2)}\n`, 'utf8');
+    if (
+      Object.keys(packageJSON.dependencies).length
+      || Object.keys(packageJSON.devDependencies).length
+    ) {
+      writeFileSync(`${PATH__PROJECT_ROOT}/package.json`, `${JSON.stringify(packageJSON, null, 2)}\n`, 'utf8');
+    }
   }
   
   if (docker) {
     const { username } = docker;
     const addCerts = secure && !vHost;
-    const files = [
-      {
-        file: 'Dockerfile',
-        from: 'docker/.docker',
-        to: '.docker',
-        tokens: [
-          { token: 'DOCKER__APP_NAME', replacement: kebabAppName },
-        ],
-      },
+    const filesToParse = [
       {
         file: 'docker-compose.yml',
         from: 'docker',
@@ -811,30 +827,72 @@ async function scaffold() {
         tokens: [
           { token: 'DC__APP_NAME', replacement: kebabAppName },
           { token: 'DC__E2E', remove: !e2eTests },
+          { token: 'DC__LOG_NAME', replacement: kebabAppName },
           { token: 'DC__MULTI_USER', remove: !multiUser },
+          { token: 'DC__NGINX', remove: false },
+          { token: 'DC__NGINX_SERVER', remove: !serverTypeIsNginx },
+          { token: 'DC__NODE_APP', remove: !isNodeServer },
           { token: 'DC__NODE_CERTS', remove: !addCerts },
           { token: 'DC__PORTS', remove: vHost },
           { token: 'DC__USERNAME', replacement: username },
           { token: 'DC__VHOST', remove: !vHost },
-          { token: 'DC__VHOST_NON_SECURE', remove: secure },
+          { token: 'DC__VHOST_PORT', remove: !vHost || serverTypeIsNginx },
+          { token: 'DC__VHOST_NON_SECURE', remove: secure || serverTypeIsNginx },
           { token: 'DC__VHOST_SECURE', remove: !secure },
           { token: 'DC__VOLUMES', remove: !multiUser && !addCerts },
         ],
       },
     ];
+    const filesToCopy = [];
     
-    if (vHost) {
-      files.push({
-        file: '.env',
-        from: 'docker',
-        to: '',
+    if (isNodeServer) {
+      filesToParse.push({
+        file: 'Dockerfile',
+        from: 'docker/.docker',
+        to: '.docker',
         tokens: [
-          { token: 'ENV__VHOST_DOMAIN', replacement: `${kebabAppName}.local` },
+          { token: 'DOCKER__APP_NAME', replacement: kebabAppName },
         ],
       });
     }
     
-    addParsedFiles(files);
+    if (vHost || serverTypeIsNginx) {
+      filesToParse.push(
+        {
+          file: '.env',
+          from: 'docker',
+          to: '',
+          tokens: [
+            { token: 'ENV__NGINX_SERVER', remove: !serverTypeIsNginx },
+            { token: 'ENV__VHOST', remove: !vHost },
+            { token: 'ENV__VHOST_DOMAIN', replacement: `${kebabAppName}.local` },
+            { token: 'ENV__VHOST_INTERNAL_PORT', replacement: secure ? '443' : '80' },
+          ],
+        },
+        {
+          file: 'default.conf.template',
+          from: 'docker/.docker/nginx/templates',
+          to: '.docker/nginx/templates',
+          tokens: [
+            { token: 'CONF__GZIP', remove: !gZip },
+            { token: 'CONF__SECURE', remove: !secure },
+            { token: 'CONF__SERVER', remove: !serverTypeIsNginx },
+            { token: 'CONF__VHOST', remove: !vHost },
+          ],
+        }
+      );
+    }
+    
+    if (serverTypeIsNginx) {
+      filesToCopy.push({
+        files: ['404.html', 'index.html'],
+        from: 'docker/.docker/nginx/www/app',
+        to: `.docker/nginx/www/${kebabAppName}`,
+      });
+    }
+    
+    addParsedFiles(filesToParse);
+    if (filesToCopy.length) copyFiles(filesToCopy);
   }
   
   if (ghPage) {
