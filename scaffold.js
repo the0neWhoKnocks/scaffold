@@ -906,6 +906,10 @@ async function scaffold() {
   
   await Promise.all(pendingFiles);
   
+  if (!existsSync(`${PATH__PROJECT_ROOT}/.git`)) {
+    await cmd('git init', { cwd: PATH__PROJECT_ROOT });
+  }
+  
   const fileList = await getFileList({
     ignore: ['.git/', 'node_modules/'],
     path: PATH__PROJECT_ROOT,
