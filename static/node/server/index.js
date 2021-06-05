@@ -1,8 +1,8 @@
 const { STATUS_CODES } = require('http');
 //TOKEN:#SERVER__FS
-//TOKEN:^SERVER__COMPRESS
+//TOKEN:^SERVER__GZIP
 const compression = require('compression');
-//TOKEN:$SERVER__COMPRESS
+//TOKEN:$SERVER__GZIP
 //TOKEN:^SERVER__COOKIES
 const cookieParser = require('cookie-parser');
 //TOKEN:$SERVER__COOKIES
@@ -65,9 +65,9 @@ const shell = require('./shell');
 const { NODE_ENV } = process.env;
 const dev = NODE_ENV !== 'production';
 const middleware = [
-  //TOKEN:^SERVER__COMPRESS
+  //TOKEN:^SERVER__GZIP
   compression({ threshold: 0 }),
-  //TOKEN:$SERVER__COMPRESS
+  //TOKEN:$SERVER__GZIP
   //TOKEN:^SERVER__STATIC
   sirv(PATH__PUBLIC, { dev, etag: true }),
   //TOKEN:$SERVER__STATIC
