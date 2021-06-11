@@ -20,4 +20,13 @@ A CLI for scaffolding out projects
    
    source "REPO_ROOT/bin/aliases.sh"
    ```
+   Then source your shell to expose the `scaffold` function
+   ```sh
+   source ~/.zshrc
+   ```
 
+---
+
+## Run
+
+Just run the `scaffold` command, and answer the prompted questions.
