@@ -3,6 +3,7 @@ const {
   writeFileSync,
 } = require('fs');
 const { dirname, resolve } = require('path');
+const chalk = require('chalk');
 const mkdirp = require('mkdirp');
 const [
   nodeBinary,
@@ -907,7 +908,8 @@ async function scaffold() {
   await Promise.all(pendingFiles);
   
   if (!existsSync(`${PATH__PROJECT_ROOT}/.git`)) {
-    await cmd('git init', { cwd: PATH__PROJECT_ROOT });
+    console.log(`\n${chalk.green.inverse(' INIT ')} ${chalk.cyan('git')}`);
+    await cmd('git init', { cwd: PATH__PROJECT_ROOT, silent: false });
   }
   
   if (
@@ -915,7 +917,8 @@ async function scaffold() {
     && existsSync(`${PATH__PROJECT_ROOT}/package.json`)
     && !existsSync(`${PATH__PROJECT_ROOT}/node_modules`)
   ) {
-    await cmd('npm i', { cwd: PATH__PROJECT_ROOT });
+    console.log(`\n${chalk.green.inverse(' INSTALL ')} ${chalk.cyan('Node deps')}`);
+    await cmd('npm i', { cwd: PATH__PROJECT_ROOT, silent: false });
   }
   
   const fileList = await getFileList({
