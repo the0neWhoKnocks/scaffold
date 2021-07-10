@@ -2,7 +2,7 @@
 const API_PREFIX = '/api';
 //TOKEN:$CONST__HAS_API
 //TOKEN:^CONST__MULTI_USER
-const NAMESPACE__STORAGE = 'app';
+const NAMESPACE__STORAGE = '//TOKEN:#CONST__STORAGE_NAMESPACE';
 //TOKEN:$CONST__MULTI_USER
 
 // Shared by both Client and Server
