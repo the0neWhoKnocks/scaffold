@@ -277,6 +277,13 @@ async function scaffold() {
       when: ({ devOptions }) => devOptions && devOptions.logger,
     },
     {
+      message: 'Storage Namespace',
+      type: 'input',
+      name: 'storageNamespace',
+      default: ({ loggerNamespace }) => loggerNamespace || 'app',
+      when: ({ serverOptions }) => serverOptions && serverOptions.multiUser,
+    },
+    {
       message: 'Container Platform',
       type: 'list',
       name: 'containerPlatform',
@@ -329,6 +336,7 @@ async function scaffold() {
     removePreviousScaffold,
     serverFramework,
     serverOptions,
+    storageNamespace,
   } = scaffoldOpts;
   const {
     ghPage,
@@ -645,6 +653,7 @@ async function scaffold() {
             { token: 'CONST__LOGGER_NAMESPACE', replacement: loggerNamespace || '--' },
             { token: 'CONST__MULTI_USER', remove: !multiUser },
             { token: 'CONST__SERVER', remove: !addServer },
+            { token: 'CONST__STORAGE_NAMESPACE', replacement: storageNamespace || 'app' },
             { token: 'CONST__VHOST', remove: !vHost },
             { token: 'CONST__WEB_SOCKETS', remove: !webSocket },
           ],
