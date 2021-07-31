@@ -108,6 +108,9 @@ const conf = {
         // '!imgs',
         // '!imgs/**/*',
       ],
+      //TOKEN:^WP__SVELTE
+      cleanStaleWebpackAssets: false, // Cleaning after rebuilds doesn't play nice with `mini-css-extract-plugin`
+      //TOKEN:$WP__SVELTE
     }),
     new webpack.DefinePlugin({
       'process.env.FOR_CLIENT_BUNDLE': JSON.stringify(true),
