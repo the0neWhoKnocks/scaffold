@@ -683,7 +683,7 @@ async function scaffold() {
         packageJSON.devDependencies['nodemon'] = '2.0.7';
       }
       
-      if (addClient) packageJSON.devDependencies['browser-sync'] = '2.26.14';
+      if (addClient) packageJSON.devDependencies['browser-sync'] = '2.27.5';
       
       addParsedFiles([{
         executable: true,
