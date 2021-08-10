@@ -1,78 +1,85 @@
 /**
- * Takes an input name like `user[1][name]` and builds out an appropriate
- * nested Array or Object structure.
+ * Allows for assigning a `name` to inputs (like in PHP) and having those names
+ * build out a complex Object or Array.
  *
- * @param {String} name - The input's name
- * @param {String} value - The input's value
- * @param {Object} objRef - The current Object reference
+ * @param {HTMLElement} formEl - A Form element from the DOM
+ * @returns {Object}
  * @example
- * convertInputName('user[][1][name]', 'John', {});
- * // The Object passed in will now look like this
- * // { user: [ [ <empty>, { name: 'John' } ] ] }
+ * ```js
+ * // If something like the following structure is passed in...
+ * const inputs = [
+ *   { name: 'key', value: 'str' },
+ *   { name: 'changes[test][]', value: 'fu' },
+ *   { name: 'changes[test][1][blah]', value: 'bar'},
+ *   { name: 'changes[test][1][zip]', value: 'zip' },
+ *   { name: 'changes[test][]', value: 'bazz' },
+ *   { name: 'user[][1][name]', value: 'User' },
+ * ];
+ * // ... you'll end up with this:
+ * // {
+ * //   "key": "str",
+ * //   "changes": {
+ * //     "test": [
+ * //       "fu",
+ * //       { "blah": "bar", "zip": "zip" },
+ * //       "bazz",
+ * //     ],
+ * //   },
+ * //   "user": [
+ * //     [
+ * //       <empty>,
+ * //       { "name": "User" },
+ * //     ],
+ * //   ],
+ * // }
+ * ```
  */
-function convertInputName(name, value, objRef) {
-  const regEx = /\[(.*?)\]/g;
-  const matches = name.match(regEx);
-
-  if (matches) {
-    const firstKey = name.match(/([^\[]+)/)[0]; // eslint-disable-line no-useless-escape
-    let currRef = objRef;
-    
-    const getBracketValue = (str) => {
-      let ndx;
-      let value;
-      
-      if (str) {
-        value = str.match(regEx.source)[1];
-        ndx = +value;
-      }
-      
-      return { ndx, value };
-    };
-    
-    matches.forEach((m, objNdx) => {
-      const { value: bracketContents, ndx } = getBracketValue(m);
-      const isLast = matches.length - 1 === objNdx;
-      const { ndx: nextNdx } = getBracketValue(matches[objNdx + 1]);
-      const nextType = (isNaN(nextNdx)) ? {} : [];
-      let newRef;
-      
-      if (objNdx === 0 && !currRef[firstKey]) {
-        const currType = (isNaN(ndx) && bracketContents !== '') ? {} : [];
-        currRef[firstKey] = currType;
-      }
-      
-      if (objNdx === 0) currRef = currRef[firstKey];
-
-      if (isNaN(ndx)) {
-        if (isLast) currRef[bracketContents] = value;
-        else {
-          currRef[bracketContents] = nextType;
-          currRef = currRef[bracketContents];
-        }
-      }
-      else {
-        if (bracketContents === '') {
-          newRef = nextType;
-          currRef.push(newRef);
-        }
-        else {
-          newRef = nextType;
-          currRef[ndx] = newRef;
-        }
-        
-        currRef = newRef;
-      }
-    });
-  }
-}
-
 module.exports = function serializeForm(formEl) {
   const formData = Object.fromEntries(new FormData(formEl));
+  const inputData = Object.keys(formData).map(name => ({ name, value: formData[name] }));
   const serialized = {};
-  Object.keys(formData).forEach((prop) => {
-    if (prop.includes('[')) convertInputName(prop, formData[prop], serialized);
-    else serialized[prop] = formData[prop];
+  
+  inputData.forEach(({ name, value }) => {
+    const rootKey = name.match(/[^[]+/)[0];
+    const keys = (name.match(/(\[[^\]]+\]|\[\])/g) || []).map((rawKey) => {
+      const key = rawKey.replace(/(\[|\])/g, '');
+      const isNum = !isNaN(+key);
+      return { isNum, key, rawKey };
+    });
+  
+    if (keys.length) {
+      if (!serialized[rootKey]) serialized[rootKey] = (keys[0].isNum) ? [] : {};
+      let ref = serialized[rootKey];
+  
+      keys.forEach(({ isNum, key }, ndx) => {
+        const nextObj = keys[ndx + 1];
+  
+        if (isNum) {
+          if (nextObj) {
+            if (nextObj.isNum) {
+              ref[+key] = ref[+key] || [];
+              ref = ref[+key];
+            }
+            else {
+              ref[+key] = ref[+key] || {};
+              ref = ref[+key];
+            }
+          }
+          else {
+            if (key !== '') ref[+key] = value;
+            else ref.push(value);
+          }
+        }
+        else {
+          if (!nextObj) ref[key] = value;
+          else if (!ref[key]) ref[key] = (nextObj && !nextObj.isNum) ? {} : [];
+          ref = ref[key];
+        }
+      });
+    }
+    else {
+      serialized[rootKey] = value;
+    }
   });
   
   return serialized;
