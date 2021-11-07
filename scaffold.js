@@ -712,8 +712,7 @@ async function scaffold() {
 
       switch(logger) {
         case 'ulog': {
-          // locking at .14 because of https://github.com/Download/ulog/issues/50#issuecomment-806713200
-          moduleVersion = '2.0.0-beta.18';
+          moduleVersion = '2.0.0-beta.19';
           break;
         }
       }
