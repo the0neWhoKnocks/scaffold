@@ -1,5 +1,5 @@
 import { DOM__SVELTE_MOUNT_POINT } from '../constants';
-import App from './app.svelte';
+import App from './components/App.svelte';
 //TOKEN:^CLIENT__MULTI_USER
 import ConfigDialog from './components/ConfigDialog.svelte';
 //TOKEN:$CLIENT__MULTI_USER
