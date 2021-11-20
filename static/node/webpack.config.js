@@ -35,6 +35,27 @@ const mainFields = [
 const mode = process.env.NODE_ENV || 'development';
 const dev = mode === 'development';
 
+const outputFilename = ({ chunk: { name }, contentHashType }) => {
+  let _name;
+  
+  switch (contentHashType) {
+    //TOKEN:^WP__SVELTE
+    case 'css/mini-extract': {
+      // dump CSS files in a 'css' folder
+      const newName = name.replace(/^js\//, 'css/');
+      _name = `${newName}_[chunkhash:${HASH_LENGTH}].css`;
+      break;
+    }
+    //TOKEN:$WP__SVELTE
+    case 'javascript': {
+      _name = `[name]_[chunkhash:${HASH_LENGTH}].js`;
+      break;
+    }
+  }
+  
+  return _name;
+};
+
 const conf = {
   devtool: dev && 'source-map',
   entry: {
@@ -92,7 +113,7 @@ const conf = {
     // Point sourcemap entries to original disk location (format as URL on Windows)
     devtoolModuleFilenameTemplate: info => resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
     // assigns the hashed name to the file
-    filename: `[name]_[chunkhash:${HASH_LENGTH}].js`,
+    filename: outputFilename,
     path: resolve(__dirname, './dist/public'),
     publicPath: '/',
   },
@@ -117,7 +138,8 @@ const conf = {
     }),
     //TOKEN:^WP__SVELTE
     new MiniCssExtractPlugin({
-      filename: `[name]_[chunkhash:${HASH_LENGTH}].css`,
+      chunkFilename: outputFilename,
+      filename: outputFilename,
     }),
     //TOKEN:$WP__SVELTE
     /**
