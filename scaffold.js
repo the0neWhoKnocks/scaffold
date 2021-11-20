@@ -532,18 +532,18 @@ async function scaffold() {
     
     if (addClient) {
       if (bundlerIsWebpack) {
-        packageJSON.devDependencies['clean-webpack-plugin'] = '3.0.0';
+        packageJSON.devDependencies['clean-webpack-plugin'] = '4.0.0';
         packageJSON.devDependencies['ignore-emit-webpack-plugin'] = '2.0.6';
-        packageJSON.devDependencies['terser-webpack-plugin'] = '5.1.1';
-        packageJSON.devDependencies['webpack'] = '5.31.0';
-        packageJSON.devDependencies['webpack-cli'] = '4.6.0';
-        packageJSON.devDependencies['webpack-manifest-plugin'] = '3.1.1';
+        packageJSON.devDependencies['terser-webpack-plugin'] = '5.2.5';
+        packageJSON.devDependencies['webpack'] = '5.63.0';
+        packageJSON.devDependencies['webpack-cli'] = '4.9.1';
+        packageJSON.devDependencies['webpack-manifest-plugin'] = '4.0.2';
         
         if (clientFrameworkIsSvelte) {
-          packageJSON.devDependencies['css-loader'] = '5.2.0';
-          packageJSON.devDependencies['css-minimizer-webpack-plugin'] = '1.3.0';
-          packageJSON.devDependencies['mini-css-extract-plugin'] = '1.4.1';
-          packageJSON.devDependencies['svelte-loader'] = '3.1.0';
+          packageJSON.devDependencies['css-loader'] = '6.5.1';
+          packageJSON.devDependencies['css-minimizer-webpack-plugin'] = '3.1.3';
+          packageJSON.devDependencies['mini-css-extract-plugin'] = '2.4.4';
+          packageJSON.devDependencies['svelte-loader'] = '3.1.2';
         }
         
         addParsedFiles([{
@@ -558,7 +558,7 @@ async function scaffold() {
       }
       
       if (clientFrameworkIsSvelte) {
-        packageJSON.devDependencies['svelte'] = '3.37.0';
+        packageJSON.devDependencies['svelte'] = '3.44.1';
         
         addParsedFiles([
           {
@@ -679,11 +679,11 @@ async function scaffold() {
     
     if (hasWatcher) {
       if (addServer) {
-        packageJSON.devDependencies['chokidar'] = '3.5.1';
-        packageJSON.devDependencies['nodemon'] = '2.0.7';
+        packageJSON.devDependencies['chokidar'] = '3.5.2';
+        packageJSON.devDependencies['nodemon'] = '2.0.15';
       }
       
-      if (addClient) packageJSON.devDependencies['browser-sync'] = '2.27.5';
+      if (addClient) packageJSON.devDependencies['browser-sync'] = '2.27.7';
       
       addParsedFiles([{
         executable: true,
@@ -722,13 +722,14 @@ async function scaffold() {
     }
     
     if (eslint) {
-      packageJSON.devDependencies['eslint'] = '7.23.0';
+      packageJSON.devDependencies['eslint'] = '8.2.0';
+      packageJSON.devDependencies['eslint-plugin-node'] = '11.1.0';
       
       const lintExts = ['js'];
       const sourceFolders = ['bin', 'src'];
       
       if (clientFrameworkIsSvelte) {
-        packageJSON.devDependencies['eslint-plugin-svelte3'] = '3.1.2';
+        packageJSON.devDependencies['eslint-plugin-svelte3'] = '3.2.1';
         lintExts.push('svelte');
       }
       
