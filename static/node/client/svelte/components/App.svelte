@@ -2,7 +2,7 @@
   //TOKEN:^APP__SERVER_INTERACTIONS
   import { afterUpdate, onMount } from 'svelte';
   //TOKEN:$APP__SERVER_INTERACTIONS
-  import logger from '../utils/logger';
+  import logger from '../../utils/logger';
   //TOKEN:^APP__HAS_CONSTANTS
   import {
     //TOKEN:^APP__MULTI_USER
@@ -18,25 +18,25 @@
     WS__CLOSE_CODE__USER_REMOVED,
     WS__MSG__EXAMPLE,
     //TOKEN:$APP__WEB_SOCKET
-  } from '../constants';
+  } from '../../constants';
   //TOKEN:$APP__HAS_CONSTANTS
+  //TOKEN:^APP__WEB_SOCKET
+  import { connectToSocket } from '../socket';
+  //TOKEN:$APP__WEB_SOCKET
   //TOKEN:^APP__MULTI_USER
+  import {
+    getStorageType,
+    setStorage,
+  } from '../utils/storage';
   import Icon, {
     ICON__ANGLE_DOWN,
     ICON__ANGLE_UP,
     ICON__USER,
-  } from './components/Icon.svelte';
-  import LoginDialog from './components/LoginDialog.svelte';
-  import UserDataDialog from './components/UserDataDialog.svelte';
-  import UserProfileDialog from './components/UserProfileDialog.svelte';
-  import {
-    getStorageType,
-    setStorage,
-  } from './utils/storage';
+  } from './Icon.svelte';
+  import LoginDialog from './LoginDialog.svelte';
+  import UserDataDialog from './UserDataDialog.svelte';
+  import UserProfileDialog from './UserProfileDialog.svelte';
   //TOKEN:$APP__MULTI_USER
-  //TOKEN:^APP__WEB_SOCKET
-  import { connectToSocket } from './socket';
-  //TOKEN:$APP__WEB_SOCKET
   
   const log = logger('app');
   //TOKEN:^APP__SERVER_INTERACTIONS
