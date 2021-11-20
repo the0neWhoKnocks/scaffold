@@ -4,7 +4,10 @@ module.exports = {
     es6: true,
     node: true,
   },
-  extends: 'eslint:recommended',
+  extends: [
+    'eslint:recommended',
+    'plugin:node/recommended',
+  ],
   overrides: [
     //TOKEN:^LINT__SVELTE
     {
@@ -14,7 +17,7 @@ module.exports = {
     //TOKEN:$LINT__SVELTE
   ],
   parserOptions: {
-    ecmaVersion: 2019,
+    ecmaVersion: 2020,
     sourceType: 'module',
   },
   plugins: [
@@ -31,7 +34,26 @@ module.exports = {
       objects: 'always-multiline',
     }],
     'keyword-spacing': ['error', { after: true, before: true }],
+    'no-process-exit': 'off',
     'no-unused-vars': ['error', { args: 'after-used' }],
+    'node/no-unpublished-import': ['error', {
+      //TOKEN:^LINT__SVELTE
+      allowModules: ['svelte'],
+      //TOKEN:$LINT__SVELTE
+    }],
+    'node/no-unpublished-require': 'off',
+    'node/no-unsupported-features/es-syntax': ['error', {
+      version: '>=14.16.1',
+      ignores: [
+        'dynamicImport', // WP imports
+        'modules', // allow for import/export statements
+      ],
+    }],
+    'node/no-unsupported-features/node-builtins': ['error', {
+      version: '>=14.16.1',
+      ignores: ['inspector'],
+    }],
+    'node/shebang': 'off',
     'space-before-blocks': ['error', 'always'],
   },
 };
