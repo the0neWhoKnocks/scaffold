@@ -113,6 +113,7 @@ const conf = {
     // Point sourcemap entries to original disk location (format as URL on Windows)
     devtoolModuleFilenameTemplate: info => resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
     // assigns the hashed name to the file
+    chunkFilename: outputFilename,
     filename: outputFilename,
     path: resolve(__dirname, './dist/public'),
     publicPath: '/',
