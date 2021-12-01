@@ -562,9 +562,9 @@ async function scaffold() {
         
         addParsedFiles([
           {
-            file: 'app.svelte',
-            from: 'node/client/svelte',
-            to: 'src/client',
+            file: 'App.svelte',
+            from: 'node/client/svelte/components',
+            to: 'src/client/components',
             tokens: [
               { token: 'APP__API', remove: !apiEnabled },
               { token: 'APP__EXT_API', remove: !externalRequests },
