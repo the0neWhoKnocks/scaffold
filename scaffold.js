@@ -568,7 +568,7 @@ async function scaffold() {
             tokens: [
               { token: 'APP__API', remove: !apiEnabled },
               { token: 'APP__EXT_API', remove: !externalRequests },
-              { token: 'APP__HAS_CONSTANTS', remove: !multiUser && !webSocket },
+              { token: 'APP__HAS_CONSTANTS', remove: !apiEnabled && !externalRequests && !multiUser && !webSocket },
               { token: 'APP__MULTI_USER', remove: !multiUser },
               { token: 'APP__SERVER_INTERACTIONS', remove: !hasServerInteractions },
               { token: 'APP__WEB_SOCKET', remove: !webSocket },
