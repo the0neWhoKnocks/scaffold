@@ -194,7 +194,13 @@ If the above doesn't work, follow the manual instructions below.
    - Expand the Trust section
    - Choose `Always Trust` for the `When using this certificate` dropdown. Close the pop-up.
 
-**NOTE**: If the cert doesn't seem to be working, try in Incognito first. If it's working there, then just restart Chrome to get it to work in non-Incognito.
+**Linux**
+```sh
+sudo cp ./certs.localhost/localhost-CA.crt /etc/ca-certificates/trust-source/anchors/
+sudo trust extract-compat
+```
+
+**NOTE**: If the cert doesn't seem to be working, you may have to restart your Browser. You can try in Incognito first, but generally a Browser restart works. In some rare cases, a system reboot may be required (I've had to do this on OSX).
 
 ### Install the Certificate Authority in Firefox
 
