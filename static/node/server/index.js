@@ -136,7 +136,9 @@ app.use = function use(...handlers) {
 const app = polka();
 //TOKEN:$SERVER__FRAMEWORK__POLKA
 //TOKEN:^SERVER__MULTI_USER
-const jsonParser = bodyParser.json();
+const jsonParser = bodyParser.json({
+  limit: '100mb', // default is '100kb'
+});
 
 if (!existsSync(PATH__DATA)) mkdirp.sync(PATH__DATA);
 //TOKEN:$SERVER__MULTI_USER
