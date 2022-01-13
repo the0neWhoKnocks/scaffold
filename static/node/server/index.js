@@ -97,8 +97,9 @@ function app(req, res) {
   
   handlers.push(app.notFoundHandler);
   
-  const next = () => {
-    if (handlers[funcNdx]) {
+  const next = (err) => {
+    if (err) res.error(err);
+    else if (handlers[funcNdx]) {
       funcNdx++;
       handlers[funcNdx-1](req, res, next);
     }
@@ -143,7 +144,21 @@ if (!existsSync(PATH__DATA)) mkdirp.sync(PATH__DATA);
 app
   .use((req, res, next) => {
     if (!res.error) {
-      res.error = (statusCode, error) => {
+      res.error = (...err) => {
+        let error;
+        let statusCode;
+        
+        if (typeof err[0] === 'number') {
+          const [c, e] = err;
+          error = e;
+          statusCode = c;
+        }
+        else if (err[0] instanceof Error) {
+          const { message: e, statusCode: c } = err[0];
+          error = e;
+          statusCode = c;
+        }
+        
         log.error(`[${statusCode}] | ${error}`);
         // NOTE - utilizing `message` so that if an Error is thrown on the Client
         // within a `then`, there's no extra logic to get error data within the
