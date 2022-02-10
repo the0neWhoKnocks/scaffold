@@ -1,10 +1,12 @@
 #!/bin/bash
 
+DOCKER_HOST="host.docker.internal"
 SCRIPT_DIR="$(cd "$(dirname "$0")" > /dev/null 2>&1; pwd -P)"
 BUILD=true
 WATCH_MODE=false
-isWSL=false
+isLinux=false
 isOSX=false
+isWSL=false
 
 # Parse arguments
 while [ $# -gt 0 ]; do
@@ -21,7 +23,12 @@ done
 
 # Linux env
 if [ -f "/proc/version" ]; then
-  grep -qE "(Microsoft|WSL)" /proc/version && isWSL=true || isWSL=false
+  if grep -qE "(Microsoft|WSL)" /proc/version; then
+    isWSL=true
+  else
+    isLinux=true
+    DOCKER_HOST="172.17.0.1"
+  fi
 else
   isOSX=$(uname | grep -qi "darwin" &> /dev/null)
 fi
@@ -50,12 +57,13 @@ fi
 E2E_SERVICE="e2e"
 cypressCmd=""
 xlaunchPath="${SCRIPT_DIR}/XServer.xlaunch"
+extraArgs="-e CYPRESS_baseUrl=http://${DOCKER_HOST}:3000"
 
 # When watching for test changes, `open` (instead of `run`) Cypress so that the
 # Dev can use the GUI for an easy test writing experience.
 if $WATCH_MODE; then
   if $isWSL; then
-    display="host.docker.internal:0"
+    display="${DOCKER_HOST}:0"
     xlaunchBinary="/c/Program Files/VcXsrv/xlaunch.exe"
     xlaunchPath=$(wslpath -w "${SCRIPT_DIR}/XServer.xlaunch")
     xlaunchKillCmd="/c/Windows/System32/taskkill.exe /IM \"vcxsrv.exe\" /F"
@@ -72,10 +80,15 @@ if $WATCH_MODE; then
     xquartzKillCmd="osascript -e 'quit app \"xquartz\"'"
     IP=$(ifconfig en0 | grep inet | awk '$1=="inet" {print $2}')
     display="$IP:0"
+  elif $isLinux; then
+    IP=$(ip addr show | grep docker | grep -Eo 'inet ([^/]+)' | sed 's|inet ||')
+    DBUS_PATH=$(echo "${DBUS_SESSION_BUS_ADDRESS}" | sed 's|unix:path=||')
+    display="${DISPLAY}"
+    extraArgs="${extraArgs} --user $(id -u):$(id -g) -e DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS}" -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v /run/dbus/system_bus_socket:/run/dbus/system_bus_socket -v ${DBUS_PATH}:${DBUS_PATH}"
   fi
 
   if [[ "$display" != "" ]]; then
-    cypressCmd="docker-compose run -e DISPLAY=$display --rm --entrypoint cypress ${E2E_SERVICE} open --project ."
+    cypressCmd="docker-compose run -e DISPLAY=$display ${extraArgs} --rm --entrypoint cypress ${E2E_SERVICE} open --project ."
     
     if [[ "$xlaunchBinary" != "" ]] && [ -f "$xlaunchBinary" ]; then
       echo;
@@ -85,6 +98,11 @@ if $WATCH_MODE; then
       echo;
       echo "[START] XServer"
       xhost + "$IP"
+    elif $isLinux; then
+      echo;
+      echo "[SET] xhost"
+      # 'cypresstests' is the 'hostname' defined in docker-compose.yml
+      xhost + local:cypresstests
     else
       echo "[ERROR] The XServer binary could not be located. Follow the instructions in the README to get it installed."
       echo;
@@ -112,9 +130,10 @@ echo;
 echo "[START] Tests"
 echo;
 if [[ "$cypressCmd" != "" ]]; then
+  echo "[RUN] ${cypressCmd}"
   ${cypressCmd}
 else
-  docker-compose up --abort-on-container-exit --remove-orphans "${E2E_SERVICE}"
+  docker-compose up "${extraArgs}" --abort-on-container-exit --remove-orphans "${E2E_SERVICE}"
 fi
 exitCode=$(echo $?)
 
