@@ -59,13 +59,14 @@ services:
     container_name: e2e-#TOKEN:#DC__APP_NAME
     depends_on:
       - #TOKEN:#DC__APP_NAME
-    environment:
-      CYPRESS_baseUrl: http://host.docker.internal:3000
-      # ELECTRON_ENABLE_LOGGING: 1 # view console logs from Browser (headless)
-      # DEBUG: cypress:server:browsers:electron # view Electron internal logging
+    # environment:
+    #   # ELECTRON_ENABLE_LOGGING: 1 # view console logs from Browser (headless)
+    #   # DEBUG: cypress:server:browsers:electron # view Electron internal logging
+    hostname: cypresstests
     ipc: host # https://github.com/cypress-io/cypress/issues/350#issuecomment-267704772
     ports:
       - "3001:3000"
+    privileged: true
     working_dir: /e2e
     volumes:
       - "${PWD}/e2e:/e2e"
