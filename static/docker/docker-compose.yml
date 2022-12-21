@@ -68,6 +68,9 @@ services:
       # browserSync
       - "3001:3001"
       - "3002:3002"
+      #TOKEN:^DC__WEB_SOCKET
+      - "3003:3003"
+      #TOKEN:$DC__WEB_SOCKET
       #TOKEN:$DC__BSYNC
       # inspector
       - "9229:9229"

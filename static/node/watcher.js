@@ -210,15 +210,25 @@ fileGate
       port: SERVER__PORT + 1,
       proxy: {
         target: `${protocol}://localhost:${SERVER__PORT}`,
+        //TOKEN:^WATCHER__WEB_SOCKET
         ws: true,
+        //TOKEN:$WATCHER__WEB_SOCKET
       },
-      reloadDebounce: 300, // Wait for a specified window of event-silence before sending any reload events.
+      reloadDebounce: 1000, // Wait for a specified window of event-silence before sending any reload events.
+      serveStatic: ['dist/public'], // now required when using `proxy` otherwise automatic-reloads don't work.
       snippetOptions: {
+        async: true,
         rule: {
           match: /<\/body>/i,
           fn: (snippet) => snippet,
         },
       },
+      //TOKEN:^WATCHER__WEB_SOCKET
+      socket: {
+        domain: `localhost:${SERVER__PORT + 3}`,
+        port: SERVER__PORT + 3,
+      },
+      //TOKEN:$WATCHER__WEB_SOCKET
       ui: {
         port: SERVER__PORT + 2,
       },
