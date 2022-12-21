@@ -33,6 +33,7 @@ RUN ["node", "-e", " \
 # Set up the environment
 FROM node-w-extras AS #TOKEN:#DOCKER__APP_NAME
 ENV APP=/home/node/app
+ENV IN_CONTAINER=true
 ENV NODE_ENV=production
 RUN mkdir -p $APP/node_modules && chown -R node:node /home/node/*
 
