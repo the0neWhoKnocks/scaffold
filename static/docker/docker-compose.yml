@@ -35,7 +35,7 @@ services:
       # Map Local port to the Container's exposed port
       - "3000:3000"
     #TOKEN:$DC__PORTS
-    #TOKEN:^DC__VOLUMES
+    user: "${CURR_UID}:${CURR_GID}"
     volumes:
       # Map shell files over, so they're maintained between sessions
       - "${PWD}/.docker/.vimrc:/home/node/.vimrc"
@@ -52,7 +52,24 @@ services:
       # - "${PWD}/dist/server:/home/node/app/server"
       # - "${PWD}/dist/utils:/home/node/app/utils"
       # - "${PWD}/dist/constants.js:/home/node/app/constants.js"
-    #TOKEN:$DC__VOLUMES
+  
+  #TOKEN:#DC__DEV_APP_NAME:
+    extends: #TOKEN:#DC__APP_NAME # allows for just changing key pieces of data for development
+    command: tail -F /dev/null # starts the container, and keeps it running
+    container_name: #TOKEN:#DC__DEV_APP_NAME
+    environment:
+      NODE_ENV: development
+    ports:
+      #TOKEN:^DC__BSYNC
+      # browserSync
+      - "3001:3001"
+      - "3002:3002"
+      #TOKEN:$DC__BSYNC
+      # inspector
+      - "9229:9229"
+    volumes:
+      # Map the current directory over for development
+      - "${PWD}:/home/node/app"
   #TOKEN:^DC__E2E
   
   e2e:
