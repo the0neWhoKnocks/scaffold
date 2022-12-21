@@ -1,4 +1,8 @@
-version: "2" # using 2 because 3 doesn't support extending
+##
+# https://github.com/moby/moby/issues/31101#issuecomment-922378041
+# Clarifies why there's no `version` prop, and why `extends` works regardless of
+# what the docs.docker.com documentation says.
+##
 
 services:
   #TOKEN:#DC__APP_NAME:
