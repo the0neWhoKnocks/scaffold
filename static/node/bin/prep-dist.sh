@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Create required directories
 mkdir -p #TOKEN:#PREP__FOLDERS
