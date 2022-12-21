@@ -37,6 +37,10 @@ services:
     #TOKEN:$DC__PORTS
     #TOKEN:^DC__VOLUMES
     volumes:
+      # Map shell files over, so they're maintained between sessions
+      - "${PWD}/.docker/.vimrc:/home/node/.vimrc"
+      - "${PWD}/.docker/.zshrc:/home/node/.zshrc"
+      - "${PWD}/.ignore:/home/node/dev" # allows for .zsh_history to be written
       #TOKEN:^DC__NODE_CERTS
       - "${PWD}/certs.localhost:/home/node/app/server/certs"
       #TOKEN:$DC__NODE_CERTS
