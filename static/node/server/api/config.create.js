@@ -1,5 +1,5 @@
-const { writeFile } = require('fs');
-const { randomBytes } = require('crypto');
+const { writeFile } = require('node:fs');
+const { randomBytes } = require('node:crypto');
 const {
   CRYPT__LENGTH__BYTES,
   CRYPT__ENCODING,

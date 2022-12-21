@@ -1,7 +1,7 @@
 const {
   createDecipheriv,
   scrypt,
-} = require('crypto');
+} = require('node:crypto');
 const {
   CRYPT__ALGORITHM,
   CRYPT__LENGTH__KEY,

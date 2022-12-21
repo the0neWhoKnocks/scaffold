@@ -440,7 +440,7 @@ async function scaffold() {
             {
               token: 'SERVER__FS',
               replacement: fsDeps.length
-                ? `const { ${[...new Set(fsDeps)].join(', ')} } = require('fs');`
+                ? `const { ${[...new Set(fsDeps)].join(', ')} } = require('node:fs');`
                 : '',
             },
             { token: 'SERVER__HTTPS', remove: !secure },

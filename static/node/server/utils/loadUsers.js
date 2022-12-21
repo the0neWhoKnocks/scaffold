@@ -1,4 +1,4 @@
-const { existsSync, readFile } = require('fs');
+const { existsSync, readFile } = require('node:fs');
 const { PATH__USERS } = require('../../constants');
 
 const loadUsers = () => new Promise((resolve, reject) => {

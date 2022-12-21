@@ -1,4 +1,4 @@
-const { writeFile } = require('fs');
+const { writeFile } = require('node:fs');
 const { PATH__USERS } = require('../../constants');
 const log = require('../../utils/logger')('api.user.create');
 const encrypt = require('../utils/encrypt');

@@ -1,4 +1,4 @@
-const { STATUS_CODES } = require('http');
+const { STATUS_CODES } = require('node:http');
 //TOKEN:#SERVER__FS
 //TOKEN:^SERVER__COMPRESS
 const compression = require('compression');
@@ -201,8 +201,8 @@ app
   //TOKEN:$SERVER__MULTI_USER
   //TOKEN:^SERVER__API
   .get(ROUTE__API__HELLO, (req, res) => {
-    const { parse: parseQuery } = require('querystring');
-    const { parse: parseURL } = require('url');
+    const { parse: parseQuery } = require('node:querystring');
+    const { parse: parseURL } = require('node:url');
     const params = { ...parseQuery(parseURL(req.url).query) };
     log.info(`[API] Recieved params: ${JSON.stringify(params)}`);
     res.json({ hello: 'dave' });
@@ -237,10 +237,10 @@ let serverOpts = {};
 if (process.env.NODE_EXTRA_CA_CERTS) {
   serverOpts.cert = readFileSync(process.env.NODE_EXTRA_CA_CERTS, 'utf8');
   serverOpts.key = readFileSync(process.env.NODE_EXTRA_CA_CERTS.replace('.crt', '.key'), 'utf8');
-  httpModule = require('https');
+  httpModule = require('node:https');
   protocol = 'https';
 }
-else httpModule = require('http');
+else httpModule = require('node:http');
 
 const server = httpModule.createServer(serverOpts, /* TOKEN:#SERVER__APP_HANDLER */);
 
