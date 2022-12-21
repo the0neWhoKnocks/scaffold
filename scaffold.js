@@ -807,12 +807,27 @@ async function scaffold() {
     const addCerts = secure && !vHost;
     const files = [
       {
+        file: '.vimrc',
+        from: 'docker/.docker',
+        to: '.docker',
+      },
+      {
+        file: '.zshrc',
+        from: 'docker/.docker',
+        to: '.docker',
+      },
+      {
         file: 'Dockerfile',
         from: 'docker/.docker',
         to: '.docker',
         tokens: [
           { token: 'DOCKER__APP_NAME', replacement: kebabAppName },
         ],
+      },
+      {
+        file: 'zsh-autosuggestions.zsh',
+        from: 'docker/.docker',
+        to: '.docker',
       },
       {
         file: 'docker-compose.yml',
@@ -940,6 +955,13 @@ async function scaffold() {
     '\n─┘        └────────',
     `\n${fileList}`,
   ].join(''));
+  
+  if (docker) {
+    await cmd(
+      'mkdir ./.ignore && touch ./.ignore/.zsh_history && chmod 777 ./.ignore/.zsh_history',
+      { cwd: PATH__PROJECT_ROOT, silent: false }
+    );
+  }
 }
 
 scaffold();

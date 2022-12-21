@@ -1,5 +1,6 @@
 # Folders
 .git
+.ignore
 #TOKEN:^IGNORE__HTTPS
 certs.*
 #TOKEN:$IGNORE__HTTPS

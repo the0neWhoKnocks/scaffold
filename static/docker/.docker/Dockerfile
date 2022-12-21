@@ -32,6 +32,14 @@ ENV NODE_ENV=production
 ENV APP=/home/node/app
 RUN mkdir -p $APP/node_modules && chown -R node:node /home/node/*
 
+# Set up a usable terminal experience for development
+COPY ./.docker/.vimrc /home/node/.vimrc
+COPY ./.docker/.zshrc /home/node/.zshrc
+COPY ./.docker/zsh-autosuggestions.zsh /home/node/zsh-autosuggestions.zsh
+RUN apk add --no-cache --update vim zsh \
+  && touch /home/node/.zsh_history \
+  && chmod +x /home/node/.vimrc /home/node/.zsh_history /home/node/.zshrc /home/node/zsh-autosuggestions.zsh
+
 WORKDIR $APP
 
 # Copy over package related files from the preperation step to install
