@@ -56,7 +56,10 @@ RUN npm i --only=production --quiet --unsafe-perm \
   && rm ./package*.json
 
 # Copy locally compiled code to the image
-COPY --chown=node:node ./dist ./
+COPY --chown=node:node ./dist/constants.js ./constants.js
+COPY --chown=node:node ./dist/utils ./utils
+COPY --chown=node:node ./dist/server ./server
+COPY --chown=node:node ./dist/public ./public
 
 # Expose the default port from the Server, on the container
 EXPOSE 3000
