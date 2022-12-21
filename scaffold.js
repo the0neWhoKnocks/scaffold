@@ -687,7 +687,7 @@ async function scaffold() {
         packageJSON.devDependencies['nodemon'] = '2.0.15';
       }
       
-      if (addClient) packageJSON.devDependencies['browser-sync'] = '2.27.7';
+      if (addClient) packageJSON.devDependencies['browser-sync'] = '2.27.11';
       
       addParsedFiles([{
         executable: true,
@@ -698,6 +698,7 @@ async function scaffold() {
           { token: 'WATCHER__CLIENT', remove: !addClient },
           { token: 'WATCHER__LOGGER', remove: !logger },
           { token: 'WATCHER__SERVER', remove: !addServer },
+          { token: 'WATCHER__WEB_SOCKET', remove: !webSocket },
         ],
       }]);
     }
@@ -847,6 +848,7 @@ async function scaffold() {
         to: '',
         tokens: [
           { token: 'DC__APP_NAME', replacement: kebabAppName },
+          { token: 'DC__BSYNC', remove: !(hasWatcher && addClient) },
           { token: 'DC__DEV_APP_NAME', replacement: kebabAppNameDev },
           { token: 'DC__E2E', remove: !e2eTests },
           { token: 'DC__MULTI_USER', remove: !multiUser },
@@ -856,6 +858,7 @@ async function scaffold() {
           { token: 'DC__VHOST', remove: !vHost },
           { token: 'DC__VHOST_NON_SECURE', remove: secure },
           { token: 'DC__VHOST_SECURE', remove: !secure },
+          { token: 'DC__WEB_SOCKET', remove: !webSocket },
         ],
       },
     ];
