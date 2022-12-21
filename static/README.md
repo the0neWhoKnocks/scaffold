@@ -48,6 +48,9 @@ To automate that process I `source` [this script](https://github.com/the0neWhoKn
 
 Install dependencies
 ```sh
+//TOKEN:^README__DOCKER
+# This should be run from within the Docker container to ensure Dev dependencies are installed.
+//TOKEN:$README__DOCKER
 npm i
 ```
 
