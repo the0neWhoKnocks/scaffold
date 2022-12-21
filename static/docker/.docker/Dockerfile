@@ -12,7 +12,9 @@ FROM node-w-extras as #TOKEN:#DOCKER__APP_NAME--packagejson
 COPY --chown=node:node ./package*.json ./
 RUN ["node", "-e", " \
   const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8')); \
-  const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf-8')); \
+  const lock = (fs.existsSync('package-lock.json')) \
+    ? JSON.parse(fs.readFileSync('package-lock.json', 'utf-8')) \
+    : false; \
   \
   let preInstallScript; \
   if (pkg.scripts && pkg.scripts.preinstall) preInstallScript = pkg.scripts.preinstall; \
@@ -20,12 +22,12 @@ RUN ["node", "-e", " \
   delete pkg.devDependencies; \
   delete pkg.scripts; \
   delete pkg.version; \
-  delete lock.version; \
+  if (lock) delete lock.version; \
   \
   if (preInstallScript) pkg.scripts = { preinstall: preInstallScript }; \
   \
   fs.writeFileSync('package.json', JSON.stringify(pkg)); \
-  fs.writeFileSync('package-lock.json', JSON.stringify(lock)); \
+  if (lock) fs.writeFileSync('package-lock.json', JSON.stringify(lock)); \
 "]
 
 # Set up the environment
