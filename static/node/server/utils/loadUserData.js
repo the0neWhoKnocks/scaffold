@@ -1,4 +1,4 @@
-const { existsSync, readFile } = require('fs');
+const { existsSync, readFile } = require('node:fs');
 
 module.exports = function loadUserData(filePath) {
   return new Promise((resolve) => {

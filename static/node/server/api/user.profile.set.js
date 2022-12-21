@@ -1,4 +1,4 @@
-const { existsSync, rename, writeFile } = require('fs');
+const { existsSync, rename, writeFile } = require('node:fs');
 const { PATH__USERS } = require('../../constants');
 const log = require('../../utils/logger')('api.user.profile.set');
 const decrypt = require('../utils/decrypt');
