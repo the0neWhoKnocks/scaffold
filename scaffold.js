@@ -363,6 +363,7 @@ async function scaffold() {
   } = (middleware || {});
   
   const kebabAppName = kebabCase(appTitle);
+  const kebabAppNameDev = `${kebabAppName}-dev`;
   const clientFrameworkIsSvelte = clientFramework === 'svelte';
   const bundlerIsWebpack = bundler === 'webpack';
   const serverFrameworkIsExpress = serverFramework === 'express';
@@ -830,11 +831,20 @@ async function scaffold() {
         to: '.docker',
       },
       {
+        file: 'repo-funcs.sh',
+        from: 'bin',
+        to: 'bin',
+        tokens: [
+          { token: 'SHELL__APP_NAME_DEV', replacement: kebabAppNameDev },
+        ],
+      },
+      {
         file: 'docker-compose.yml',
         from: 'docker',
         to: '',
         tokens: [
           { token: 'DC__APP_NAME', replacement: kebabAppName },
+          { token: 'DC__DEV_APP_NAME', replacement: kebabAppNameDev },
           { token: 'DC__E2E', remove: !e2eTests },
           { token: 'DC__MULTI_USER', remove: !multiUser },
           { token: 'DC__NODE_CERTS', remove: !addCerts },
@@ -843,7 +853,6 @@ async function scaffold() {
           { token: 'DC__VHOST', remove: !vHost },
           { token: 'DC__VHOST_NON_SECURE', remove: secure },
           { token: 'DC__VHOST_SECURE', remove: !secure },
-          { token: 'DC__VOLUMES', remove: !multiUser && !addCerts },
         ],
       },
     ];
@@ -956,9 +965,15 @@ async function scaffold() {
     `\n${fileList}`,
   ].join(''));
   
-  if (docker) {
+  if (docker && pendingParsedFiles.find(({ file }) => file === 'repo-funcs.sh')) {
     await cmd(
       'mkdir ./.ignore && touch ./.ignore/.zsh_history && chmod 777 ./.ignore/.zsh_history',
+      { cwd: PATH__PROJECT_ROOT, silent: false }
+    );
+    
+    console.log(`\n${chalk.green.inverse(' TODO ')} ${chalk.cyan('The rest is up to you')}`);
+    await cmd(
+      'printf "Checklist:\\n  - Run: source ./bin/repo-funcs.sh && echo \\\"Loaded: \\${REPO_FUNCS}\\\"\\n  - Start the Container\\n  - Install Dev dependencies\\n  - Start the App\\n"',
       { cwd: PATH__PROJECT_ROOT, silent: false }
     );
   }

@@ -35,6 +35,16 @@
 | `dc`  | `docker-compose` |
 //TOKEN:$README__DOCKER
 | `nr`  | `npm run`        |
+//TOKEN:^README__DOCKER
+
+**NOTE** - To ensure local development reflects what will end up in production, local files are exposed to a development Docker container. You can add `source <REPO_PATH>/bin/aliases.sh` to your shell's rc file to use easier to remember Docker commands.
+To automate that process I `source` [this script](https://github.com/the0neWhoKnocks/shell-scripts/blob/master/override-cd.sh) so anytime I `cd` in or out of a repo, the aliases are added or removed when not at the root of the repo.
+
+| Alias | Command |
+| ----- | ------- |
+| `startcont` |	Starts and enters the Container in development mode. |
+| `entercont` | Enter the running development Container to debug or what ever. |
+//TOKEN:$README__DOCKER
 
 Install dependencies
 ```sh
