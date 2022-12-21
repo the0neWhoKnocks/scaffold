@@ -6,7 +6,7 @@ function scaffold {
   local PROJECT_DIR="$PWD"
   
   (
-    cd "${SCAFFOLD_DIR}" \
-    && node scaffold.js "${PROJECT_DIR}"
+    cd "${SCAFFOLD_DIR}"
+    node scaffold.js "${PROJECT_DIR}"
   )
 }
