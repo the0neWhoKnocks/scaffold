@@ -678,6 +678,10 @@ async function scaffold() {
       ]);
     }
     
+    if (docker) {
+      packageJSON.scripts.preinstall = 'if test ! \\"$IN_CONTAINER\\" = \\"true\\"; then echo \\"Not in Docker\\"; rm -rf node_modules exit 1; fi';
+    }
+    
     if (hasWatcher) {
       if (addServer) {
         packageJSON.devDependencies['chokidar'] = '3.5.2';
@@ -947,6 +951,7 @@ async function scaffold() {
   
   if (
     projectType === 'node'
+    && !docker
     && existsSync(`${PATH__PROJECT_ROOT}/package.json`)
     && !existsSync(`${PATH__PROJECT_ROOT}/node_modules`)
   ) {
