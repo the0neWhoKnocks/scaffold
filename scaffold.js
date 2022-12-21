@@ -543,7 +543,7 @@ async function scaffold() {
           packageJSON.devDependencies['css-loader'] = '6.5.1';
           packageJSON.devDependencies['css-minimizer-webpack-plugin'] = '3.1.3';
           packageJSON.devDependencies['mini-css-extract-plugin'] = '2.4.4';
-          packageJSON.devDependencies['svelte-loader'] = '3.1.2';
+          packageJSON.devDependencies['svelte-loader'] = '3.1.4'; 
         }
         
         addParsedFiles([{
@@ -558,7 +558,7 @@ async function scaffold() {
       }
       
       if (clientFrameworkIsSvelte) {
-        packageJSON.devDependencies['svelte'] = '3.44.1';
+        packageJSON.devDependencies['svelte'] = '3.55.0'; 
         
         addParsedFiles([
           {
@@ -734,7 +734,7 @@ async function scaffold() {
       const sourceFolders = ['bin', 'src'];
       
       if (clientFrameworkIsSvelte) {
-        packageJSON.devDependencies['eslint-plugin-svelte3'] = '3.2.1';
+        packageJSON.devDependencies['eslint-plugin-svelte3'] = '4.0.0'; 
         lintExts.push('svelte');
       }
       
