@@ -413,7 +413,6 @@ async function scaffold() {
         packageJSON.dependencies['express'] = '4.17.1';
       }
       
-      if (externalRequests) packageJSON.dependencies['teeny-request'] = '7.0.1';
       if (compression) packageJSON.dependencies['compression'] = '1.7.4';
       if (cookies) packageJSON.dependencies['cookie-parser'] = '1.4.5';
       if (staticFiles) packageJSON.dependencies['sirv'] = '1.0.12';

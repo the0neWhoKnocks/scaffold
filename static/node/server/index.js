@@ -209,17 +209,18 @@ app
   })
   //TOKEN:$SERVER__API
   //TOKEN:^SERVER__EXT_API
-  .get(ROUTE__API__EXT, (req, res) => {
-    const { teenyRequest: request } = require('teeny-request');
-    
+  .get(ROUTE__API__EXT, async (req, res) => {
     log.info(`[EXT_API] Calling external API`);
-    request({ uri: 'https://opentdb.com/api.php?amount=1' }, (err, resp, body) => {
-      if (err) return res.error(resp.statusCode);
+    try {
+      const resp = await fetch('https://opentdb.com/api.php?amount=1');
       
+      if (!resp.ok) return res.error(resp.status);
+        
       log.info(`[EXT_API] Recieved response`);
-      const { results: [{ correct_answer, question }] } = body;
+      const { results: [{ correct_answer, question }] } = await resp.json();
       res.json({ answer: correct_answer, question });
-    });
+    }
+    catch (err) { return res.error(err); }
   })
   //TOKEN:$SERVER__EXT_API
   .get('/', (req, res) => {
