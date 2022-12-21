@@ -134,11 +134,7 @@ const watchedServerFiles = [
 ];
 //TOKEN:$WATCHER__SERVER
 
-const pollForFileChanges = !!process.env.WSL_INTEROP; // related to WSL2: https://github.com/microsoft/WSL/issues/4739
-const chokidarOpts = {
-  ignoreInitial: true,
-  usePolling: pollForFileChanges,
-};
+const chokidarOpts = { ignoreInitial: true };
 
 fileGate
   .then(() => {
@@ -174,7 +170,6 @@ fileGate
       delay: 500,
       exec: 'node --inspect=0.0.0.0',
       ext: 'js json',
-      legacyWatch: pollForFileChanges,
       script: './dist/server',
       // verbose: true,
       watch: watchedServerFiles,
