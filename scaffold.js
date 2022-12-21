@@ -498,7 +498,7 @@ async function scaffold() {
       if (webSocket) {
         packageJSON.dependencies['bufferutil'] = '4.0.3';
         packageJSON.dependencies['supports-color'] = '8.1.1';
-        packageJSON.dependencies['ws'] = '7.4.4';
+        packageJSON.dependencies['ws'] = '7.5.9';
         
         addParsedFiles([{
           file: 'socket.js',
@@ -684,7 +684,7 @@ async function scaffold() {
     if (hasWatcher) {
       if (addServer) {
         packageJSON.devDependencies['chokidar'] = '3.5.2';
-        packageJSON.devDependencies['nodemon'] = '2.0.15';
+        packageJSON.devDependencies['nodemon'] = '2.0.20';
       }
       
       if (addClient) packageJSON.devDependencies['browser-sync'] = '2.27.11';
