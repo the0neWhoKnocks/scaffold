@@ -32,7 +32,7 @@
 | ----- | ---------------- |
 //TOKEN:^README__DOCKER
 | `d`   | `docker`         |
-| `dc`  | `docker-compose` |
+| `dc`  | `docker compose` |
 //TOKEN:$README__DOCKER
 | `nr`  | `npm run`        |
 //TOKEN:^README__DOCKER

@@ -88,7 +88,7 @@ if $WATCH_MODE; then
   fi
 
   if [[ "$display" != "" ]]; then
-    cypressCmd="docker-compose run -e DISPLAY=$display ${extraArgs} --rm --entrypoint cypress ${E2E_SERVICE} open --project ."
+    cypressCmd="docker compose run -e DISPLAY=$display ${extraArgs} --rm --entrypoint cypress ${E2E_SERVICE} open --project ."
     
     if [[ "$xlaunchBinary" != "" ]] && [ -f "$xlaunchBinary" ]; then
       echo;
@@ -123,7 +123,7 @@ if $BUILD; then
   
   echo;
   echo "[BUILD] Containers"
-  docker-compose build app e2e
+  docker compose build app e2e
 fi
 
 echo;
@@ -133,11 +133,11 @@ if [[ "$cypressCmd" != "" ]]; then
   echo "[RUN] ${cypressCmd}"
   ${cypressCmd}
 else
-  docker-compose up "${extraArgs}" --abort-on-container-exit --remove-orphans "${E2E_SERVICE}"
+  docker compose up "${extraArgs}" --abort-on-container-exit --remove-orphans "${E2E_SERVICE}"
 fi
 exitCode=$(echo $?)
 
-docker-compose down
+docker compose down
 
 if [[ "$xlaunchKillCmd" != "" ]]; then
   echo;
