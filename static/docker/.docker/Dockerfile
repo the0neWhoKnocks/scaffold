@@ -3,7 +3,13 @@ FROM node:18-alpine as node18-dev-base
 # Add any extra packages below. Comment why they're added for your own sanity later.
 # - `rsync` for the `dist` setup
 # - `tzdata` so the `TZ` env var works for timezones
-RUN apk add --no-cache --update rsync tzdata
+# - `vim zsh` for development env
+RUN apk add --no-cache --update rsync tzdata vim zsh
+
+# Set up a usable terminal experience for development
+COPY ./.docker/.vimrc /home/node/.vimrc
+COPY ./.docker/.zshrc /home/node/.zshrc
+COPY ./.docker/zsh-autosuggestions.zsh /home/node/zsh-autosuggestions.zsh
 
 ## Create intermediary Container specifically for package.json 
 FROM node18-dev-base as #TOKEN:#DOCKER__APP_NAME--packagejson
@@ -36,14 +42,6 @@ ENV APP=/home/node/app
 ENV IN_CONTAINER=true
 ENV NODE_ENV=production
 RUN mkdir -p $APP/node_modules && chown -R node:node /home/node/*
-
-# Set up a usable terminal experience for development
-COPY ./.docker/.vimrc /home/node/.vimrc
-COPY ./.docker/.zshrc /home/node/.zshrc
-COPY ./.docker/zsh-autosuggestions.zsh /home/node/zsh-autosuggestions.zsh
-RUN apk add --no-cache --update vim zsh \
-  && touch /home/node/.zsh_history \
-  && chmod +x /home/node/.vimrc /home/node/.zsh_history /home/node/.zshrc /home/node/zsh-autosuggestions.zsh
 
 WORKDIR $APP
 
