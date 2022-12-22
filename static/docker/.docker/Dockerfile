@@ -1,12 +1,12 @@
 ## Base Node image
-FROM node:18-alpine as node-w-extras
+FROM node:18-alpine as node18-dev-base
 # Add any extra packages below. Comment why they're added for your own sanity later.
 # - `rsync` for the `dist` setup
 # - `tzdata` so the `TZ` env var works for timezones
 RUN apk add --no-cache --update rsync tzdata
 
 ## Create intermediary Container specifically for package.json 
-FROM node-w-extras as #TOKEN:#DOCKER__APP_NAME--packagejson
+FROM node18-dev-base as #TOKEN:#DOCKER__APP_NAME--packagejson
 # Create a temporary package.json where things like `version` and `scripts`
 # are omitted so the cache of the build step won't be invalidated.
 COPY --chown=node:node ./package*.json ./
@@ -31,7 +31,7 @@ RUN ["node", "-e", " \
 "]
 
 # Set up the environment
-FROM node-w-extras AS #TOKEN:#DOCKER__APP_NAME
+FROM node18-dev-base AS #TOKEN:#DOCKER__APP_NAME
 ENV APP=/home/node/app
 ENV IN_CONTAINER=true
 ENV NODE_ENV=production
