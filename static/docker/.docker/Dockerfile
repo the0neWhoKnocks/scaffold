@@ -1,6 +1,7 @@
 ## Base Node image
 FROM node:18-alpine as node18-dev-base
-# Add any extra packages below. Comment why they're added for your own sanity later.
+# Add any extra base packages below. Comment why they're added for your own 
+# sanity later. Add any App specific packages further down (there's a comment).
 # - `rsync` for the `dist` setup
 # - `tzdata` so the `TZ` env var works for timezones
 # - `vim zsh` for development env
@@ -42,6 +43,11 @@ ENV APP=/home/node/app
 ENV IN_CONTAINER=true
 ENV NODE_ENV=production
 RUN mkdir -p $APP/node_modules && chown -R node:node /home/node/*
+
+######
+## Add App specific packages below
+######
+#RUN apk add --no-cache --update __PKG__
 
 WORKDIR $APP
 
