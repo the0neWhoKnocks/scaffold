@@ -68,6 +68,7 @@
 >
   <div
     class="dialog-mask"
+    aria-hidden="true"
     on:click={handleCloseClick}
     in:toggleMask
     out:toggleMask
@@ -75,7 +76,6 @@
   <dialog
     class="dialog"
     class:is--modal={modal}
-    tabindex="0"
     open
     in:toggleDialog="{{ dir: 'in', start: 70 }}"
     out:toggleDialog="{{ start: 50 }}"
