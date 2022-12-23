@@ -464,7 +464,7 @@ async function scaffold() {
       ]);
       
       if (multiUser) {
-        packageJSON.dependencies['body-parser'] = '1.19.0';
+        packageJSON.dependencies['body-parser'] = '1.20.1';
         packageJSON.dependencies['mkdirp'] = '1.0.4';
         
         copyFiles([
