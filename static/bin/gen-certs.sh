@@ -12,7 +12,7 @@ function printMsg {
   
   printf "\n${color}"
   printf %"$(tput cols)"s | tr " " "-"
-  printf " ${1}\n"
+  printf "\n ${1}\n"
   printf %"$(tput cols)"s | tr " " "-"
   printf "${RESET}\n"
 }
@@ -181,5 +181,5 @@ EOF
   openssl x509 -in "${DIR}/${CERT_NAME}.crt" -noout -text
 
   printMsg "[REMOVE] Temporary files"
-  rm -v "${DIR}/${CERT_NAME_CA}.srl" "${DIR}/${CERT_NAME}.csr" "${DIR}/temp.cnf"
+  rm -fv "${DIR}/${CERT_NAME_CA}.srl" "${DIR}/${CERT_NAME}.csr" "${DIR}/temp.cnf"
 fi
