@@ -143,6 +143,17 @@ This repo utilizes GitHub workflows to auto-deploy a GitHub page.
 Some experiences will complain if your App isn't run over `https`. To allow for secure Local development (and LAN Apps over IP), follow the below instructions to generate and install certs.
 
 **NOTE**: If you've already generated and added certs for a specific domain or IP, there's no need to generate and add a new cert. Either delete the old one, or reuse it in your new App.
+//TOKEN:^README__DOCKER
+
+**NOTE**: If you are using an existing cert, you'll need to symlink it to this directory so that your `docker-compose.yml` file can access it in the `volumes` section. For example:
+```sh
+ln -s ../.app_certs ./certs
+```
+```yml
+volumes:
+  - "${PWD}/certs:/app_certs"
+```
+//TOKEN:$README__DOCKER
 
 Run `./bin/gen-certs.sh --help` if you want to see the full list of options.
 
