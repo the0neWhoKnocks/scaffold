@@ -292,7 +292,7 @@ async function scaffold() {
         serverOptions: { vHost },
       }) => {
         if (e2eTests || vHost) return 1;
-        return 0;
+        return 1; // keeping the above logic in case I change this later
       },
       choices: [
         { name: 'None', value: '' },
