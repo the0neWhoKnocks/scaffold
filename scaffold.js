@@ -277,7 +277,7 @@ async function scaffold() {
       when: ({ devOptions }) => devOptions && devOptions.logger,
     },
     {
-      message: 'Storage Namespace',
+      message: 'LocalStorage Namespace',
       type: 'input',
       name: 'storageNamespace',
       default: ({ loggerNamespace }) => loggerNamespace || 'app',
@@ -851,7 +851,6 @@ async function scaffold() {
           { token: 'DC__BSYNC', remove: !(hasWatcher && addClient) },
           { token: 'DC__DEV_APP_NAME', replacement: kebabAppNameDev },
           { token: 'DC__E2E', remove: !e2eTests },
-          { token: 'DC__MULTI_USER', remove: !multiUser },
           { token: 'DC__NODE_CERTS', remove: !addCerts },
           { token: 'DC__PORTS', remove: vHost },
           { token: 'DC__USERNAME', replacement: username },
@@ -961,6 +960,14 @@ async function scaffold() {
     await cmd('npm i', { cwd: PATH__PROJECT_ROOT, silent: false });
   }
   
+  const addedDockerFuncs = docker && pendingParsedFiles.find(({ file }) => file === 'repo-funcs.sh');
+  if (addedDockerFuncs) {
+    await cmd(
+      'mkdir ./{.app_data,.ignore} && touch ./.ignore/.zsh_history && chmod 777 ./.ignore/.zsh_history',
+      { cwd: PATH__PROJECT_ROOT, shell: 'bash', silent: false }
+    );
+  }
+  
   const fileList = await getFileList({
     ignore: ['.git/', 'node_modules/'],
     path: PATH__PROJECT_ROOT,
@@ -972,18 +979,25 @@ async function scaffold() {
     `\n${fileList}`,
   ].join(''));
   
-  if (docker && pendingParsedFiles.find(({ file }) => file === 'repo-funcs.sh')) {
-    await cmd(
-      'mkdir ./.ignore && touch ./.ignore/.zsh_history && chmod 777 ./.ignore/.zsh_history',
-      { cwd: PATH__PROJECT_ROOT, silent: false }
-    );
+  const listItems = [];
+  if (addedDockerFuncs) {
+    if (secure) {
+      listItems.push(`Read the ${chalk.cyan('Local HTTPS')} section in the ${chalk.cyan('README')} to wire up your certs properly.`);
+    }
     
-    console.log(`\n${chalk.green.inverse(' TODO ')} ${chalk.cyan('The rest is up to you')}`);
-    await cmd(
-      'printf "Checklist:\\n  - Run: source ./bin/repo-funcs.sh && echo \\\"Loaded: \\${REPO_FUNCS}\\\"\\n  - Start the Container\\n  - Install Dev dependencies\\n  - Start the App\\n"',
-      { cwd: PATH__PROJECT_ROOT, silent: false }
+    listItems.push(
+      `Run: ${chalk.cyan('source ./bin/repo-funcs.sh && echo "Loaded: \${REPO_FUNCS}"')}`,
+      `Start the Container with: ${chalk.cyan('startcont')}`,
+      `Install Dev dependencies with: ${chalk.cyan('npm i')}`,
     );
   }
+  
+  listItems.push(
+    `Start the App with: ${chalk.cyan('nr start:dev')}`,
+  );
+  
+  console.log(`\n${chalk.green.inverse(' TODO ')} ${chalk.cyan('The rest is up to you')}`);
+  console.log(`\nChecklist:\n${listItems.map(str => `  - ${str}\n`).join('')}`);
 }
 
 scaffold();

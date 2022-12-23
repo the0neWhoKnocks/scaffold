@@ -1,7 +1,7 @@
-const cmd = (cmd, { cwd, onError, silent = true } = {}) => new Promise((resolve, reject) => {
+const cmd = (cmd, { cwd, onError, shell = 'sh', silent = true } = {}) => new Promise((resolve, reject) => {
   const { spawn } = require('child_process');
   const opts = { cwd };
-  const child = spawn('sh', ['-c', cmd], opts);
+  const child = spawn(shell, ['-c', cmd], opts);
   let stdout = '';
   let stderr = '';
   
