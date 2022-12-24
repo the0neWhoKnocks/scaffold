@@ -8,6 +8,7 @@ FROM node:18-alpine as node18-dev-base
 RUN apk add --no-cache --update rsync tzdata vim zsh
 
 # Set up a usable terminal experience for development
+RUN echo "update-notifier=false" >> /home/node/.npmrc
 COPY ./.docker/.vimrc /home/node/.vimrc
 COPY ./.docker/.zshrc /home/node/.zshrc
 COPY ./.docker/zsh-autosuggestions.zsh /home/node/zsh-autosuggestions.zsh
