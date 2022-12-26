@@ -963,7 +963,7 @@ async function scaffold() {
   const addedDockerFuncs = docker && pendingParsedFiles.find(({ file }) => file === 'repo-funcs.sh');
   if (addedDockerFuncs) {
     await cmd(
-      'mkdir ./{.app_data,.ignore} && touch ./.ignore/.zsh_history && chmod 777 ./.ignore/.zsh_history',
+      'mkdir -p ./{.app_data,.ignore} && touch ./.ignore/.zsh_history && chmod 777 ./.ignore/.zsh_history',
       { cwd: PATH__PROJECT_ROOT, shell: 'bash', silent: false }
     );
   }
