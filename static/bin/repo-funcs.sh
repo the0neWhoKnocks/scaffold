@@ -16,9 +16,16 @@ function startcont {
   touch ./.ignore/.zsh_history
   chmod 777 ./.ignore/.zsh_history
   
+  # ensure base files/folders are available to copy to container during `build`
   ./bin/prep-dist.sh
+  
+  # boot container and enter it
   docker compose up -d "${CONTAINER}"
-  sleep 4
+  exitCode=$?
+  if [ $exitCode -ne 0 ]; then
+    echo "[ERROR] Problem starting ${CONTAINER}"
+    return $exitCode
+  fi
   docker compose exec -it "${CONTAINER}" zsh && docker compose down
 }
 
