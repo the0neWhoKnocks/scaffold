@@ -960,14 +960,6 @@ async function scaffold() {
     await cmd('npm i', { cwd: PATH__PROJECT_ROOT, silent: false });
   }
   
-  const addedDockerFuncs = docker && pendingParsedFiles.find(({ file }) => file === 'repo-funcs.sh');
-  if (addedDockerFuncs) {
-    await cmd(
-      'mkdir -p ./{.app_data,.ignore} && touch ./.ignore/.zsh_history && chmod 777 ./.ignore/.zsh_history',
-      { cwd: PATH__PROJECT_ROOT, shell: 'bash', silent: false }
-    );
-  }
-  
   const fileList = await getFileList({
     ignore: ['.git/', 'node_modules/'],
     path: PATH__PROJECT_ROOT,
@@ -979,6 +971,7 @@ async function scaffold() {
     `\n${fileList}`,
   ].join(''));
   
+  const addedDockerFuncs = docker && pendingParsedFiles.find(({ file }) => file === 'repo-funcs.sh');
   const listItems = [];
   if (addedDockerFuncs) {
     if (secure) {
