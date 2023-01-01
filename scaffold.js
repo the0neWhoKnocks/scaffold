@@ -496,9 +496,7 @@ async function scaffold() {
       }
       
       if (webSocket) {
-        packageJSON.dependencies['bufferutil'] = '4.0.3';
-        packageJSON.dependencies['supports-color'] = '8.1.1';
-        packageJSON.dependencies['ws'] = '7.5.9';
+        packageJSON.dependencies['ws'] = '8.11.0';
         
         addParsedFiles([{
           file: 'socket.js',
@@ -567,6 +565,7 @@ async function scaffold() {
             to: 'src/client/components',
             tokens: [
               { token: 'APP__API', remove: !apiEnabled },
+              { token: 'APP__ASYNC_MOUNT', replacement: webSocket ? 'async ' : '' },
               { token: 'APP__EXT_API', remove: !externalRequests },
               { token: 'APP__HAS_CONSTANTS', remove: !apiEnabled && !externalRequests && !multiUser && !webSocket },
               { token: 'APP__MULTI_USER', remove: !multiUser },
