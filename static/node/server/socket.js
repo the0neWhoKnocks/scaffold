@@ -1,12 +1,55 @@
 const { OPEN, Server } = require('ws');
 const {
   WS__MSG__EXAMPLE,
+  WS__MSG__SERVER_DOWN,
   //TOKEN:^SERVER_SOCKET__VHOST
   WS__MSG__PING,
   WS__MSG__PONG,
   //TOKEN:$SERVER_SOCKET__VHOST
 } = require('../constants');
 const log = require('../utils/logger')('server:socket');
+
+function accountForServerDeath(server, serverSocket) {
+  const serverConnections = new Set();
+  const deathSignals = [
+    'SIGINT', 
+    'SIGQUIT',
+    'SIGTERM', 
+  ];
+  server.on('connection', connection => {
+    serverConnections.add(connection);
+    connection.on('close', () => {
+      serverConnections.delete(connection);
+    });
+  });
+
+  function destroyConnections() {
+    for (const connection of serverConnections.values()) {
+      connection.destroy();
+    }
+  }
+
+  function handleServerDeath(signal) {
+    log.info(`[${signal}] Server closing`);
+
+    // NOTE - I've seen this NOT work if there are some zombie WS processes
+    // floating around from a previous bad run. So try killing all `node`
+    // instances and see if things work after.
+    // NOTE - This also only works when the WS isn't being proxied via BrowserSync
+    // while in development. So if you go to the non-proxied port, things will
+    // behave as expected.
+    serverSocket.emitToAll(WS__MSG__SERVER_DOWN);
+    serverSocket.close();
+
+    server.close(() => {
+      log.info(`[${signal}] Server closed`);
+      process.kill(process.pid, signal);
+    });
+    destroyConnections();
+  }
+
+  deathSignals.forEach(signal => process.once(signal, handleServerDeath));
+}
 
 module.exports = function socket(server) {
   const wss = new Server({ server });
@@ -42,7 +85,7 @@ module.exports = function socket(server) {
     });
   });
   
-  return {
+  const serverSocket = {
     close() {
       wss.close();
     },
@@ -54,4 +97,8 @@ module.exports = function socket(server) {
       });
     },
   };
+  
+  accountForServerDeath(server, serverSocket);
+  
+  return serverSocket;
 }

@@ -43,9 +43,6 @@ const {
   ROUTE__API__USER_SET_PROFILE,
   //TOKEN:$SERVER__MULTI_USER
   SERVER__PORT,
-  //TOKEN:^SERVER__WEBSOCKET
-  WS__MSG__SERVER_DOWN,
-  //TOKEN:$SERVER__WEBSOCKET
 } = require('../constants');
 const log = require('../utils/logger')('server');
 //TOKEN:^SERVER__MULTI_USER
@@ -271,46 +268,7 @@ server.listen(SERVER__PORT, err => {
   log.info(`Server running at: ${protocol}://localhost:${SERVER__PORT}`);
   //TOKEN:$SERVER__NO_VHOST
 });
-
 //TOKEN:^SERVER__WEBSOCKET
-const serverSocket = socket(server);
-const serverConnections = new Set();
-const deathSignals = [
-  'SIGINT', 
-  'SIGQUIT',
-  'SIGTERM', 
-];
-server.on('connection', connection => {
-  serverConnections.add(connection);
-  connection.on('close', () => {
-    serverConnections.delete(connection);
-  });
-});
 
-function destroyConnections() {
-  for (const connection of serverConnections.values()) {
-    connection.destroy();
-  }
-}
-
-function handleServerDeath(signal) {
-  log.info(`[${signal}] Server closing`);
-
-  // NOTE - I've seen this NOT work if there are some zombie WS processes
-  // floating around from a previous bad run. So try killing all `node`
-  // instances and see if things work after.
-  // NOTE - This also only works when the WS isn't being proxied via BrowserSync
-  // while in development. So if you go to the non-proxied port, things will
-  // behave as expected.
-  serverSocket.emitToAll(WS__MSG__SERVER_DOWN);
-  serverSocket.close();
-
-  server.close(() => {
-    log.info(`[${signal}] Server closed`);
-    process.kill(process.pid, signal);
-  });
-  destroyConnections();
-}
-
-deathSignals.forEach(signal => process.once(signal, handleServerDeath));
+socket(server);
 //TOKEN:$SERVER__WEBSOCKET

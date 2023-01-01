@@ -200,7 +200,7 @@
     logsLength = serverData.length;
   });
   
-  onMount(async () => {
+  onMount(/* TOKEN:#APP__ASYNC_MOUNT */() => {
     log.info('App starting');
     //TOKEN:^APP__API
     
