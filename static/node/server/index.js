@@ -43,6 +43,14 @@ const {
   ROUTE__API__USER_SET_PROFILE,
   //TOKEN:$SERVER__MULTI_USER
   SERVER__PORT,
+  //TOKEN:^SERVER__WEBSOCKET
+  WS__MSG__EXAMPLE,
+  //TOKEN:^SERVER_SOCKET__VHOST
+  WS__MSG__PING,
+  WS__MSG__PONG,
+  //TOKEN:$SERVER_SOCKET__VHOST
+  WS__MSG__SERVER_UP,
+  //TOKEN:$SERVER__WEBSOCKET
 } = require('../constants');
 const log = require('../utils/logger')('server');
 //TOKEN:^SERVER__MULTI_USER
@@ -241,6 +249,44 @@ if (process.env.NODE_EXTRA_CA_CERTS) {
 else httpModule = require('node:http');
 
 const server = httpModule.createServer(serverOpts, /* TOKEN:#SERVER__APP_HANDLER */);
+//TOKEN:^SERVER__WEBSOCKET
+const wss = socket(server, {
+  handleClientConnection: function handleClientConnection(wss) {
+    wss.dispatchToClient(WS__MSG__EXAMPLE, { msg: 'Hello, welcome to this App.' });
+  },
+  msgHandlers: {
+    client: {
+      [WS__MSG__EXAMPLE]: function handleExample(wss, data) {
+        wss.dispatchToClient(WS__MSG__EXAMPLE, {
+          msg: `Client: ${data.d} | Server: ${Date.now()}`,
+        });
+      },
+      //TOKEN:^SERVER_SOCKET__VHOST
+      [WS__MSG__PING]: function handlePing(wss) {
+        wss.dispatchToClient(WS__MSG__PONG, {});
+      },
+      //TOKEN:$SERVER_SOCKET__VHOST
+    },
+    server: {
+      [WS__MSG__SERVER_UP]: function handleServerStart(wss) {
+        log.info('Starting long running process');
+        
+        let count = 1;
+        const procInt = setInterval(() => {
+          if (count < 6) {
+            wss.dispatchToClients(WS__MSG__EXAMPLE, { msg: `Server process progress: ${count}` });
+            count += 1;
+          }
+          else {
+            clearInterval(procInt);
+            wss.dispatchToClients(WS__MSG__EXAMPLE, { msg: 'Server process complete' });
+          }
+        }, 2000);
+      },
+    },
+  }
+});
+//TOKEN:$SERVER__WEBSOCKET
 
 server.listen(SERVER__PORT, err => {
   if (err) log.error('Error', err);
@@ -267,8 +313,8 @@ server.listen(SERVER__PORT, err => {
   //TOKEN:^SERVER__NO_VHOST
   log.info(`Server running at: ${protocol}://localhost:${SERVER__PORT}`);
   //TOKEN:$SERVER__NO_VHOST
+  //TOKEN:^SERVER__WEBSOCKET
+  
+  wss.dispatch(WS__MSG__SERVER_UP);
+  //TOKEN:$SERVER__WEBSOCKET
 });
-//TOKEN:^SERVER__WEBSOCKET
-
-socket(server);
-//TOKEN:$SERVER__WEBSOCKET
