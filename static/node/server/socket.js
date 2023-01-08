@@ -1,15 +1,8 @@
-const { OPEN, Server } = require('ws');
-const {
-  WS__MSG__EXAMPLE,
-  WS__MSG__SERVER_DOWN,
-  //TOKEN:^SERVER_SOCKET__VHOST
-  WS__MSG__PING,
-  WS__MSG__PONG,
-  //TOKEN:$SERVER_SOCKET__VHOST
-} = require('../constants');
+const { OPEN, WebSocketServer } = require('ws');
+const { WS__MSG__SERVER_DOWN } = require('../constants');
 const log = require('../utils/logger')('server:socket');
 
-function accountForServerDeath(server, serverSocket) {
+function accountForServerDeath(server) {
   const serverConnections = new Set();
   const deathSignals = [
     'SIGINT', 
@@ -38,8 +31,8 @@ function accountForServerDeath(server, serverSocket) {
     // NOTE - This also only works when the WS isn't being proxied via BrowserSync
     // while in development. So if you go to the non-proxied port, things will
     // behave as expected.
-    serverSocket.emitToAll(WS__MSG__SERVER_DOWN);
-    serverSocket.close();
+    server.wss.dispatchToClients(WS__MSG__SERVER_DOWN);
+    server.wss.closeConnections();
 
     server.close(() => {
       log.info(`[${signal}] Server closed`);
@@ -51,54 +44,93 @@ function accountForServerDeath(server, serverSocket) {
   deathSignals.forEach(signal => process.once(signal, handleServerDeath));
 }
 
-module.exports = function socket(server) {
-  const wss = new Server({ server });
+module.exports = function socket(server, opts = {}) {
+  const wss = new WebSocketServer({ server });
   
-  wss.on('connection', function connected(socket) {
-    log.info('Client connected');
-    server.clientSocket = socket;
-    
-    socket.on('message', (payload) => {
-      const { data, type } = JSON.parse(payload);
-    
-      log.info(`[HANDLE] "${ type }"`);
-      
-      switch (type) {
-        case WS__MSG__EXAMPLE:
-          socket.send(JSON.stringify({
-            data: { msg: `Client: ${data.d} | Server: ${Date.now()}` },
-            type: WS__MSG__EXAMPLE,
-          }));
-          break;
-        //TOKEN:^SERVER_SOCKET__VHOST
-        
-        case WS__MSG__PING:
-          socket.send(JSON.stringify({ data: {}, type: WS__MSG__PONG }));
-          break;
-        //TOKEN:$SERVER_SOCKET__VHOST
-      }
-    });
-    
-    socket.on('close', (code, reason) => {
-      log.info(`Client disconnected | ${code} | ${reason}`);
-      delete server.clientSocket;
-    });
-  });
-  
-  const serverSocket = {
-    close() {
+  // NOTE: The `request` and `response` objects in a `request` handler have 
+  // `client` and `socket` props which are the same `Socket` instance but have 
+  // nothing to do with `ws`, they're exposed by Node's `http` module. Just
+  // stating for clarity since it can be confusing.
+  // The easiest way for request handlers to utilize this API is via one of the
+  // mentioned props, though I feel the `client` prop is less confusing.
+  // Example: `req.client.server.wss.<FN>`.
+  server.wss = {
+    closeConnections() {
       wss.close();
     },
-    emitToAll(type, data = {}) {
+    dispatch(type, data = {}) {
+      wss.emit('message', JSON.stringify({ data, type }));
+    },
+    dispatchToClients(type, data = {}) {
       wss.clients.forEach((socket) => {
-        if (socket.readyState === OPEN) {
-          socket.send(JSON.stringify({ data, type }));
-        }
+        if (socket.readyState === OPEN) socket.send(JSON.stringify({ data, type }));
       });
     },
   };
   
-  accountForServerDeath(server, serverSocket);
+  wss.on('message', function handleServerMessage(payload) {
+    const { data, type } = JSON.parse(payload);
+    
+    log.info(`[HANDLE] Server message: "${type}"`);
+    
+    const serverHandlers = opts?.msgHandlers?.server || {};
+    const msgKeys = Object.keys(serverHandlers);
+    let msgFound = false;
+    for (let k=0; k<msgKeys.length; k++) {
+      if (msgKeys[k] === type) {
+        const fn = serverHandlers[msgKeys[k]];
+        if (fn) {
+          fn(server.wss, data);
+          msgFound = true;
+          break;
+        }
+      }
+    }
+    
+    if (!msgFound) log.warn(`No handler for "${type}", data lost: ${JSON.stringify(data)}`);
+  });
   
-  return serverSocket;
+  wss.on('connection', function handleClientConnection(socket) {
+    log.info('Client connected');
+    
+    const _wss = {
+      ...server.wss,
+      clientSocket: socket,
+      dispatchToClient(type, data = {}) {
+        if (socket.readyState === OPEN) socket.send(JSON.stringify({ data, type }));
+      },
+    };
+    
+    if (opts.handleClientConnection) opts.handleClientConnection(_wss);
+    
+    socket.on('message', function handleClientMessage(payload) {
+      const { data, type } = JSON.parse(payload);
+    
+      log.info(`[HANDLE] Client message: "${type}"`);
+      
+      const clientHandlers = opts?.msgHandlers?.client || {};
+      const msgKeys = Object.keys(clientHandlers);
+      let msgFound = false;
+      for (let k=0; k<msgKeys.length; k++) {
+        if (msgKeys[k] === type) {
+          const fn = clientHandlers[msgKeys[k]];
+          if (fn) {
+            fn(_wss, data);
+            msgFound = true;
+            break;
+          }
+        }
+      }
+      
+      if (!msgFound) log.warn(`No handler for "${type}", data lost: ${JSON.stringify(data)}`);
+    });
+    
+    socket.on('close', (code, reason) => {
+      log.info(`Client disconnected | ${code} | ${reason}`);
+    });
+  });
+  
+  accountForServerDeath(server);
+  
+  return server.wss;
 }
