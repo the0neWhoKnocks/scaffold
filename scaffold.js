@@ -829,7 +829,7 @@ async function scaffold() {
       },
       {
         file: 'repo-funcs.sh',
-        from: 'bin',
+        from: 'docker/bin',
         to: 'bin',
         tokens: [
           { token: 'REPOFUNCS__APP_NAME_DEV', replacement: kebabAppNameDev },
