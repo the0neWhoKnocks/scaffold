@@ -360,10 +360,10 @@
     background: #222;
     display: block;
   }
-  :global(.server-data__logs div) {
+  .server-data__logs :global(div) {
     margin-bottom: 6px;
   }
-  :global(.server-data__logs span) {
+  .server-data__logs :global(span) {
     padding: 2px 8px;
     border: solid 1px;
     border-radius: 0.25em;
@@ -413,7 +413,7 @@
     align-items: center;
     justify-content: space-between;
   }
-  :global(.user-menu > button svg) {
+  .user-menu > :global(button svg) {
     color: #000;
     font-size: 1.1em;
   }
