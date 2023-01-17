@@ -38,10 +38,12 @@ services:
     #TOKEN:$DC__PORTS
     user: "${CURR_UID}:${CURR_GID}"
     volumes:
-      - "${PWD}/.app_data:/app_data"
       #TOKEN:^DC__NODE_CERTS
-      - "${PWD}/certs.localhost:/app_certs"
+      - type: bind
+        source: "${PWD}/certs.localhost"
+        target: "/app_certs"
       #TOKEN:$DC__NODE_CERTS
+      - "${PWD}/.app_data:/app_data"
   
   #TOKEN:#DC__DEV_APP_NAME:
     extends: #TOKEN:#DC__APP_NAME # allows for just changing key pieces of data for development
@@ -88,7 +90,7 @@ services:
     working_dir: /e2e
     volumes:
       - "${PWD}/e2e:/e2e"
-      - "${PWD}/data:/app/data"
+      - "${PWD}/.app_data:/app/data"
   #TOKEN:$DC__E2E
   #TOKEN:^DC__VHOST
   
@@ -104,10 +106,12 @@ services:
       - "${VHOST__PORT__PROXY}:443"
       #TOKEN:$DC__VHOST_SECURE
     volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
       #TOKEN:^DC__VHOST_SECURE
-      - "${PWD}/certs.${VHOST__DOMAIN}:/etc/nginx/certs"
+      - type: bind
+        source: "${PWD}/certs.${VHOST__DOMAIN}"
+        target: "/etc/nginx/certs"
       #TOKEN:$DC__VHOST_SECURE
+      - /var/run/docker.sock:/tmp/docker.sock:ro
       # Uncomment to view the generated config
       # - "${PWD}/.docker/vhost/conf.d:/etc/nginx/conf.d"
   #TOKEN:$DC__VHOST
