@@ -60,7 +60,7 @@
   .labeled-input input:required {
     padding: 0.5em 1.75em 0.5em 0.5em;
   }
-  :global(.labeled-input input:required ~ svg) {
+  .labeled-input input:required ~ :global(svg) {
     color: #ff7600;
     font-size: 1em;
     position: absolute;

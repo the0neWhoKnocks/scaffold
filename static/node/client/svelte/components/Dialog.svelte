@@ -117,16 +117,16 @@
     box-sizing: border-box;
   }
   
-  :global(.dialog-wrapper button),
-  :global(.dialog-wrapper input),
-  :global(.dialog-wrapper select),
-  :global(.dialog-wrapper textarea) {
+  .dialog-wrapper :global(button),
+  .dialog-wrapper :global(input),
+  .dialog-wrapper :global(select),
+  .dialog-wrapper :global(textarea) {
 		fill: orange;
 	}
-  :global(.dialog-wrapper button:not(disabled)) {
+  .dialog-wrapper :global(button:not(disabled)) {
     cursor: pointer;
   }
-  :global(.dialog__body button) {
+  .dialog__body :global(button) {
     color: #fff;
     width: 100%;
     padding: 0.75em 1em;
@@ -135,10 +135,10 @@
     background: #000;
     position: relative;
   }
-  :global(.dialog__body button:focus) {
+  .dialog__body :global(button:focus) {
     outline: none;
   }
-  :global(.dialog__body button:focus::after) {
+  .dialog__body :global(button:focus::after) {
     content: '';
     position: absolute;
     border: solid 2px currentColor;
