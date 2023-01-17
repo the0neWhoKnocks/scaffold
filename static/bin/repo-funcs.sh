@@ -29,6 +29,13 @@ function startcont {
     return
   fi
   #TOKEN:$REPOFUNCS__DOTENV
+  #TOKEN:^REPOFUNCS__SECURE
+  
+  if [ ! -d "./certs" ]; then
+    echo -e "\n You need to set up the 'certs' folder.\n If you don't know how, follow the instructions on https://github.com/the0neWhoKnocks/generate-certs."
+    return
+  fi
+  #TOKEN:$REPOFUNCS__SECURE
   
   # ensure base files/folders are available to copy to container during `build`
   ./bin/prep-dist.sh

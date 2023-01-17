@@ -511,14 +511,6 @@ async function scaffold() {
       }
       
       const binFiles = [];
-      if (secure) {
-        binFiles.push({
-          executable: true,
-          files: ['gen-certs.sh'],
-          from: 'bin',
-          to: 'bin',
-        });
-      }
       if (secure || (!secure && vHost)) {
         binFiles.push({
           executable: true,
@@ -842,6 +834,7 @@ async function scaffold() {
         tokens: [
           { token: 'REPOFUNCS__APP_NAME_DEV', replacement: kebabAppNameDev },
           { token: 'REPOFUNCS__DOTENV', remove: !dotenv },
+          { token: 'REPOFUNCS__SECURE', remove: !secure },
         ],
       },
       {
