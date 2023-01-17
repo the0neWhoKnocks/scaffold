@@ -26,10 +26,10 @@ function startcont {
     echo "[ERROR] Problem starting ${CONTAINER}"
     return $exitCode
   fi
-  docker compose exec -it "${CONTAINER}" zsh && docker compose down
+  docker compose exec -u node -it "${CONTAINER}" zsh && docker compose down
 }
 
 REPO_FUNCS+=("entercont")
 function entercont {
-  docker compose exec "${CONTAINER}" zsh
+  docker compose exec -u node -it "${CONTAINER}" zsh
 }
