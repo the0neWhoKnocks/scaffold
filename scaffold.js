@@ -535,7 +535,13 @@ async function scaffold() {
           packageJSON.devDependencies['css-loader'] = '6.5.1';
           packageJSON.devDependencies['css-minimizer-webpack-plugin'] = '3.1.3';
           packageJSON.devDependencies['mini-css-extract-plugin'] = '2.4.4';
-          packageJSON.devDependencies['svelte-loader'] = '3.1.4'; 
+          packageJSON.devDependencies['svelte-loader'] = '3.1.4';
+          
+          copyFiles([{
+            files: ['loader.remove-duplicate-svelte-classes.js'],
+            from: 'node/webpack',
+            to: '.webpack',
+          }]);
         }
         
         addParsedFiles([{
