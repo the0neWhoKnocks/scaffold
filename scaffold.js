@@ -257,6 +257,7 @@ async function scaffold() {
       when: ({ addClient, addServer }) => addClient || addServer,
       filter: answers => merge(answers),
       choices: [
+        { name: 'Add .env file', value: { dotenv: true }, checked: false },
         { name: 'Add e2e tests', value: { e2eTests: true }, checked: false },
         { name: 'Add logging util', value: { logger: 'ulog' }, checked: true },
         { name: 'ESLint', value: { eslint: true }, checked: true },
@@ -342,6 +343,7 @@ async function scaffold() {
     ghPage,
   } = (deploymentOptions || {});
   const {
+    dotenv,
     e2eTests,
     eslint,
     hasWatcher,
@@ -839,6 +841,7 @@ async function scaffold() {
         to: 'bin',
         tokens: [
           { token: 'REPOFUNCS__APP_NAME_DEV', replacement: kebabAppNameDev },
+          { token: 'REPOFUNCS__DOTENV', remove: !dotenv },
         ],
       },
       {
@@ -892,6 +895,7 @@ async function scaffold() {
       from: '',
       to: '',
       tokens: [
+        { token: 'IGNORE__DOTENV', remove: !dotenv },
         { token: 'IGNORE__E2E', remove: !e2eTests },
         { token: 'IGNORE__HTTPS', remove: !secure },
         { token: 'IGNORE__VHOST', remove: !vHost },

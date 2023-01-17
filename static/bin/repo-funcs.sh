@@ -15,6 +15,20 @@ function startcont {
   mkdir -p ./{.app_data,.ignore}
   touch ./.ignore/.zsh_history
   chmod 777 ./.ignore/.zsh_history
+  #TOKEN:^REPOFUNCS__DOTENV
+  
+  envPath="./.env"
+  if [ ! -f "${envPath}" ]; then
+    echo -e "##\n# NOTE: Any new variables should have defaults added in 'repo-funcs.sh'\n##\n" >> "${envPath}"
+    echo "EXAMPLE_VAR=<VAL>" >> "${envPath}"
+    
+    echo -e "\n The '.env' file wasn't set up, so it was populated with temporary values.\n Any variables with '<VAL>' need to be updated."
+    return
+  elif grep -q "<VAL>" "${envPath}"; then
+    echo -e "\n The '.env' file contains variables that need '<VAL>' replaced."
+    return
+  fi
+  #TOKEN:$REPOFUNCS__DOTENV
   
   # ensure base files/folders are available to copy to container during `build`
   ./bin/prep-dist.sh
