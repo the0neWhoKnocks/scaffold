@@ -57,7 +57,7 @@ const outputFilename = ({ chunk: { name }, contentHashType }) => {
 };
 
 const conf = {
-  devtool: dev && 'source-map',
+  devtool: dev && 'inline-cheap-source-map',
   entry: {
     'js/app': resolve(__dirname, './src/client/index.js'),
   },
@@ -69,11 +69,11 @@ const conf = {
         test: /\.(svelte|html)$/,
         use: {
           loader: 'svelte-loader',
-          // Svelte compiler options: https://svelte.dev/docs#svelte_compile
+          // Svelte compiler options: https://svelte.dev/docs#compile-time-svelte-compile
           options: {
-            dev,
+            compilerOptions: { dev },
             emitCss: true,
-            hotReload: false, // pending https://github.com/sveltejs/svelte/issues/2377
+            hotReload: false,
           },
         },
       },
@@ -86,6 +86,8 @@ const conf = {
             loader: 'css-loader',
             options: { sourceMap: dev },
           },
+          // remove duplicate svelte classes
+          { loader: resolve('./.webpack/loader.remove-duplicate-svelte-classes') },
         ],
       },
       //TOKEN:$WP__SVELTE
