@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CONTAINER="#TOKEN:#SHELL__APP_NAME_DEV"
+CONTAINER="#TOKEN:#REPOFUNCS__APP_NAME_DEV"
 export REPO_FUNCS=()
 
 # Wire up the current User so that any files created in development can easily

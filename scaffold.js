@@ -838,7 +838,7 @@ async function scaffold() {
         from: 'bin',
         to: 'bin',
         tokens: [
-          { token: 'SHELL__APP_NAME_DEV', replacement: kebabAppNameDev },
+          { token: 'REPOFUNCS__APP_NAME_DEV', replacement: kebabAppNameDev },
         ],
       },
       {
