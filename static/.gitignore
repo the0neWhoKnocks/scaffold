@@ -3,7 +3,7 @@
 .git
 .ignore
 #TOKEN:^IGNORE__HTTPS
-certs.*
+certs*
 #TOKEN:$IGNORE__HTTPS
 #TOKEN:^IGNORE__VHOST
 conf.d
