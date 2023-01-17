@@ -1,5 +1,6 @@
 ## Base Node image
-FROM node:18-alpine as node18-dev-base
+# NOTE: locking to version before 18.13 because V8 broke toLocaleString: https://github.com/nodejs/node/issues/45171
+FROM node:18.12-alpine3.17 as node18-dev-base
 # Add any extra base packages below. Comment why they're added for your own 
 # sanity later. Add any App specific packages further down (there's a comment).
 # - `rsync` for the `dist` setup
