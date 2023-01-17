@@ -695,7 +695,7 @@ async function scaffold() {
     }
     
     if (docker) {
-      packageJSON.scripts.preinstall = 'if test ! \\"$IN_CONTAINER\\" = \\"true\\"; then echo \\"Not in Docker\\"; rm -rf node_modules exit 1; fi';
+      packageJSON.scripts.preinstall = 'if [ -z "$IN_CONTAINER" ] || ! $IN_CONTAINER; then echo " [ERROR] Not in Docker\n"; rm -rf node_modules; exit 1; fi';
     }
     
     if (hasWatcher) {
@@ -821,7 +821,12 @@ async function scaffold() {
     packageJSON.dependencies = sortObj(packageJSON.dependencies);
     packageJSON.devDependencies = sortObj(packageJSON.devDependencies);
     packageJSON.scripts = sortObj(packageJSON.scripts);
-    writeFileSync(`${PATH__PROJECT_ROOT}/package.json`, `${JSON.stringify(packageJSON, null, 2)}\n`, 'utf8');
+    const jsonReplacer = (key, value) => {
+      // double quotes are automatically escaped
+      if (typeof value === 'string') return value.replace(/\n/g, '\\n');
+      return value;
+    };
+    writeFileSync(`${PATH__PROJECT_ROOT}/package.json`, `${JSON.stringify(packageJSON, jsonReplacer, 2)}\n`, 'utf8');
   }
   
   if (docker) {
