@@ -399,13 +399,31 @@ async function scaffold() {
     
     const packageJSON = {
       scripts: {
-        build: './bin/prep-dist.sh && NODE_ENV=production webpack',
+        build: './bin/prep-dist.sh',
         start: 'node ./dist/server',
-        'start:dev': './bin/prep-dist.sh && webpack & ./watcher.js "./bin/prep-dist.sh" "./dist/public/manifest.json"'
+        'start:dev': './bin/prep-dist.sh'
       },
       dependencies: {},
       devDependencies: {},
     };
+    if (bundler) {
+      if (bundlerIsWebpack) {
+        packageJSON.scripts.build += ' && NODE_ENV=production webpack';
+        packageJSON.scripts['start:dev'] += ' && webpack';
+      }
+      
+      packageJSON.scripts['start:dev'] += ' &'; // run bundler and next step in parallel
+    }
+    else {
+      packageJSON.scripts['start:dev'] += ' &&'; // wait for previous step, then execute next step
+    }
+    if (hasWatcher) {
+      packageJSON.scripts['start:dev'] += ' ./watcher.js "./bin/prep-dist.sh" "./dist/public/manifest.json"';
+    }
+    else {
+      // NOTE: If it's gotten to this point, not really certain a `start:dev` would be neccessary since a User could just run `build && start`.
+      packageJSON.scripts['start:dev'] += ' node ./dist/server';
+    }
     
     if (addServer) {
       if (serverFrameworkIsPolka) {
