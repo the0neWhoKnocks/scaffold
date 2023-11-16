@@ -1,4 +1,6 @@
+//TOKEN:^SERVER__FRAMEWORK__NODE
 const { STATUS_CODES } = require('node:http');
+//TOKEN:$SERVER__FRAMEWORK__NODE
 //TOKEN:#SERVER__FS
 //TOKEN:^SERVER__COMPRESS
 const compression = require('compression');
