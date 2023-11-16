@@ -71,7 +71,7 @@ services:
       - "${PWD}:/home/node/app"
   #TOKEN:^DC__E2E
   
-  e2e:
+  e2e-#TOKEN:#DC__APP_NAME:
     build:
       context: ./e2e/
       dockerfile: Dockerfile

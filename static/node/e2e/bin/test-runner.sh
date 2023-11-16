@@ -34,7 +34,7 @@ else
 fi
 
 APP_SERVICE="#TOKEN:#TEST_RUNNER__APP_NAME"
-E2E_SERVICE="e2e"
+E2E_SERVICE="e2e-#TOKEN:#TEST_RUNNER__APP_NAME"
 cypressCmd=""
 xlaunchPath="${SCRIPT_DIR}/XServer.xlaunch"
 extraArgs="-e CYPRESS_baseUrl=http://${DOCKER_HOST}:3000"
