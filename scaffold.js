@@ -545,7 +545,7 @@ async function scaffold() {
         packageJSON.devDependencies['clean-webpack-plugin'] = '4.0.0';
         packageJSON.devDependencies['ignore-emit-webpack-plugin'] = '2.0.6';
         packageJSON.devDependencies['terser-webpack-plugin'] = '5.2.5';
-        packageJSON.devDependencies['webpack'] = '5.63.0';
+        packageJSON.devDependencies['webpack'] = '5.88.2';
         packageJSON.devDependencies['webpack-cli'] = '4.9.1';
         packageJSON.devDependencies['webpack-manifest-plugin'] = '4.0.2';
         
@@ -701,10 +701,10 @@ async function scaffold() {
     if (hasWatcher) {
       if (addServer) {
         packageJSON.devDependencies['chokidar'] = '3.5.2';
-        packageJSON.devDependencies['nodemon'] = '2.0.20';
+        packageJSON.devDependencies['nodemon'] = '3.0.1';
       }
       
-      if (addClient) packageJSON.devDependencies['browser-sync'] = '2.27.11';
+      if (addClient) packageJSON.devDependencies['browser-sync'] = '2.29.3';
       
       addParsedFiles([{
         executable: true,
