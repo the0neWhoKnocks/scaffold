@@ -33,6 +33,7 @@ else
   isOSX=$(uname | grep -qi "darwin" &> /dev/null)
 fi
 
+APP_SERVICE="#TOKEN:#TEST_RUNNER__APP_NAME"
 E2E_SERVICE="e2e"
 cypressCmd=""
 xlaunchPath="${SCRIPT_DIR}/XServer.xlaunch"
@@ -102,7 +103,7 @@ if $BUILD; then
   
   echo;
   echo "[BUILD] Containers"
-  docker compose build app e2e
+  docker compose build ${APP_SERVICE} ${E2E_SERVICE}
 fi
 
 echo;

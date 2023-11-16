@@ -777,7 +777,7 @@ async function scaffold() {
       copyFiles([
         {
           executable: true,
-          files: ['test-runner.sh', 'XServer.xlaunch'],
+          files: ['XServer.xlaunch'],
           from: 'node/e2e/bin',
           to: 'e2e/bin',
         },
@@ -803,19 +803,30 @@ async function scaffold() {
         },
       ]);
       
-      addParsedFiles([{
-        file: 'app.test.js',
-        from: 'node/e2e/tests',
-        to: 'e2e/tests',
-        tokens: [
-          { token: 'TEST__API', remove: !apiEnabled },
-          { token: 'TEST__APP_TITLE', replacement: appTitle },
-          { token: 'TEST__EXT_API', remove: !externalRequests },
-          { token: 'TEST__MULTI_USER', remove: !multiUser },
-          { token: 'TEST__SERVER_INTERACTIONS', remove: !hasServerInteractions },
-          { token: 'TEST__WEB_SOCKETS', remove: !webSocket },
-        ],
-      }]);
+      addParsedFiles([
+        {
+          executable: true,
+          file: 'test-runner.sh',
+          from: 'node/e2e/bin',
+          to: 'e2e/bin',
+          tokens: [
+            { token: 'TEST_RUNNER__APP_NAME', replacement: kebabAppName },
+          ],
+        },
+        {
+          file: 'app.test.js',
+          from: 'node/e2e/tests',
+          to: 'e2e/tests',
+          tokens: [
+            { token: 'TEST__API', remove: !apiEnabled },
+            { token: 'TEST__APP_TITLE', replacement: appTitle },
+            { token: 'TEST__EXT_API', remove: !externalRequests },
+            { token: 'TEST__MULTI_USER', remove: !multiUser },
+            { token: 'TEST__SERVER_INTERACTIONS', remove: !hasServerInteractions },
+            { token: 'TEST__WEB_SOCKETS', remove: !webSocket },
+          ],
+        },
+      ]);
     }
     
     packageJSON.dependencies = sortObj(packageJSON.dependencies);
