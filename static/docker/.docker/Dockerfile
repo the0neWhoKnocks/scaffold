@@ -1,6 +1,5 @@
 ## Base Node image
-# NOTE: locking to version before 18.13 because V8 broke toLocaleString: https://github.com/nodejs/node/issues/45171
-FROM node:18.12-alpine3.17 as node18-dev-base
+FROM node:20.6.0-alpine3.18 as node20-dev-base
 # Add any extra base packages below. Comment why they're added for your own 
 # sanity later. Add any App specific packages further down (there's a comment).
 # - `rsync` for the `dist` setup
@@ -15,7 +14,7 @@ COPY ./.docker/.zshrc /home/node/.zshrc
 COPY ./.docker/zsh-autosuggestions.zsh /home/node/zsh-autosuggestions.zsh
 
 ## Create intermediary Container specifically for package.json 
-FROM node18-dev-base as #TOKEN:#DOCKER__APP_NAME--packagejson
+FROM node20-dev-base as #TOKEN:#DOCKER__APP_NAME--packagejson
 # Create a temporary package.json where things like `version` and `scripts`
 # are omitted so the cache of the build step won't be invalidated.
 COPY --chown=node:node ./package*.json ./
@@ -40,7 +39,7 @@ RUN ["node", "-e", " \
 "]
 
 # Set up the environment
-FROM node18-dev-base AS #TOKEN:#DOCKER__APP_NAME
+FROM node20-dev-base AS #TOKEN:#DOCKER__APP_NAME
 ENV APP=/home/node/app
 ENV IN_CONTAINER=true
 ENV NODE_ENV=production
