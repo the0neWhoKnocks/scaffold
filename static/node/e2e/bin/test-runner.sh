@@ -33,27 +33,6 @@ else
   isOSX=$(uname | grep -qi "darwin" &> /dev/null)
 fi
 
-TEST_FOLDER="./e2e"
-PATH_01=("${TEST_FOLDER}/cypress.json" "{ \"video\": false }\n")
-PATH_02=("${TEST_FOLDER}/cypress/integration")
-PATH_03=("${TEST_FOLDER}/cypress/integration/example.test.js" "context('Example', () => {\n  beforeEach(() => { cy.visit('/'); });\n\n  it('should have loaded', () => {\n    cy.get('title').contains(/.*/);\n  });\n});\n")
-scaffold=(PATH_01[@] PATH_02[@] PATH_03[@])
-if [ ! -f "${!scaffold[0]:0:1}" ]; then
-  echo "[SCAFFOLD] Cypress test directory"
-  
-  length=${#scaffold[@]}
-  for ((i=0; i<$length; i++)); do
-    path="${!scaffold[i]:0:1}"
-    contents="${!scaffold[i]:1:1}"
-    
-    if [[ "${contents}" != "" ]]; then
-      printf "${contents}" > "${path}"
-    else
-      mkdir -p "${path}"
-    fi
-  done
-fi
-
 E2E_SERVICE="e2e"
 cypressCmd=""
 xlaunchPath="${SCRIPT_DIR}/XServer.xlaunch"
