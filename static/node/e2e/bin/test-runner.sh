@@ -34,6 +34,7 @@ else
 fi
 
 APP_SERVICE="#TOKEN:#TEST_RUNNER__APP_NAME"
+E2E_CONTAINER_NAME="e2e-#TOKEN:#TEST_RUNNER__APP_NAME"
 E2E_SERVICE="e2e-#TOKEN:#TEST_RUNNER__APP_NAME"
 cypressCmd=""
 xlaunchPath="${SCRIPT_DIR}/XServer.xlaunch"
@@ -68,7 +69,7 @@ if $WATCH_MODE; then
   fi
 
   if [[ "$display" != "" ]]; then
-    cypressCmd="docker compose run -e DISPLAY=$display ${extraArgs} --rm --entrypoint cypress ${E2E_SERVICE} open --project ."
+    cypressCmd="docker compose run --name=${E2E_CONTAINER_NAME} -e DISPLAY=$display ${extraArgs} --rm --entrypoint cypress ${E2E_SERVICE} open --project ."
     
     if [[ "$xlaunchBinary" != "" ]] && [ -f "$xlaunchBinary" ]; then
       echo;
