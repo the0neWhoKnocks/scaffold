@@ -64,7 +64,9 @@ RUN npm i --only=production --quiet --unsafe-perm \
 COPY --chown=node:node ./dist/constants.js ./constants.js
 COPY --chown=node:node ./dist/utils ./utils
 COPY --chown=node:node ./dist/server ./server
+#TOKEN:^DOCKER__CLIENT
 COPY --chown=node:node ./dist/public ./public
+#TOKEN:$DOCKER__CLIENT
 
 # Expose the default port from the Server, on the container
 EXPOSE 3000

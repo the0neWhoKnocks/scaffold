@@ -849,6 +849,7 @@ async function scaffold() {
         to: '.docker',
         tokens: [
           { token: 'DOCKER__APP_NAME', replacement: kebabAppName },
+          { token: 'DOCKER__CLIENT', remove: !addClient },
         ],
       },
       {
