@@ -575,6 +575,7 @@ async function scaffold() {
       
       if (clientFrameworkIsSvelte) {
         packageJSON.devDependencies['svelte'] = '4.2.2';
+        packageJSON.devDependencies['svelte-portal'] = '2.2.0';
         
         addParsedFiles([
           {

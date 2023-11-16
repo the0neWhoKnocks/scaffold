@@ -317,6 +317,7 @@
   {/if}
   <!--TOKEN:$APP__MULTI_USER -->
 </div>
+<div id="overlays"></div>
 
 <style>
   .app {
