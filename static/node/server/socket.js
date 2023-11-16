@@ -44,6 +44,11 @@ function accountForServerDeath(server) {
   deathSignals.forEach(signal => process.once(signal, handleServerDeath));
 }
 
+function genUniqueId() {
+  const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+  return `${s4()}${s4()}-${s4()}`;
+}
+
 module.exports = function socket(server, opts = {}) {
   const wss = new WebSocketServer({ server });
   
@@ -99,6 +104,7 @@ module.exports = function socket(server, opts = {}) {
       dispatchToClient(type, data = {}) {
         if (socket.readyState === OPEN) socket.send(JSON.stringify({ data, type }));
       },
+      id: genUniqueId(),
     };
     
     if (opts.handleClientConnection) opts.handleClientConnection(_wss);
