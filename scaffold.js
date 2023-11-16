@@ -553,7 +553,7 @@ async function scaffold() {
           packageJSON.devDependencies['css-loader'] = '6.5.1';
           packageJSON.devDependencies['css-minimizer-webpack-plugin'] = '3.1.3';
           packageJSON.devDependencies['mini-css-extract-plugin'] = '2.4.4';
-          packageJSON.devDependencies['svelte-loader'] = '3.1.4';
+          packageJSON.devDependencies['svelte-loader'] = '3.1.9';
           
           copyFiles([{
             files: ['loader.remove-duplicate-svelte-classes.js'],
@@ -574,7 +574,7 @@ async function scaffold() {
       }
       
       if (clientFrameworkIsSvelte) {
-        packageJSON.devDependencies['svelte'] = '3.55.0'; 
+        packageJSON.devDependencies['svelte'] = '4.2.2';
         
         addParsedFiles([
           {
@@ -751,7 +751,7 @@ async function scaffold() {
       const sourceFolders = ['bin', 'src'];
       
       if (clientFrameworkIsSvelte) {
-        packageJSON.devDependencies['eslint-plugin-svelte3'] = '4.0.0'; 
+        packageJSON.devDependencies['eslint-plugin-svelte'] = '2.34.0';
         lintExts.push('svelte');
       }
       

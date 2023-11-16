@@ -12,9 +12,14 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const HASH_LENGTH = 5;
 const alias = {
   //TOKEN:^WP__SVELTE
-  svelte: resolve('node_modules', 'svelte'),
+  svelte: resolve('node_modules', 'svelte/src/runtime'),
   //TOKEN:$WP__SVELTE
 };
+const conditionNames = [
+  'require',
+  'node',
+  'svelte',
+];
 const extensions = [
   //TOKEN:^WP__SVELTE
   '.svelte',
@@ -170,7 +175,7 @@ const conf = {
       writeToFileEmit: true,
     }),
   ],
-  resolve: { alias, extensions, mainFields },
+  resolve: { alias, conditionNames, extensions, mainFields },
   stats: {
     children: false,
     entrypoints: false,
