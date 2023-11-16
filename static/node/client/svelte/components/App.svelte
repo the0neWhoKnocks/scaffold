@@ -16,6 +16,7 @@
     //TOKEN:$APP__API
     //TOKEN:^APP__WEB_SOCKET
     WS__CLOSE_CODE__USER_REMOVED,
+    WS__MSG__CONNECTED_TO_SERVER,
     WS__MSG__EXAMPLE,
     //TOKEN:$APP__WEB_SOCKET
   } from '../../constants';
@@ -214,6 +215,11 @@
       socketAPI.on(WS__CLOSE_CODE__USER_REMOVED, () => {
         log.info('User disconnected');
       });
+      
+      socketAPI.on(WS__MSG__CONNECTED_TO_SERVER, ({ id, msg }) => {
+        printMessage('WS', `${msg} with socket id: "${id}"`);
+      });
+      
       socketAPI.on(WS__MSG__EXAMPLE, ({ msg }) => {
         printMessage('WS', msg);
       });

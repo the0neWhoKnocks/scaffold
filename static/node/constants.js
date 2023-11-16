@@ -38,6 +38,7 @@ const constants = {
   //TOKEN:$CONST__VHOST
   //TOKEN:^CONST__WEB_SOCKETS
   WS__CLOSE_CODE__USER_REMOVED: 4000, // Close event numbers https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
+  WS__MSG__CONNECTED_TO_SERVER: 'connected to server',
   WS__MSG__EXAMPLE: 'example',
   //TOKEN:^CONST__VHOST
   WS__MSG__PING: 'ping',

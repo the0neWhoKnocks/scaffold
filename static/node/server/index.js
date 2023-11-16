@@ -44,6 +44,7 @@ const {
   //TOKEN:$SERVER__MULTI_USER
   SERVER__PORT,
   //TOKEN:^SERVER__WEBSOCKET
+  WS__MSG__CONNECTED_TO_SERVER,
   WS__MSG__EXAMPLE,
   //TOKEN:^SERVER_SOCKET__VHOST
   WS__MSG__PING,
@@ -252,7 +253,7 @@ const server = httpModule.createServer(serverOpts, /* TOKEN:#SERVER__APP_HANDLER
 //TOKEN:^SERVER__WEBSOCKET
 const wss = socket(server, {
   handleClientConnection: function handleClientConnection(wss) {
-    wss.dispatchToClient(WS__MSG__EXAMPLE, { msg: 'Hello, welcome to this App.' });
+    wss.dispatchToClient(WS__MSG__CONNECTED_TO_SERVER, { id: wss.id, msg: 'App connected to Server' });
   },
   msgHandlers: {
     client: {
