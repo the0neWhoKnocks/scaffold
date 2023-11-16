@@ -57,22 +57,26 @@ if (!process.env.FOR_CLIENT_BUNDLE) {
   const ROOT_PATH = resolve(__dirname, './');
   //TOKEN:^CONST__MULTI_USER
   const DATA_PATH = process.env.DATA_PATH || `${ROOT_PATH}/../data`;
+  //TOKEN:$CONST__MULTI_USER
   
-  constants.CRYPT__ALGORITHM = 'aes-256-gcm';
-  constants.CRYPT__LENGTH__BYTES = 16;
-  constants.CRYPT__LENGTH__KEY = 32;
-  constants.CRYPT__ENCODING = 'hex';
-  //TOKEN:$CONST__MULTI_USER
-  constants.DISCONNECT_TIMEOUT = 5000;
-  //TOKEN:^CONST__MULTI_USER
-  constants.PATH__CONFIG = `${DATA_PATH}/config.json`;
-  constants.PATH__DATA = DATA_PATH;
-  //TOKEN:$CONST__MULTI_USER
-  constants.PATH__PUBLIC = `${ROOT_PATH}/public`;
-  //TOKEN:^CONST__MULTI_USER
-  constants.PATH__USERS = `${DATA_PATH}/users.json`;
-  //TOKEN:$CONST__MULTI_USER
-  constants.SERVER__PORT = +process.env.SERVER_PORT || 3000;
+  Object.assign(constants, {
+    //TOKEN:^CONST__MULTI_USER
+    CRYPT__ALGORITHM: 'aes-256-gcm',
+    CRYPT__LENGTH__BYTES: 16,
+    CRYPT__LENGTH__KEY: 32,
+    CRYPT__ENCODING: 'hex',
+    //TOKEN:$CONST__MULTI_USER
+    DISCONNECT_TIMEOUT: 5000,
+    //TOKEN:^CONST__MULTI_USER
+    PATH__CONFIG: `${DATA_PATH}/config.json`,
+    PATH__DATA: DATA_PATH,
+    //TOKEN:$CONST__MULTI_USER
+    PATH__PUBLIC: `${ROOT_PATH}/public`,
+    //TOKEN:^CONST__MULTI_USER
+    PATH__USERS: `${DATA_PATH}/users.json`,
+    //TOKEN:$CONST__MULTI_USER
+    SERVER__PORT: +process.env.SERVER_PORT || 3000,
+  });
 }
 //TOKEN:$CONST__SERVER
 
