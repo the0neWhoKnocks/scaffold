@@ -38,7 +38,7 @@ E2E_CONTAINER_NAME="e2e-#TOKEN:#TEST_RUNNER__APP_NAME"
 E2E_SERVICE="e2e-#TOKEN:#TEST_RUNNER__APP_NAME"
 cypressCmd=""
 xlaunchPath="${SCRIPT_DIR}/XServer.xlaunch"
-extraArgs="-e CYPRESS_baseUrl=http://${DOCKER_HOST}:3000"
+extraArgs="-e CYPRESS_baseUrl=#TOKEN:#TEST_RUNNER__PROTOCOL://${DOCKER_HOST}:3000"
 
 # When watching for test changes, `open` (instead of `run`) Cypress so that the
 # Dev can use the GUI for an easy test writing experience.

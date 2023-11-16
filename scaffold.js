@@ -811,6 +811,7 @@ async function scaffold() {
           to: 'e2e/bin',
           tokens: [
             { token: 'TEST_RUNNER__APP_NAME', replacement: kebabAppName },
+            { token: 'TEST_RUNNER__PROTOCOL', replacement: (secure) ? 'https' : 'http' },
           ],
         },
         {
