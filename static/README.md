@@ -4,6 +4,9 @@
 //TOKEN:^README__DOCKER
 - [Docker](#docker)
 //TOKEN:$README__DOCKER
+//TOKEN:^README__E2E
+- [E2E Testing](#e2e-testing)
+//TOKEN:$README__E2E
 //TOKEN:^README__GH_PAGE
 - [GitHub Page](#github-page)
 //TOKEN:$README__GH_PAGE
