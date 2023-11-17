@@ -19,7 +19,6 @@ import './commands';
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
-
 function abortEarly() {
   if (
     this.currentTest.state === 'failed'

@@ -771,7 +771,7 @@ async function scaffold() {
     }
     
     if (e2eTests) {
-      packageJSON.devDependencies['eslint-plugin-cypress'] = '2.11.3';
+      packageJSON.devDependencies['eslint-plugin-cypress'] = '2.15.1';
       packageJSON.scripts['test'] = './e2e/bin/test-runner.sh';
       packageJSON.scripts['test:watch'] = 'npm run test -- --watch';
       
@@ -793,12 +793,12 @@ async function scaffold() {
           to: 'e2e/cypress/plugins',
         },
         {
-          files: ['commands.js', 'index.js'],
+          files: ['commands.js', 'e2e.js'],
           from: 'node/e2e/cypress/support',
           to: 'e2e/cypress/support',
         },
         {
-          files: ['.eslintrc.js', 'cypress.json', 'Dockerfile'],
+          files: ['.eslintrc.js', 'cypress.config.js', 'Dockerfile'],
           from: 'node/e2e',
           to: 'e2e',
         },
