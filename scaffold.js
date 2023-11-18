@@ -1,8 +1,8 @@
 const {
   existsSync,
   writeFileSync,
-} = require('fs');
-const { dirname, resolve } = require('path');
+} = require('node:fs');
+const { dirname, resolve } = require('node:path');
 const chalk = require('chalk');
 const mkdirp = require('mkdirp');
 const [

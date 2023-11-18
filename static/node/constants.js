@@ -52,7 +52,7 @@ const constants = {
 
 if (!process.env.FOR_CLIENT_BUNDLE) {
   // Server only (will be stripped out via WP)
-  const { resolve } = require('path');
+  const { resolve } = require('node:path');
   
   const ROOT_PATH = resolve(__dirname, './');
   //TOKEN:^CONST__MULTI_USER

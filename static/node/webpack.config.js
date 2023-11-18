@@ -1,4 +1,4 @@
-const { resolve } = require('path');
+const { resolve } = require('node:path');
 const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const { WebpackManifestPlugin } = require('webpack-manifest-plugin');

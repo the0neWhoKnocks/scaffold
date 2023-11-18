@@ -1,4 +1,4 @@
-const { promises: { access, chmod } } = require('fs');
+const { access, chmod } = require('node:fs/promises');
 
 module.exports = async function makeExecutable(filePath) {
   // https://chmod-calculator.com/

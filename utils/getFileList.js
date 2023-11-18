@@ -1,5 +1,5 @@
-const { promises: { readdir, stat } } = require('fs');
-const { basename, dirname } = require('path');
+const { readdir, stat } = require('node:fs/promises');
+const { basename, dirname } = require('node:path');
 
 module.exports = async function getFileList(
   { ignore = [], path: dirPath },
