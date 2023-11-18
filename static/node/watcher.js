@@ -23,7 +23,7 @@ let bSyncHTTPS;
 
 if (process.env.NODE_EXTRA_CA_CERTS) {
   //TOKEN:^WATCHER__SERVER
-  httpModule = require('https');
+  httpModule = require('node:https');
   protocol = 'https';
   //TOKEN:$WATCHER__SERVER
   //TOKEN:^WATCHER__CLIENT
@@ -35,7 +35,7 @@ if (process.env.NODE_EXTRA_CA_CERTS) {
 }
 //TOKEN:^WATCHER__SERVER
 else {
-  httpModule = require('http');
+  httpModule = require('node:http');
 }
 //TOKEN:$WATCHER__SERVER
 
@@ -87,8 +87,8 @@ const checkServer = () => new Promise((rootResolve, rootReject) => {
 //TOKEN:$WATCHER__SERVER
 
 const fileCheck = (file, timeout = 30) => new Promise((resolveCheck, rejectCheck) => {
-  const { existsSync } = require('fs');
-  const { resolve } = require('path');
+  const { existsSync } = require('node:fs');
+  const { resolve } = require('node:path');
   const filePath = resolve(__dirname, file);
   const exists = () => existsSync(filePath);
   let elapsedTime = 0;
@@ -159,7 +159,7 @@ fileGate
             delete serverFilesWatcher.events;
             
             if (serverSyncCmd) {
-              const { execSync } = require('child_process');
+              const { execSync } = require('node:child_process');
               execSync(serverSyncCmd);
             }
           }, 300);

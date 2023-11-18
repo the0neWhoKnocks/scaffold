@@ -1,5 +1,6 @@
+const { spawn } = require('node:child_process');
+
 const cmd = (cmd, { cwd, onError, shell = 'sh', silent = true } = {}) => new Promise((resolve, reject) => {
-  const { spawn } = require('child_process');
   const opts = { cwd };
   const child = spawn(shell, ['-c', cmd], opts);
   let stdout = '';

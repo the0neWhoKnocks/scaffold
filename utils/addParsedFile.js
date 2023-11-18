@@ -1,4 +1,4 @@
-const { promises: { readFile, writeFile } } = require('fs');
+const { readFile, writeFile } = require('node:fs/promises');
 const makeExecutable = require('./makeExecutable');
 const replaceTokens = require('./replaceTokens');
 

@@ -1,5 +1,5 @@
-const { promises: { copyFile: fsCopyFile } } = require('fs');
-const { basename } = require('path');
+const { copyFile: fsCopyFile } = require('node:fs/promises');
+const { basename } = require('node:path');
 const makeExecutable = require('./makeExecutable');
 
 module.exports = ({
