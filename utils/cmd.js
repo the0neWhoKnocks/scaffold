@@ -1,6 +1,6 @@
 const { spawn } = require('node:child_process');
 
-const cmd = (cmd, { cwd, onError, shell = 'sh', silent = true } = {}) => new Promise((resolve, reject) => {
+const cmd = (cmd, { cwd, shell = 'sh', silent = true } = {}) => new Promise((resolve, reject) => {
   const opts = { cwd };
   const child = spawn(shell, ['-c', cmd], opts);
   let stdout = '';
@@ -19,19 +19,12 @@ const cmd = (cmd, { cwd, onError, shell = 'sh', silent = true } = {}) => new Pro
   });
   
   child.on('close', async (statusCode) => {
-    if (statusCode === 0) resolve(
-      stdout
-        .split('\n')
-        .filter(line => !!line.trim())
-        .join('\n')
-    );
+    if (statusCode === 0) {
+      resolve( stdout.split('\n').filter(line => !!line.trim()).join('\n') );
+    }
     else {
-      if (onError) {
-        if (onError.constructor.name === 'AsyncFunction') await onError(stderr);
-        else onError(stderr);
-      }
-      reject(`Command "${cmd}" failed\n${stderr}`);
-      process.exit(statusCode);
+      const errMsg = (stderr) ? `:\n${stderr}` : '';
+      reject(`Command "${cmd}" failed with code "${statusCode}"${errMsg}`);
     }
   });
 });
