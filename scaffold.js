@@ -2,15 +2,26 @@ const {
   existsSync,
   writeFileSync,
 } = require('node:fs');
-const { dirname, resolve } = require('node:path');
+const { basename, dirname, resolve } = require('node:path');
 const chalk = require('chalk');
 const mkdirp = require('mkdirp');
-const [
-  nodeBinary,
-  PATH__SOURCE_SCRIPT,
-  PATH__PROJECT_ROOT,
-] = process.argv;
+const cmd = require('./utils/cmd');
+const getFileList = require('./utils/getFileList');
+const kebabCase = require('./utils/kebabCase');
+const merge = require('./utils/merge');
+const sortObj = require('./utils/sortObj');
+
+const [ , PATH__SOURCE_SCRIPT, PATH__PROJECT_ROOT ] = process.argv;
 const PATH__SOURCE_ROOT = dirname(PATH__SOURCE_SCRIPT);
+const addParsedFile = require('./utils/addParsedFile')({
+  outputRoot: PATH__PROJECT_ROOT,
+  srcRoot: `${PATH__SOURCE_ROOT}/static`,
+});
+const copyFile = require('./utils/copyFile')({
+  outputRoot: PATH__PROJECT_ROOT,
+  staticRoot: `${PATH__SOURCE_ROOT}/static`,
+});
+
 const GLOBS__DELETE_FILES = [
   '**/*',
   '!.git',
@@ -21,46 +32,50 @@ const GLOBS__DELETE_FILES = [
   '!package-lock.json',
   '!yarn.lock',
 ];
-
-// Prevent running the script in it's repo
-if (PATH__PROJECT_ROOT.startsWith(PATH__SOURCE_ROOT)) {
-  console.log([
-    "",
-    "  [ ERROR ]",
-    "",
-    "  Looks like you're trying to run the scaffold script within it's source",
-    "  directory. You'll want to create a new directory and run the script in",
-    "  that new folder.",
-  ].join('\n'));
-  process.exit(0);
-}
-
-const addParsedFile = require('./utils/addParsedFile')({
-  outputRoot: PATH__PROJECT_ROOT,
-  srcRoot: `${PATH__SOURCE_ROOT}/static`,
-});
-const kebabCase = require('./utils/kebabCase');
-const merge = require('./utils/merge');
-const sortObj = require('./utils/sortObj');
-const getFileList = require('./utils/getFileList');
-const copyFile = require('./utils/copyFile')({
-  outputRoot: PATH__PROJECT_ROOT,
-  staticRoot: `${PATH__SOURCE_ROOT}/static`,
-});
-const cmd = require('./utils/cmd');
-
 const pendingParsedFiles = [];
+const pendingFileCopies = [];
+
 function addParsedFiles(items) {
   pendingParsedFiles.push(...items);
 }
 
-const pendingFileCopies = [];
 function copyFiles(items) {
   pendingFileCopies.push(...items);
 }
 
 async function scaffold() {
-  // NOTE - inquirer is very slow to load, so only bring it in when needed
+  // Don't allow within '.git' or 'node_modules' folders
+  if (/(\.git|node_modules)$/.test(PATH__PROJECT_ROOT)) {
+    console.log([
+      "",
+      "  [ ERROR ]",
+      "",
+      `  Looks like you're trying to run the scaffold script within "${basename(PATH__PROJECT_ROOT)}"`,
+      "  which is not valid. Try to run in another folder.",
+    ].join('\n'));
+    process.exit(1);
+  }
+  // Prevent running the script in it's repo (unless within an ignored directory)
+  else if (PATH__PROJECT_ROOT.startsWith(PATH__SOURCE_ROOT)) {
+    try {
+      await cmd(`git check-ignore "${PATH__PROJECT_ROOT}"`, { cwd: PATH__SOURCE_ROOT });
+    }
+    catch (err) {
+      console.log([
+        "",
+        "  [ ERROR ]",
+        "",
+        "  Looks like you're trying to run the scaffold script within it's source",
+        "  repo. You have a couple of options:",
+        "",
+        "  1. Create a new directory outside of this repo and run the script in",
+        "     that new folder.",
+        "  2. Create a folder in this repo, and add it to the .gitignore file.",
+      ].join('\n'));
+      process.exit(1);
+    }
+  }
+  
   const { prompt } = require('inquirer');
   
   // Check for updates before running
