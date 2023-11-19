@@ -4,7 +4,7 @@ const {
 } = require('node:fs');
 const { basename, dirname, resolve } = require('node:path');
 const chalk = require('chalk');
-const mkdirp = require('mkdirp');
+const { mkdirp } = require('mkdirp');
 const cmd = require('./utils/cmd');
 const getFileList = require('./utils/getFileList');
 const kebabCase = require('./utils/kebabCase');
