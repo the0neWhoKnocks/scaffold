@@ -14,11 +14,11 @@ A CLI tool for scaffolding out projects.
     # install Node deps and wire up git hooks
     npm i && git config --local core.hooksPath ./.githooks/
     ```
-- In your shell's `rc` file source the aliases file
+- In your shell's `rc` file source the shell script
     ```sh
     # in a .zshrc file
 
-    source "REPO_ROOT/bin/aliases.sh"
+    source "REPO_ROOT/bin/scaffold.sh"
     ```
     Then source your shell to expose the `scaffold` function
     ```sh
