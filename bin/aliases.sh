@@ -7,6 +7,6 @@ function scaffold {
   
   (
     cd "${SCAFFOLD_DIR}"
-    node scaffold.js "${PROJECT_DIR}"
+    node scaffold.js "$@" "${PROJECT_DIR}"
   )
 }

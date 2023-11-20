@@ -5,13 +5,31 @@ const {
 const { basename, dirname, resolve } = require('node:path');
 const chalk = require('chalk');
 const { mkdirp } = require('mkdirp');
+const yargs = require('yargs/yargs');
+const { hideBin } = require('yargs/helpers');
 const cmd = require('./utils/cmd');
 const getFileList = require('./utils/getFileList');
 const kebabCase = require('./utils/kebabCase');
 const merge = require('./utils/merge');
 const sortObj = require('./utils/sortObj');
+const {
+  cliOpts,
+  projectType,
+  scaffoldQuestions,
+  updateQuestions,
+} = require('./cliOpts');
 
-const [ , PATH__SOURCE_SCRIPT, PATH__PROJECT_ROOT ] = process.argv;
+const { argv: { skipUpdateCheck, ...rawCLIVals } } = yargs(hideBin(process.argv)).options(cliOpts);
+const cliAnswers = Object.entries(rawCLIVals).reduce((obj, [ key, val ]) => {
+  if (key !== '_' && key !== '$0' && !key.includes('-')) {
+    obj[key] = val;
+  }
+  return obj;
+}, {});
+const testing = cliAnswers.testing;
+
+const [ , PATH__SOURCE_SCRIPT ] = process.argv;
+const [ PATH__PROJECT_ROOT ] = rawCLIVals._;
 const PATH__SOURCE_ROOT = dirname(PATH__SOURCE_SCRIPT);
 const addParsedFile = require('./utils/addParsedFile')({
   outputRoot: PATH__PROJECT_ROOT,
@@ -78,267 +96,45 @@ async function scaffold() {
   
   const { prompt } = require('inquirer');
   
-  // Check for updates before running
-  console.log('\n  Checking for updates');
-  const repoStatus = await cmd('git fetch && git status -sb', { cwd: PATH__SOURCE_ROOT });
-  const behindAhead = repoStatus.split('\n')[0].match(/\[[^\]]+]$/); // get the bracketed content at the end
-  // NOTE - The status could be both `ahead` and `behind` if changes to the remote
-  // have occurred, and the local repo has committed changes as well.
-  if (behindAhead && behindAhead[0].includes('behind')) {
-    const { update } = await prompt([
-      {
-        message: 'Update available. Update now?',
-        type: 'list',
-        name: 'update',
-        default: 0,
-        choices: [
-          { name: 'Yes', value: 'now' },
-          { name: 'Later', value: 'later' },
-        ],
-      },
-    ]);
-    
-    if (update === 'now') {
-      const unCommittedChangesExist = (await cmd('git diff', { cwd: PATH__SOURCE_ROOT }) !== '');
-      if (unCommittedChangesExist) {
-        console.log('[STASH] changes');
-        await cmd('git stash', { cwd: PATH__SOURCE_ROOT });
+  if (!skipUpdateCheck) {
+    // Check for updates before running
+    console.log('\n  Checking for updates');
+    const repoStatus = await cmd('git fetch && git status -sb', { cwd: PATH__SOURCE_ROOT });
+    const behindAhead = repoStatus.split('\n')[0].match(/\[[^\]]+]$/); // get the bracketed content at the end
+    // NOTE - The status could be both `ahead` and `behind` if changes to the remote
+    // have occurred, and the local repo has committed changes as well.
+    if (behindAhead && behindAhead[0].includes('behind')) {
+      const { update } = await prompt(updateQuestions);
+      
+      if (update === 'now') {
+        const unCommittedChangesExist = (await cmd('git diff', { cwd: PATH__SOURCE_ROOT }) !== '');
+        if (unCommittedChangesExist) {
+          console.log('[STASH] changes');
+          await cmd('git stash', { cwd: PATH__SOURCE_ROOT });
+        }
+        
+        // rebase
+        console.log('[REBASING] from origin/master');
+        await cmd('git pull --rebase origin master', { cwd: PATH__SOURCE_ROOT });
+        
+        if (unCommittedChangesExist) {
+          console.log('[UN-STASH] changes');
+          await cmd('git stash apply', { cwd: PATH__SOURCE_ROOT });
+        }
+        
+        console.log('Update complete. Re-run script to scaffold project.');
+        process.exit();
       }
-      
-      // rebase
-      console.log('[REBASING] from origin/master');
-      await cmd('git pull --rebase origin master', { cwd: PATH__SOURCE_ROOT });
-      
-      if (unCommittedChangesExist) {
-        console.log('[UN-STASH] changes');
-        await cmd('git stash apply', { cwd: PATH__SOURCE_ROOT });
-      }
-      
-      console.log('Update complete. Re-run script to scaffold project.');
-      process.exit();
+    }
+    else {
+      console.log('  No updates\n');
     }
   }
   else {
-    console.log('  No updates\n');
+    console.log('  Skipped update check\n');
   }
   
-  const deployOpts = ({ addClient }) => {
-    return [
-      { name: 'GitHub Page', value: { ghPage: true }, checked: false },
-    ].filter(({ value: { ghPage } }) => {
-      if (!addClient && ghPage) return false;
-      return true;
-    });
-  };
-  
-  const projectType = 'node';
-  const scaffoldOpts = await prompt([
-    // {
-    //   message: 'Project Type',
-    //   type: 'list',
-    //   name: 'projectType',
-    //   choices: [
-    //     { name: 'Node.js', value: 'node' },
-    //   ],
-    // },
-    {
-      message: 'Remove previously scaffolded files?',
-      type: 'confirm',
-      name: 'removePreviousScaffold',
-      when: () => {
-        let previouslyScaffolded = false;
-        
-        if (projectType === 'node') previouslyScaffolded = existsSync(`${PATH__PROJECT_ROOT}/src`);
-        
-        return previouslyScaffolded;
-      },
-    },
-    {
-      message: 'Add Server',
-      type: 'confirm',
-      name: 'addServer',
-    },
-    {
-      message: '  Server Framework',
-      type: 'list',
-      name: 'serverFramework',
-      default: 0,
-      when: ({ addServer }) => addServer,
-      choices: [
-        { name: 'Node', value: 'node' },
-        { name: 'Express', value: 'express' },
-        { name: 'Polka', value: 'polka' },
-      ],
-    },
-    {
-      message: '  Server Options',
-      type: 'checkbox',
-      name: 'serverOptions',
-      when: ({ addServer }) => addServer,
-      filter: answers => merge(answers),
-      choices: [
-        {
-          name: 'Will have an API',
-          short: 'API',
-          value: { apiEnabled: true },
-          checked: false,
-        },
-        {
-          name: 'Will make external requests',
-          short: 'External Requests',
-          value: { externalRequests: true },
-          checked: false,
-        },
-        {
-          name: 'Will serve static assets',
-          short: '[middleware] Static',
-          value: { middleware: { staticFiles: true } },
-          checked: false,
-        },
-        {
-          name: 'Should support User accounts',
-          short: 'Users',
-          value: { multiUser: true },
-          checked: false,
-        },
-        {
-          name: 'Should support https',
-          short: 'Secure',
-          value: { secure: true },
-          checked: false,
-        },
-        {
-          name: 'Should support virtual hosts',
-          short: 'VHosts',
-          value: { vHost: true },
-          checked: false,
-        },
-        {
-          name: 'Should support Web Sockets',
-          short: 'Web Socket',
-          value: { webSocket: true },
-          checked: false,
-        },
-        {
-          name: 'Should gzip responses',
-          short: '[middleware] GZip',
-          value: { middleware: { compression: true } },
-          checked: false,
-        },
-        {
-          name: 'Should be able to read/write cookies',
-          short: '[middleware] Cookies',
-          value: { middleware: { cookies: true } },
-          checked: false,
-        },
-      ],
-    },
-    {
-      message: 'Add Client',
-      type: 'confirm',
-      name: 'addClient',
-    },
-    {
-      message: '  Client Framework',
-      type: 'list',
-      name: 'clientFramework',
-      when: ({ addClient }) => addClient,
-      default: 1,
-      choices: [
-        { name: 'None', value: 'none' },
-        { name: 'Svelte', value: 'svelte' },
-      ],
-    },
-    {
-      message: '  Bundler',
-      type: 'list',
-      name: 'bundler',
-      when: ({ addClient }) => addClient,
-      choices: ({ clientFramework }) => {
-        return [
-          { name: 'None', value: 'none' },
-          { name: 'Webpack', value: 'webpack' },
-          // { name: 'Rollup', value: 'rollup' },
-        ].filter(q => {
-          if (clientFramework !== 'svelte') return true;
-          return clientFramework === 'svelte' && q.value !== 'none';
-        });
-      },
-    },
-    {
-      message: 'Dev Options',
-      type: 'checkbox',
-      name: 'devOptions',
-      when: ({ addClient, addServer }) => addClient || addServer,
-      filter: answers => merge(answers),
-      choices: [
-        { name: 'Add .env file', value: { dotenv: true }, checked: false },
-        { name: 'Add e2e tests', value: { e2eTests: true }, checked: false },
-        { name: 'Add logging util', value: { logger: 'ulog' }, checked: true },
-        { name: 'ESLint', value: { eslint: true }, checked: true },
-        { name: 'Watch for changes', value: { hasWatcher: true }, checked: true },
-      ],
-    },
-    {
-      message: 'App Title',
-      type: 'input',
-      name: 'appTitle',
-      default: 'App',
-    },
-    {
-      message: 'Logger Namespace',
-      type: 'input',
-      name: 'loggerNamespace',
-      default: 'app',
-      when: ({ devOptions }) => devOptions && devOptions.logger,
-    },
-    {
-      message: 'LocalStorage Namespace',
-      type: 'input',
-      name: 'storageNamespace',
-      default: ({ loggerNamespace }) => loggerNamespace || 'app',
-      when: ({ serverOptions }) => serverOptions && serverOptions.multiUser,
-    },
-    {
-      message: 'Container Platform',
-      type: 'list',
-      name: 'containerPlatform',
-      default: ({
-        devOptions: { e2eTests },
-        serverOptions: { vHost },
-      }) => {
-        if (e2eTests || vHost) return 1;
-        return 1; // keeping the above logic in case I change this later
-      },
-      choices: [
-        { name: 'None', value: '' },
-        { name: 'Docker', value: 'docker' },
-      ],
-    },
-    {
-      message: '  Docker Username',
-      type: 'input',
-      name: 'docker.username',
-      default: 'theonewhoknocks',
-      when: ({ containerPlatform }) => containerPlatform === 'docker',
-    },
-    // {
-    //   message: '  Docker Password',
-    //   type: 'password',
-    //   mask: '*',
-    //   name: 'docker.password',
-    //   when: ({ containerPlatform }) => containerPlatform === 'docker',
-    // },
-    {
-      message: 'Deployment Options',
-      type: 'checkbox',
-      name: 'deploymentOptions',
-      filter: answers => merge(answers),
-      when: answers => !!deployOpts(answers).length,
-      choices: answers => deployOpts(answers),
-    },
-  ]);
-  
+  const scaffoldAnswers = await prompt(scaffoldQuestions, cliAnswers);
   const {
     addClient,
     addServer,
@@ -353,7 +149,7 @@ async function scaffold() {
     serverFramework,
     serverOptions,
     storageNamespace,
-  } = scaffoldOpts;
+  } = scaffoldAnswers;
   const {
     ghPage,
   } = (deploymentOptions || {});
@@ -399,17 +195,22 @@ async function scaffold() {
         onlyFiles: false, // globby specific
         root: PATH__PROJECT_ROOT,
       });
-      const { deleteList } = await prompt({
-        message: 'These files will be removed',
-        type: 'checkbox',
-        name: 'deleteList',
-        choices: filesToDelete.map(f => ({
-          name: f,
-          checked: true,
-        }))
-      });
+      let list = filesToDelete;
       
-      await del(deleteList, { cwd: PATH__PROJECT_ROOT });
+      if (cliAnswers.removePreviousScaffold === undefined) {
+        const { deleteList } = await prompt({
+          message: 'These files will be removed',
+          type: 'checkbox',
+          name: 'deleteList',
+          choices: filesToDelete.map(f => ({
+            name: f,
+            checked: true,
+          }))
+        });
+        list = deleteList;
+      }
+      
+      await del(list, { cwd: PATH__PROJECT_ROOT });
     }
     
     const packageJSON = {
@@ -1005,7 +806,8 @@ async function scaffold() {
   }
   
   if (
-    projectType === 'node'
+    !testing
+    && projectType === 'node'
     && !docker
     && existsSync(`${PATH__PROJECT_ROOT}/package.json`)
     && !existsSync(`${PATH__PROJECT_ROOT}/node_modules`)
@@ -1014,37 +816,39 @@ async function scaffold() {
     await cmd('npm i', { cwd: PATH__PROJECT_ROOT, silent: false });
   }
   
-  const fileList = await getFileList({
-    ignore: ['.git/', 'node_modules/'],
-    path: PATH__PROJECT_ROOT,
-  });
-  console.log([
-    '\n ╭────────╮',
-    '\n │ RESULT │',
-    '\n─┘        └────────',
-    `\n${fileList}`,
-  ].join(''));
-  
-  const addedDockerFuncs = docker && pendingParsedFiles.find(({ file }) => file === 'repo-funcs.sh');
-  const listItems = [];
-  if (addedDockerFuncs) {
-    if (secure) {
-      listItems.push(`Read the ${chalk.cyan('Local HTTPS')} section in the ${chalk.cyan('README')} to wire up your certs properly.`);
+  if (!testing) {
+    const fileList = await getFileList({
+      ignore: ['.git/', 'node_modules/'],
+      path: PATH__PROJECT_ROOT,
+    });
+    console.log([
+      '\n ╭────────╮',
+      '\n │ RESULT │',
+      '\n─┘        └────────',
+      `\n${fileList}`,
+    ].join(''));
+    
+    const addedDockerFuncs = docker && pendingParsedFiles.find(({ file }) => file === 'repo-funcs.sh');
+    const listItems = [];
+    if (addedDockerFuncs) {
+      if (secure) {
+        listItems.push(`Read the ${chalk.cyan('Local HTTPS')} section in the ${chalk.cyan('README')} to wire up your certs properly.`);
+      }
+      
+      listItems.push(
+        `Run: ${chalk.cyan('source ./bin/repo-funcs.sh && echo "Loaded: \${REPO_FUNCS}"')}`,
+        `Start the Container with: ${chalk.cyan('startcont')}`,
+        `Install Dev dependencies with: ${chalk.cyan('npm i')}`,
+      );
     }
     
     listItems.push(
-      `Run: ${chalk.cyan('source ./bin/repo-funcs.sh && echo "Loaded: \${REPO_FUNCS}"')}`,
-      `Start the Container with: ${chalk.cyan('startcont')}`,
-      `Install Dev dependencies with: ${chalk.cyan('npm i')}`,
+      `Start the App with: ${chalk.cyan('nr start:dev')}`,
     );
+    
+    console.log(`\n${chalk.green.inverse(' TODO ')} ${chalk.cyan('The rest is up to you')}`);
+    console.log(`\nChecklist:\n${listItems.map(str => `  - ${str}\n`).join('')}`);
   }
-  
-  listItems.push(
-    `Start the App with: ${chalk.cyan('nr start:dev')}`,
-  );
-  
-  console.log(`\n${chalk.green.inverse(' TODO ')} ${chalk.cyan('The rest is up to you')}`);
-  console.log(`\nChecklist:\n${listItems.map(str => `  - ${str}\n`).join('')}`);
 }
 
 scaffold();
