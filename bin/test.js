@@ -9,7 +9,7 @@ const cmd = require('../utils/cmd');
   
   const runScaffold = (args, dir) => {
     const _args = args.split('\n').map(l => l.trim()).join(' ');
-    return cmd(`source "${__dirname}/aliases.sh" && scaffold ${_args}`, { cwd: dir, shell: process.env.SHELL, silent: false });
+    return cmd(`source "${__dirname}/scaffold.sh" && scaffold ${_args}`, { cwd: dir, shell: process.env.SHELL, silent: false });
   };
   
   const findTokens = async (dir) => {
