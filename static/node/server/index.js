@@ -264,11 +264,11 @@ const wss = socket(server, {
           msg: `Client: ${data.d} | Server: ${Date.now()}`,
         });
       },
-      //TOKEN:^SERVER_SOCKET__VHOST
+      //TOKEN:^SERVER__VHOST
       [WS__MSG__PING]: function handlePing(wss) {
         wss.dispatchToClient(WS__MSG__PONG, {});
       },
-      //TOKEN:$SERVER_SOCKET__VHOST
+      //TOKEN:$SERVER__VHOST
     },
     server: {
       [WS__MSG__SERVER_UP]: function handleServerStart(wss) {
