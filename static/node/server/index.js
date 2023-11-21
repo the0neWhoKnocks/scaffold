@@ -72,6 +72,7 @@ const shell = require('./shell');
 
 const { NODE_ENV } = process.env;
 const dev = NODE_ENV !== 'production';
+//TOKEN:^SERVER__MIDDLEWARE
 const middleware = [
   //TOKEN:^SERVER__COMPRESS
   compression({ threshold: 0 }),
@@ -83,6 +84,7 @@ const middleware = [
   cookieParser(),
   //TOKEN:$SERVER__COOKIES
 ];
+//TOKEN:$SERVER__MIDDLEWARE
 //TOKEN:^SERVER__FRAMEWORK__EXPRESS
 const app = express();
 //TOKEN:$SERVER__FRAMEWORK__EXPRESS
@@ -193,7 +195,9 @@ app
   
     next();
   })
+  //TOKEN:^SERVER__MIDDLEWARE
   .use(...middleware)
+  //TOKEN:$SERVER__MIDDLEWARE
   //TOKEN:^SERVER__MULTI_USER
   .use((req, res, next) => {
     if (existsSync(PATH__CONFIG)) req.appConfig = JSON.parse(readFileSync(PATH__CONFIG, 'utf8'));
