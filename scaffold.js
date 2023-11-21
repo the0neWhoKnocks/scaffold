@@ -134,7 +134,7 @@ async function scaffold() {
     console.log('  Skipped update check\n');
   }
   
-  const scaffoldAnswers = await prompt(scaffoldQuestions, cliAnswers);
+  const scaffoldAnswers = await prompt(scaffoldQuestions, { PATH__PROJECT_ROOT, ...cliAnswers });
   const {
     addClient,
     addServer,
