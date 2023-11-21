@@ -183,7 +183,6 @@ const scaffoldQuestions = [
     type: 'input',
     name: 'loggerNamespace',
     default: 'app',
-    when: ({ devOptions }) => devOptions?.logger,
   },
   {
     message: 'LocalStorage Namespace',
