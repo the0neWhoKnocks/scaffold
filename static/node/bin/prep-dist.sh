@@ -7,3 +7,10 @@ mkdir -p #TOKEN:#PREP__FOLDERS
 rsync -avh \
   #TOKEN:#PREP__SERVER_FILE_PATHS
   ./dist --delete
+#TOKEN:^PREP__STATIC
+
+# Sync Static files
+rsync -avh \
+  ./src/static \
+  ./dist/public/imgs --delete
+#TOKEN:$PREP__STATIC
