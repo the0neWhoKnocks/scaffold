@@ -297,6 +297,7 @@ async function scaffold() {
                 : '',
             },
             { token: 'SERVER__HTTPS', remove: !secure },
+            { token: 'SERVER__MIDDLEWARE', remove: !compression && !cookies && !staticFiles },
             { token: 'SERVER__MULTI_USER', remove: !multiUser },
             { token: 'SERVER__NO_VHOST', remove: vHost },
             { token: 'SERVER__STATIC', remove: !staticFiles },
