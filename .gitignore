@@ -1,6 +1,7 @@
 # Folders
 .git
 .ignore
+certs*
 node_modules
 
 # Files

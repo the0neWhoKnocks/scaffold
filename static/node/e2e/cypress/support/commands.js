@@ -108,3 +108,13 @@ Cypress.Commands.add('getAliases', function(...aliasNames) {
   const arr = aliasNames.map(a => this[a]);
   return (arr.length === 1) ? arr[0] : arr;
 });
+//TOKEN:^COMMANDS__PROXY
+
+const ENDPOINT__PROXY_STATE = 'http://172.17.0.1:9002/state';
+Cypress.Commands.add('setProxyState', (state = {}) => {
+  cy.request('PUT', ENDPOINT__PROXY_STATE, state);
+});
+Cypress.Commands.add('clearProxyState', () => {
+  cy.setProxyState();
+});
+//TOKEN:$COMMANDS__PROXY

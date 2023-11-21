@@ -167,6 +167,7 @@ const scaffoldQuestions = [
     choices: [
       { name: 'Add .env file', value: { dotenv: true }, checked: false },
       { name: 'Add e2e tests', value: { e2eTests: true }, checked: false },
+      { name: 'Add e2e proxy (external requests get cached & served)', value: { e2eProxy: true }, checked: false },
       { name: 'Add fancy logging util', value: { logger: 'ulog' }, checked: true },
       { name: 'ESLint', value: { eslint: true }, checked: true },
       { name: 'Watch for changes', value: { hasWatcher: true }, checked: true },

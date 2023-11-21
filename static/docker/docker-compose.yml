@@ -78,7 +78,7 @@ services:
     # command: 'cypress run --browser chrome'
     container_name: e2e-#TOKEN:#DC__APP_NAME
     depends_on:
-      - #TOKEN:#DC__APP_NAME
+      - #TOKEN:#DC__E2E_DEPENDS_ON
     # environment:
     #   # ELECTRON_ENABLE_LOGGING: 1 # view console logs from Browser (headless)
     #   # DEBUG: cypress:server:browsers:electron # view Electron internal logging
@@ -118,3 +118,50 @@ services:
       # Uncomment to view the generated config
       # - "${PWD}/.docker/vhost/conf.d:/etc/nginx/conf.d"
   #TOKEN:$DC__VHOST
+  #TOKEN:^DC__E2E_PROXY
+  
+  proxy:
+    container_name: #TOKEN:#DC__APP_NAME_proxy
+    environment:
+      CRT: /home/node/certs/localhost.crt
+      KEY: /home/node/certs/localhost.key
+      MOCKS_PATH: /home/node/proxy/cache
+      NODE_EXTRA_CA_CERTS: /home/node/certs/localhost-CA.crt
+    image: theonewhoknocks/nodejs-proxy
+    ports:
+      - 9002:80
+      - 9229:9229
+    user: "${CURR_UID}:${CURR_GID}"
+    volumes:
+      # cert is required to handle any secure traffic
+      - type: bind
+        source: "${PWD}/certs"
+        target: "/home/node/certs"
+      - type: bind
+        source: "${PWD}/e2e/cypress/fixtures/cache"
+        target: "/home/node/proxy/cache"
+      - "${PWD}/proxy/matcher.js:/home/node/proxy/matcher.js"
+  
+  proxied-app:
+    extends: #TOKEN:#DC__APP_NAME
+    command: node --inspect=0.0.0.0:9230 /home/node/app/server
+    container_name: proxied_app
+    depends_on:
+      - proxy
+    environment:
+      # proxy stuff
+      #TOKEN:^DC__NODE_CERTS
+      NODE_EXTRA_CA_CERTS: /home/node/certs/localhost.crt
+      #TOKEN:$DC__NODE_CERTS
+      NODE_TLS_REJECT_UNAUTHORIZED: 0 # Using this to get around error "reason: Hostname/IP does not match certificate's altnames: Host: <HOST>. is not in the cert's altnames: DNS:localhost
+    links:
+      - "proxy:opentdb.com"
+    ports:
+      - 9230:9230
+    #TOKEN:^DC__NODE_CERTS
+    volumes:
+      - type: bind
+        source: "${PWD}/certs"
+        target: "/home/node/certs"
+    #TOKEN:$DC__NODE_CERTS
+  #TOKEN:$DC__E2E_PROXY
