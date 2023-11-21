@@ -89,8 +89,11 @@ services:
     privileged: true
     working_dir: /e2e
     volumes:
+      - type: bind
+        source: "${PWD}/.app_data"
+        target: "/app_data"
       - "${PWD}/e2e:/e2e"
-      - "${PWD}/.app_data:/app/data"
+      - "${PWD}/src:/src"
   #TOKEN:$DC__E2E
   #TOKEN:^DC__VHOST
   
