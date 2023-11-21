@@ -714,6 +714,7 @@ async function scaffold() {
         to: '.docker',
       },
       {
+        executable: true,
         file: 'repo-funcs.sh',
         from: 'docker/bin',
         to: 'bin',
