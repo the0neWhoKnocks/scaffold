@@ -828,6 +828,17 @@ async function scaffold() {
   
   await Promise.all(pendingFiles);
   
+  if (!testing) {
+    // will return a list of files with tokens
+    try {
+      const badFiles = await cmd(`grep -r --exclude-dir=node_modules "TOKEN:" "${PATH__PROJECT_ROOT}"`);
+      console.log(`\n${chalk.red.inverse(' ERROR ')} Unprocessed tokens found:\n${badFiles}`);
+      process.exit(1);
+    }
+    // fails when nothing found
+    catch (err) { /* */ }
+  }
+  
   if (!existsSync(`${PATH__PROJECT_ROOT}/.git`)) {
     console.log(`\n${chalk.green.inverse(' INIT ')} ${chalk.cyan('git')}`);
     await cmd('git init', { cwd: PATH__PROJECT_ROOT, silent: false });
