@@ -130,12 +130,14 @@ const conf = {
       cleanOnceBeforeBuildPatterns: [
         '**/*',
         '!manifest.json', // the watcher won't pick up on changes if this is deleted
-        // NOTE - Uncomment/update the below if you have extra assets that should
+        //TOKEN:^WP__STATIC
+        // NOTE - Update the below if you have extra assets that should
         // not be deleted. Examples of such files/folders are anything generated
         // at startup before the bundling has started. Note that you have to
         // exclude the folder and it's contents separately.
-        // '!imgs',
-        // '!imgs/**/*',
+        '!imgs',
+        '!imgs/**/*',
+        //TOKEN:$WP__STATIC
       ],
       //TOKEN:^WP__SVELTE
       cleanStaleWebpackAssets: false, // Cleaning after rebuilds doesn't play nice with `mini-css-extract-plugin`

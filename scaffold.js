@@ -50,8 +50,9 @@ const GLOBS__DELETE_FILES = [
   '!package-lock.json',
   '!yarn.lock',
 ];
-const pendingParsedFiles = [];
 const pendingFileCopies = [];
+const pendingFolders = [];
+const pendingParsedFiles = [];
 
 function addParsedFiles(items) {
   pendingParsedFiles.push(...items);
@@ -59,6 +60,10 @@ function addParsedFiles(items) {
 
 function copyFiles(items) {
   pendingFileCopies.push(...items);
+}
+
+function addFolder(path) {
+  pendingFolders.push({ to: path });
 }
 
 async function scaffold() {
@@ -135,6 +140,19 @@ async function scaffold() {
   }
   
   const scaffoldAnswers = await prompt(scaffoldQuestions, { PATH__PROJECT_ROOT, ...cliAnswers });
+  
+  // If there's a Server and a bundler, chances are the User will need the below
+  // so ensure it gets added.
+  if (
+    scaffoldAnswers.addServer
+    && scaffoldAnswers.bundler !== 'none'
+    && !scaffoldAnswers.serverOptions?.middleware?.staticFiles
+  ) {
+    if (!scaffoldAnswers.serverOptions) { scaffoldAnswers.serverOptions = {}; }
+    if (!scaffoldAnswers.serverOptions?.middleware) { scaffoldAnswers.serverOptions.middleware = {}; }
+    scaffoldAnswers.serverOptions.middleware.staticFiles = true;
+  }
+  
   const {
     addClient,
     addServer,
@@ -383,6 +401,7 @@ async function scaffold() {
           from: 'node',
           to: '',
           tokens: [
+            { token: 'WP__STATIC', remove: !staticFiles },
             { token: 'WP__SVELTE', remove: !clientFrameworkIsSvelte },
             { token: 'WP__WATCH', remove: !hasWatcher },
           ],
@@ -463,8 +482,10 @@ async function scaffold() {
     if (addClient || addServer) {
       const removeEmpty = i => !!i;
       const prepFolders = [
-        addServer ? './dist/server' : '',
-        addClient ? './dist/public' : '',
+        (addServer) ? './dist/server' : '',
+        (addClient)
+          ? (staticFiles) ? './dist/public/imgs' : './dist/public'
+          : '',
       ];
       const prepServerPaths = [
         './src/constants.js',
@@ -472,6 +493,11 @@ async function scaffold() {
         logger ? './src/utils' : '',
       ];
       const hasAPI = apiEnabled || multiUser;
+      
+      if (staticFiles) {
+        addFolder('src/static');
+      }
+      
       addParsedFiles([
         {
           file: 'constants.js',
@@ -506,6 +532,7 @@ async function scaffold() {
               token: 'PREP__SERVER_FILE_PATHS',
               replacement: `${prepServerPaths.filter(removeEmpty).join(' \\\n  ')} \\`,
             },
+            { token: 'PREP__STATIC', remove: !staticFiles },
           ],
         }
       ]);
@@ -774,7 +801,7 @@ async function scaffold() {
   
   const pendingPaths = [
     // get a list of unique paths
-    ...new Set([...pendingFileCopies, ...pendingParsedFiles].map(({ to }) => to))
+    ...new Set([...pendingFileCopies, ...pendingFolders, ...pendingParsedFiles].map(({ to }) => to))
   ]
     .filter(i => !!i) // remove empty items
     .filter((i, n, arr) => { // remove any parent paths that'll be created due to a child path existing 
