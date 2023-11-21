@@ -1,4 +1,6 @@
+const { existsSync } = require('node:fs');
 const kebabCase = require('./utils/kebabCase');
+const merge = require('./utils/merge');
 
 const updateQuestions = [{
   message: 'Update available. Update now?',
@@ -36,7 +38,7 @@ const scaffoldQuestions = [
     message: 'Remove previously scaffolded files?',
     type: 'confirm',
     name: 'removePreviousScaffold',
-    when: () => {
+    when: ({ PATH__PROJECT_ROOT }) => {
       let previouslyScaffolded = false;
       
       if (projectType === 'node') previouslyScaffolded = existsSync(`${PATH__PROJECT_ROOT}/src`);
