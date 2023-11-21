@@ -641,7 +641,7 @@ async function scaffold() {
           to: 'e2e/cypress/support',
         },
         {
-          files: ['.eslintrc.js', 'cypress.config.js', 'Dockerfile'],
+          files: ['.eslintrc.js', 'cypress.config.js', 'Dockerfile', 'state.json'],
           from: 'node/e2e',
           to: 'e2e',
         },
