@@ -664,7 +664,6 @@ async function scaffold() {
           to: 'e2e/tests',
           tokens: [
             { token: 'TEST__API', remove: !apiEnabled },
-            { token: 'TEST__APP_TITLE', replacement: appTitle },
             { token: 'TEST__EXT_API', remove: !externalRequests },
             { token: 'TEST__MULTI_USER', remove: !multiUser },
             { token: 'TEST__SERVER_INTERACTIONS', remove: !hasServerInteractions },

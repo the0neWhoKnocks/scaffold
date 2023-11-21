@@ -1,3 +1,21 @@
+import c from '/src/constants';
+
+const {
+  APP__TITLE,
+  //TOKEN:^TEST__EXT_API
+  ROUTE__API__EXT,
+  //TOKEN:$TEST__EXT_API
+  //TOKEN:^TEST__API
+  ROUTE__API__HELLO,
+  //TOKEN:$TEST__API
+  //TOKEN:^TEST__MULTI_USER
+  ROUTE__API__USER_CREATE,
+  ROUTE__API__USER_LOGIN,
+  ROUTE__API__USER_SET_DATA,
+  ROUTE__API__USER_SET_PROFILE,
+  //TOKEN:$TEST__MULTI_USER
+} = c;
+
 context('App', () => {
   //TOKEN:^TEST__MULTI_USER
   const SELECTOR__CREATE_FORM = '.create-form';
@@ -60,7 +78,7 @@ context('App', () => {
   });
   
   it('should have the correct title', () => {
-    cy.get('title').contains('/* TOKEN:#TEST__APP_TITLE */');
+    cy.get('title').contains(APP__TITLE);
   });
   //TOKEN:^TEST__MULTI_USER
   
@@ -78,7 +96,7 @@ context('App', () => {
   //TOKEN:^TEST__API
   
   it('should make a request to the simple API', () => {
-    cy.intercept('GET', '/api/hello').as('API__HELLO');
+    cy.intercept('GET', ROUTE__API__HELLO).as('API__HELLO');
     cy.get('.app nav').contains('Trigger API').click();
     cy.wait('@API__HELLO');
     cy.get(`${SELECTOR__SERVER_DATA_LOGS} div`).then(($logs) => {
@@ -94,7 +112,8 @@ context('App', () => {
   //TOKEN:^TEST__EXT_API
   
   it('should make a request to an external API', () => {
-    cy.intercept('GET', '/api/ext').as('API__EXT');
+    cy.intercept('GET', ROUTE__API__EXT).as('API__EXT');
+    
     cy.get('.app nav').contains('Trigger Ext. API').click();
     cy.wait('@API__EXT');
     cy.get(`${SELECTOR__SERVER_DATA_LOGS} div`).then(($logs) => {
@@ -130,7 +149,7 @@ context('App', () => {
     cy.get(`${SELECTOR__LOGIN_FORM} button`).contains('Create Account').click();
     cy.screenshot('Create Account open');
     
-    cy.intercept('POST', '/api/user/create').as('API__CREATE_USER');
+    cy.intercept('POST', ROUTE__API__USER_CREATE).as('API__CREATE_USER');
     cy.get(`${SELECTOR__CREATE_FORM} input[name="username"]`).type('user');
     cy.get(`${SELECTOR__CREATE_FORM} input[name="password"]`).type('pass');
     cy.get(`${SELECTOR__CREATE_FORM} input[name="passwordConfirmed"]`).type('pass');
@@ -140,7 +159,7 @@ context('App', () => {
     cy.get(`${SELECTOR__LOGIN_FORM} input[name="password"]`).should('have.value', 'pass');
     cy.screenshot('User created');
     
-    cy.intercept('POST', '/api/user/login').as('API__LOGIN');
+    cy.intercept('POST', ROUTE__API__USER_LOGIN).as('API__LOGIN');
     cy.get(`${SELECTOR__LOGIN_FORM} button`).contains('Log In').click();
     cy.wait('@API__LOGIN');
     cy.get(SELECTOR__LOGIN_FORM).should('not.exist');
@@ -149,7 +168,7 @@ context('App', () => {
     cy.get(`${SELECTOR__USER_MENU} > button`).contains('user').click();
     cy.screenshot('User menu open');
     
-    cy.intercept('POST', '/api/user/profile/set').as('API__SET_USER');
+    cy.intercept('POST', ROUTE__API__USER_SET_PROFILE).as('API__SET_USER');
     cy.get(`${SELECTOR__USER_MENU} nav button`).contains('Edit Profile').click();
     cy.get(`${SELECTOR__USER_PROFILE_FORM} input[name="username"]`).type('{selectall}user1');
     cy.screenshot('User name changed');
@@ -158,7 +177,7 @@ context('App', () => {
     cy.get(SELECTOR__USER_PROFILE_FORM).should('not.exist');
     cy.screenshot('User name updated');
     
-    cy.intercept('POST', '/api/user/data/set').as('API__SET_USER_DATA');
+    cy.intercept('POST', ROUTE__API__USER_SET_DATA).as('API__SET_USER_DATA');
     cy.get(`${SELECTOR__USER_MENU} > button`).contains('user1').click();
     cy.get(`${SELECTOR__USER_MENU} nav button`).contains('Set Data').click();
     cy.get(`${SELECTOR__USER_DATA_FORM} textarea`).type('random user data');
