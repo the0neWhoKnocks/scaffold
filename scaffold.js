@@ -173,6 +173,7 @@ async function scaffold() {
   } = (deploymentOptions || {});
   const {
     dotenv,
+    e2eProxy,
     e2eTests,
     eslint,
     hasWatcher,
@@ -636,9 +637,14 @@ async function scaffold() {
           to: 'e2e/cypress/plugins',
         },
         {
-          files: ['commands.js', 'e2e.js'],
+          files: ['e2e.js'],
           from: 'node/e2e/cypress/support',
           to: 'e2e/cypress/support',
+        },
+        {
+          files: ['matcher.js'],
+          from: 'node/e2e/proxy',
+          to: 'proxy',
         },
         {
           files: ['.eslintrc.js', 'cypress.config.js', 'Dockerfile', 'state.json'],
@@ -654,8 +660,19 @@ async function scaffold() {
           from: 'node/e2e/bin',
           to: 'e2e/bin',
           tokens: [
-            { token: 'TEST_RUNNER__APP_NAME', replacement: kebabAppName },
+            { token: 'TEST_RUNNER__APP_NAME', replacement: (e2eProxy) ? 'proxied-app' : kebabAppName },
+            { token: 'TEST_RUNNER__E2E_NAME', replacement: `e2e-${kebabAppName}` },
             { token: 'TEST_RUNNER__PROTOCOL', replacement: (secure) ? 'https' : 'http' },
+            { token: 'TEST_RUNNER__PROXY', remove: !e2eProxy },
+            { token: 'TEST_RUNNER__PROXY_SERVICE_REF', replacement: (e2eProxy) ? '${PROXY_SERVICE}' : '' },
+          ],
+        },
+        {
+          file: 'commands.js',
+          from: 'node/e2e/cypress/support',
+          to: 'e2e/cypress/support',
+          tokens: [
+            { token: 'COMMANDS__PROXY', remove: !e2eProxy },
           ],
         },
         {
@@ -666,11 +683,16 @@ async function scaffold() {
             { token: 'TEST__API', remove: !apiEnabled },
             { token: 'TEST__EXT_API', remove: !externalRequests },
             { token: 'TEST__MULTI_USER', remove: !multiUser },
+            { token: 'TEST__PROXY', remove: !e2eProxy },
             { token: 'TEST__SERVER_INTERACTIONS', remove: !hasServerInteractions },
             { token: 'TEST__WEB_SOCKETS', remove: !webSocket },
           ],
         },
       ]);
+      
+      if (e2eProxy) {
+        addFolder('e2e/cypress/fixtures/cache');
+      }
     }
     
     packageJSON.dependencies = sortObj(packageJSON.dependencies);
@@ -732,6 +754,8 @@ async function scaffold() {
           { token: 'DC__BSYNC', remove: !(hasWatcher && addClient) },
           { token: 'DC__DEV_APP_NAME', replacement: kebabAppNameDev },
           { token: 'DC__E2E', remove: !e2eTests },
+          { token: 'DC__E2E_DEPENDS_ON', replacement: (e2eProxy) ? 'proxied-app' : kebabAppName },
+          { token: 'DC__E2E_PROXY', remove: !e2eProxy },
           { token: 'DC__NODE_CERTS', remove: !addCerts },
           { token: 'DC__PORTS', remove: vHost },
           { token: 'DC__USERNAME', replacement: username },
@@ -871,6 +895,9 @@ async function scaffold() {
     if (addedDockerFuncs) {
       if (secure) {
         listItems.push(`Read the ${chalk.cyan('Local HTTPS')} section in the ${chalk.cyan('README')} to wire up your certs properly.`);
+      }
+      else if (!secure && e2eProxy) {
+        listItems.push(`In order for E2E requests to be proxied you'll have to add a\n    ${chalk.cyan('certs')} folder at the top of the repo. Generally I'll just\n    symlink a top-level folder I use for all my Apps. If you\n    don't already have some certs lying around, follow the\n    instructions from https://github.com/the0neWhoKnocks/generate-certs`);
       }
       
       listItems.push(

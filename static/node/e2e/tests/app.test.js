@@ -122,6 +122,22 @@ context('App', () => {
       logs = logs.filter(log => log.startsWith('EXT_API'));
       expect(logs.length).to.equal(1);
     });
+    //TOKEN:^TEST__PROXY
+    
+    const q = "I'm a mocked trivia question!";
+    const a = 'True';
+    cy.setProxyState({ mockData: [{ question: q, correct_answer: a }] });
+    cy.get('.app nav').contains('Trigger Ext. API').click();
+    cy.wait('@API__EXT');
+    cy.get(`${SELECTOR__SERVER_DATA_LOGS} div`).then(($logs) => {
+      let logs = [];
+      $logs.each((ndx, log) => { logs.push(log.textContent); });
+      logs = logs.filter(log => log.startsWith('EXT_API'));
+      expect(logs.length).to.equal(2);
+      expect(logs[1]).to.contain(`${q} | ${a}`);
+    });
+    cy.clearProxyState();
+    //TOKEN:$TEST__PROXY
     
     cy.screenshot('ext API triggered');
   });

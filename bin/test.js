@@ -39,6 +39,7 @@ const cmd = require('../utils/cmd');
   // --client-framework
   // --bundler
   // --dev-options.dotenv
+  // --dev-options.e2e-proxy
   // --dev-options.e2e-tests
   // --dev-options.logger
   // --dev-options.eslint
@@ -92,6 +93,7 @@ const cmd = require('../utils/cmd');
         --client-framework "svelte"
         --bundler "webpack"
         --dev-options.dotenv
+        --dev-options.e2e-proxy
         --dev-options.e2e-tests
         --dev-options.eslint
         --dev-options.has-watcher
