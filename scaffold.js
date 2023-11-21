@@ -509,7 +509,6 @@ async function scaffold() {
             { token: 'CONST__EXT_API', remove: !externalRequests },
             { token: 'CONST__HAS_API', remove: !hasAPI },
             { token: 'CONST__SVELTE_MNT', remove: !clientFrameworkIsSvelte },
-            { token: 'CONST__LOGGER_NAMESPACE', remove: !logger },
             { token: 'CONST__LOGGER_NAMESPACE', replacement: loggerNamespace || '--' },
             { token: 'CONST__MULTI_USER', remove: !multiUser },
             { token: 'CONST__SERVER', remove: !addServer },
