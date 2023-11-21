@@ -490,7 +490,7 @@ async function scaffold() {
       const prepServerPaths = [
         './src/constants.js',
         addServer ? './src/server' : '',
-        logger ? './src/utils' : '',
+        './src/utils',
       ];
       const hasAPI = apiEnabled || multiUser;
       
