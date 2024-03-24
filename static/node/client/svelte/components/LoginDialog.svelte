@@ -16,14 +16,14 @@
   
   export let onClose = undefined;
   export let onSuccess = undefined;
-  let loginOpen = true;
+  export let open = false;
+  let createFormRef;
   let createUserOpen = false;
   let loginFormRef;
-  let rememberCredentialsRef;
-  let createFormRef;
-  let loginUsername;
   let loginPassword;
+  let loginUsername;
   let rememberCredentials = false;
+  let rememberCredentialsRef;
   
   function handleLoginSubmit(ev) {
     ev.preventDefault();
@@ -42,17 +42,20 @@
   }
   
   function handleCloseClick() {
+    open = false;
+    createUserOpen = false;
+    
     if (onClose) onClose();
   }
   
   function handleCreateAccountClick() {
-    loginOpen = false;
+    open = false;
     createUserOpen = true;
   }
   
   function handleCancelCreateClick() {
     createUserOpen = false;
-    loginOpen = true;
+    open = true;
   }
   
   function handleCreateSubmit(ev) {
@@ -89,7 +92,7 @@
   });
 </script>
 
-{#if loginOpen}
+{#if open}
   <Dialog onCloseClick={handleCloseClick}>
     <form
       action={ROUTE__API__USER_LOGIN}
@@ -101,15 +104,17 @@
       slot="dialogBody"
       spellcheck="false"
     >
-      <HRWithText label="Log In" />
+      <HRWithText class="for--top" label="Log In" />
       <LabeledInput
         autoFocus
+        compact
         label="Username"
         name="username"
         required
         value={loginUsername}
       />
       <LabeledInput
+        compact
         label="Password"
         name="password"
         required
@@ -146,20 +151,23 @@
       slot="dialogBody"
       spellcheck="false"
     >
-      <HRWithText label="Create Account" />
+      <HRWithText class="for--top" label="Create Account" />
       <LabeledInput
         autoFocus 
+        compact
         label="Username"
         name="username"
         required
       />
       <LabeledInput
+        compact
         label="Password"
         name="password"
         required
         type="password"
       />
       <LabeledInput
+        compact
         label="Confirm Password"
         name="passwordConfirmed"
         required
@@ -180,6 +188,11 @@
 <style>
   form {
     padding: 1em;
+    overflow-y: auto;
+  }
+  
+  :global(.hr-with-text.for--top) {
+    margin-bottom: -0.25em; /* offset for the first input's animated placeholder */
   }
   
   .create-form nav {

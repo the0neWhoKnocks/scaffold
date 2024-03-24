@@ -1,5 +1,4 @@
 <script>
-  import { onMount } from 'svelte';
   import {
     ROUTE__API__USER_GET_DATA,
     ROUTE__API__USER_SET_DATA,
@@ -10,6 +9,7 @@
   export let onClose = undefined;
   export let onError = undefined;
   export let onSuccess = undefined;
+  export let open = false;
   export let userInfo = undefined;
   let data;
   let dataLoaded = false;
@@ -27,7 +27,10 @@
   
   function getUserData() {
     return postData(ROUTE__API__USER_GET_DATA, userInfo)
-      .then(({ data }) => data)
+      .then((resp) => {
+        data = resp.data;
+        dataLoaded = true;
+      })
       .catch(({ message }) => {
         if (onError) onError();
         alert(message);
@@ -40,10 +43,8 @@
   
   $: if (dataLoaded && inputRef) inputRef.focus();
   
-  onMount(async () => {
-    data = await getUserData();
-    dataLoaded = true;
-  });
+  $: if (open) { getUserData(); }
+  else { dataLoaded = false; }
 </script>
 
 {#if dataLoaded}

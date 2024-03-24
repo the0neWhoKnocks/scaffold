@@ -19,7 +19,7 @@
 </script>
 
 <div class="config">
-  <Dialog modal open>
+  <Dialog modal>
     <form
       action={ROUTE__API__CONFIG_CREATE}
       autocomplete="off"
