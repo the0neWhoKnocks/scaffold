@@ -86,6 +86,20 @@ const shell = ({ props, view } = {}) => {
           padding: 0.25em;
         }
         
+        form button {
+          width: 100%;
+          color: #eee;
+          padding: 0.75em 1em;
+          border: none;
+          border-radius: 0.25em;
+          background: #111;
+        }
+        
+        form :where(input, textarea) {
+          border: solid 1px;
+          border-radius: 0.25em;
+        }
+        
         form > *:not(:last-child) {
           margin-bottom: 1em;
         }
@@ -178,6 +192,7 @@ const shell = ({ props, view } = {}) => {
         </div>
         //TOKEN:^SHELL__SVELTE
         <div id="${DOM__SVELTE_MOUNT_POINT}"></div>
+        <div id="overlays"></div>
         //TOKEN:$SHELL__SVELTE
       </div>
       

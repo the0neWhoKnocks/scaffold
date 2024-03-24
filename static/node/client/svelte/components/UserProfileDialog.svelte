@@ -1,5 +1,4 @@
 <script>
-  import { onMount } from 'svelte';
   import {
     ROUTE__API__USER_GET_PROFILE,
     ROUTE__API__USER_SET_PROFILE,
@@ -11,16 +10,17 @@
   export let onClose = undefined;
   export let onError = undefined;
   export let onSuccess = undefined;
+  export let open = false;
   export let userInfo = undefined;
+  let dataLoaded = false;
+  let dataUpdated = false;
+  let formRef;
+  let initialFormData;
+  let inputRef;
   let oldPassword = '';
   let oldUsername = '';
   let password = '';
   let username = '';
-  let dataLoaded = false;
-  let formRef;
-  let inputRef;
-  let dataUpdated = false;
-  let initialFormData;
 
   function handleSubmit() {
     postData(formRef.action, formRef)
@@ -31,7 +31,14 @@
   }
   
   function getUserProfile() {
-    return postData(ROUTE__API__USER_GET_PROFILE, userInfo)
+    postData(ROUTE__API__USER_GET_PROFILE, userInfo)
+      .then((profileData) => {
+        oldPassword = profileData.password;
+        oldUsername = profileData.username;
+        password = profileData.password;
+        username = profileData.username;
+        dataLoaded = true;
+      })
       .catch(({ message }) => {
         if (onError) onError();
         alert(message);
@@ -47,18 +54,16 @@
   }
   
   $: if (dataLoaded && inputRef) inputRef.focus();
+  
   $: if (formRef && dataLoaded) {
     initialFormData = [...new FormData(formRef).values()].join('');
   }
   
-  onMount(async () => {
-    const profileData = await getUserProfile();
-    oldPassword = profileData.password;
-    oldUsername = profileData.username;
-    password = profileData.password;
-    username = profileData.username;
-    dataLoaded = true;
-  });
+  $: if (open) { getUserProfile(); }
+  else {
+    dataLoaded = false;
+    dataUpdated = false;
+  }
 </script>
 
 {#if dataLoaded}
@@ -77,8 +82,8 @@
     >
       <input type="hidden" name="oldPassword" value={oldPassword} />
       <input type="hidden" name="oldUsername" value={oldUsername} />
-      <LabeledInput label="Username" name="username" value={username} autoFocus required />
-      <LabeledInput label="Password" name="password" value={password} required />
+      <LabeledInput label="Username" name="username" value={username} autoFocus compact required />
+      <LabeledInput label="Password" name="password" value={password} compact required />
       <nav>
         <button disabled={!dataUpdated}>Update</button>
       </nav>

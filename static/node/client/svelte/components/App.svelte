@@ -49,7 +49,7 @@
   let socketAPI;
   //TOKEN:$APP__WEB_SOCKET
   //TOKEN:^APP__MULTI_USER
-  let loginCompOpened = false;
+  let loginOpened = false;
   let userStorageType;
   let mounted = false;
   let username;
@@ -123,10 +123,10 @@
   //TOKEN:^APP__MULTI_USER
   
   function openLogin() {
-    loginCompOpened = true;
+    loginOpened = true;
   }
   function closeLogin() {
-    loginCompOpened = false;
+    loginOpened = false;
     userStorageType = getStorageType(NAMESPACE__STORAGE__USER);
   }
   function handleLogin() {
@@ -251,6 +251,7 @@
         class="server-data__logs"
         bind:this={serverDataRef}
       >
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
         {@html serverData.join('')}
       </pre>
     </div>
@@ -292,32 +293,28 @@
     </nav>
     <!--TOKEN:$APP__SERVER_INTERACTIONS -->
   </div>
-  <!--TOKEN:^APP__MULTI_USER -->
-  {#if loginCompOpened}
-    <LoginDialog
-      onClose={closeLogin}
-      onSuccess={handleLogin}
-    />
-  {/if}
-  {#if userDataOpened}
-    <UserDataDialog
-      onClose={closeUserData}
-      onError={closeUserData}
-      onSuccess={handleUserDataUpdate}
-      {userInfo}
-    />
-  {/if}
-  {#if userProfileOpened}
-    <UserProfileDialog
-      onClose={closeUserProfile}
-      onError={closeUserProfile}
-      onSuccess={handleProfileUpdate}
-      {userInfo}
-    />
-  {/if}
-  <!--TOKEN:$APP__MULTI_USER -->
 </div>
-<div id="overlays"></div>
+<!--TOKEN:^APP__MULTI_USER -->
+<LoginDialog
+  onClose={closeLogin}
+  onSuccess={handleLogin}
+  open={loginOpened}
+/>
+<UserDataDialog
+  onClose={closeUserData}
+  onError={closeUserData}
+  onSuccess={handleUserDataUpdate}
+  open={userDataOpened}
+  {userInfo}
+/>
+<UserProfileDialog
+  onClose={closeUserProfile}
+  onError={closeUserProfile}
+  onSuccess={handleProfileUpdate}
+  open={userProfileOpened}
+  {userInfo}
+/>
+<!--TOKEN:$APP__MULTI_USER -->
 
 <style>
   .app {
