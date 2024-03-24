@@ -8,6 +8,8 @@ const {
 const log = require('../../utils/logger')('api.config.create');
 
 module.exports = function createConfig(req, res) {
+  if (req.appConfig) return res.error(405, 'Config already exists');
+  
   const { cipherKey, salt } = req.body;
   
   if (!cipherKey || !salt) {
