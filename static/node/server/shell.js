@@ -78,6 +78,9 @@ const shell = ({ props, view } = {}) => {
         button:not(:disabled) {
           cursor: pointer;
         }
+        button * {
+          pointer-events: none;
+        }
 
         input {
           font-size: 1em;
