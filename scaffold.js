@@ -363,17 +363,6 @@ async function scaffold() {
           ],
         }]);
       }
-      
-      const binFiles = [];
-      if (secure || (!secure && vHost)) {
-        binFiles.push({
-          executable: true,
-          files: ['update-hosts.sh'],
-          from: 'bin',
-          to: 'bin',
-        });
-      }
-      if (binFiles.length) copyFiles(binFiles);
     }
     
     if (addClient) {
@@ -818,7 +807,6 @@ async function scaffold() {
         { token: 'README__TITLE', replacement: appTitle },
         { token: 'README__VHOST', remove: !vHost },
         { token: 'README__VHOST_DOMAIN', replacement: kebabAppName },
-        { token: 'README__VHOST_NO_HTTPS', remove: secure || !vHost },
       ],
     },
   ]);

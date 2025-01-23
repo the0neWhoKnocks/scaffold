@@ -61,16 +61,6 @@ nr start:dev
 ---
 
 ## Docker
-//TOKEN:^README__VHOST_NO_HTTPS
-
-You'll need to update your hosts file first, so run the below script.
-
-On Windows (via WSL), you'll need to run the below script with Admin privileges. Otherwise the Windows `hosts` file won't get updated.
-
-```sh
-./bin/update-hosts.sh -d "//TOKEN:#README__VHOST_DOMAIN.local"
-```
-//TOKEN:$README__VHOST_NO_HTTPS
 
 ```sh
 # Compile Production code (required since the assets are copied over)
