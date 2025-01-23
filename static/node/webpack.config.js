@@ -89,7 +89,10 @@ const conf = {
           // translates CSS into CommonJS
           {
             loader: 'css-loader',
-            options: { sourceMap: dev },
+            options: {
+              sourceMap: dev,
+              url: false, // prevent encoding/inlining images
+            },
           },
           // remove duplicate svelte classes
           { loader: resolve('./.webpack/loader.remove-duplicate-svelte-classes') },
