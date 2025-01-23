@@ -41,7 +41,7 @@ function startcont {
   ./bin/prep-dist.sh
   
   # boot container and enter it
-  docker compose up -d "${CONTAINER}"
+  docker compose up --remove-orphans -d "${CONTAINER}"
   exitCode=$?
   if [ $exitCode -ne 0 ]; then
     echo "[ERROR] Problem starting ${CONTAINER}"
