@@ -549,6 +549,7 @@ async function scaffold() {
           { token: 'WATCHER__CLIENT', remove: !addClient },
           { token: 'WATCHER__LOGGER', remove: !logger },
           { token: 'WATCHER__SERVER', remove: !addServer },
+          { token: 'WATCHER__SOCKET_DOMAIN', remove: secure }, // seems to break the UI connections (at least when the App is https)
           { token: 'WATCHER__WEB_SOCKET', remove: !webSocket },
         ],
       }]);

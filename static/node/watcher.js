@@ -225,7 +225,9 @@ fileGate
       },
       //TOKEN:^WATCHER__WEB_SOCKET
       socket: {
+        //TOKEN:^WATCHER__SOCKET_DOMAIN
         domain: `localhost:${SERVER__PORT + 3}`,
+        //TOKEN:$WATCHER__SOCKET_DOMAIN
         port: SERVER__PORT + 3,
       },
       //TOKEN:$WATCHER__WEB_SOCKET
