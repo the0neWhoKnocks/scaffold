@@ -238,8 +238,9 @@ app
   .get('/', (req, res) => {
     res.end(shell({
       //TOKEN:^SERVER__MULTI_USER
-      props: { configExists: !!req.appConfig },
+      configExists: !!req.appConfig,
       //TOKEN:$SERVER__MULTI_USER
+      props: {},
       view: 'app', // usually tied to the `entry` name in your bundler
     }));
   });

@@ -5,7 +5,13 @@ const {
   //TOKEN:$SHELL__SVELTE
 } = require('../constants');
 
-const shell = ({ props, view } = {}) => {
+const shell = ({
+  //TOKEN:^SHELL__MULTI_USER
+  configExists,
+  //TOKEN:$SHELL__MULTI_USER
+  props,
+  view,
+} = {}) => {
   //TOKEN:^SHELL__BUNDLER__WEBPACK
   const MANIFEST_PATH = '../public/manifest.json';
   if (process.env.NODE_ENV !== 'production') delete require.cache[require.resolve(MANIFEST_PATH)];
@@ -168,6 +174,9 @@ const shell = ({ props, view } = {}) => {
           //TOKEN:^SHELL__HEROKU
           buildNumber: ${buildNumber},
           //TOKEN:$SHELL__HEROKU
+          //TOKEN:^SHELL__MULTI_USER
+          configExists: ${configExists},
+          //TOKEN:$SHELL__MULTI_USER
           props: ${JSON.stringify(props || {})},
         };
       </script>
