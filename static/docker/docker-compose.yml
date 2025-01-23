@@ -30,6 +30,12 @@ services:
     expose:
       - "${VHOST__PORT__APP}"
     #TOKEN:$DC__VHOST
+    healthcheck:
+      interval: "3s"
+      retries: 3
+      start_interval: "2s"
+      test: wget --no-verbose --tries=1 --spider --no-check-certificate #TOKEN:#DC__PROTOCOL://localhost:3000 || exit 1
+      timeout: "2s"
     image: #TOKEN:#DC__USERNAME/#TOKEN:#DC__APP_NAME
     #TOKEN:^DC__PORTS
     ports:

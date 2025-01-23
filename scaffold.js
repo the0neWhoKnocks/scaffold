@@ -747,6 +747,7 @@ async function scaffold() {
           { token: 'DC__E2E_PROXY', remove: !e2eProxy },
           { token: 'DC__NODE_CERTS', remove: !addCerts },
           { token: 'DC__PORTS', remove: vHost },
+          { token: 'DC__PROTOCOL', replacement: (secure) ? 'https' : 'http' },
           { token: 'DC__USERNAME', replacement: username },
           { token: 'DC__VHOST', remove: !vHost },
           { token: 'DC__VHOST_NON_SECURE', remove: secure },
