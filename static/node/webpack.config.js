@@ -9,6 +9,8 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 //TOKEN:$WP__SVELTE
 
+const ENTRY_PREFIX__CSS = 'css/'; // folder path to dump CSS files in after compilation
+const ENTRY_PREFIX__JS = 'js/'; // folder path to dump JS files in after compilation
 const HASH_LENGTH = 5;
 const alias = {
   //TOKEN:^WP__SVELTE
@@ -40,18 +42,21 @@ const mainFields = [
 const mode = process.env.NODE_ENV || 'development';
 const dev = mode === 'development';
 
-const outputFilename = ({ chunk: { name }, contentHashType }) => {
+const outputFilename = ({ chunk, contentHashType }) => {  
   let _name;
   
+  // Account for dynamic imports that likely won't have path prefixes.
+  if (!chunk.name.includes('/')) {
+    chunk.name = `${ENTRY_PREFIX__JS}${chunk.name}`;
+  }
+  
   switch (contentHashType) {
-    //TOKEN:^WP__SVELTE
     case 'css/mini-extract': {
       // dump CSS files in a 'css' folder
-      const newName = name.replace(/^js\//, 'css/');
+      const newName = chunk.name.replace(new RegExp(`^${ENTRY_PREFIX__JS}`), ENTRY_PREFIX__CSS);
       _name = `${newName}_[chunkhash:${HASH_LENGTH}].css`;
       break;
     }
-    //TOKEN:$WP__SVELTE
     case 'javascript': {
       _name = `[name]_[chunkhash:${HASH_LENGTH}].js`;
       break;
