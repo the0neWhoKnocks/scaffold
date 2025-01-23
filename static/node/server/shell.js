@@ -88,6 +88,15 @@ const shell = ({ props, view } = {}) => {
         input[type="text"] {
           padding: 0.25em;
         }
+          
+        label:has(> input) {
+          line-height: 1em;
+          display: flex;
+          align-items: center;
+          gap: 0.5em;
+          cursor: pointer;
+          user-select: none;
+        }
         
         form button {
           width: 100%;
