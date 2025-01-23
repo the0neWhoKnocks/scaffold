@@ -116,7 +116,7 @@ const conf = {
     splitChunks: {
       cacheGroups: {
         vendor: {
-          chunks: 'initial',
+          chunks: 'all', // `initial` accounts for the static items in `entry` but `all` picks up on dynamic imports as well
           enforce: true,
           name: 'js/vendor',
           test: /[\\/]node_modules[\\/]/,
