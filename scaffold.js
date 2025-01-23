@@ -270,7 +270,7 @@ async function scaffold() {
       
       if (compression) packageJSON.dependencies['compression'] = '1.7.4';
       if (cookies) packageJSON.dependencies['cookie-parser'] = '1.4.5';
-      if (staticFiles) packageJSON.dependencies['sirv'] = '1.0.12';
+      if (staticFiles) packageJSON.dependencies['sirv'] = '2.0.4';
       
       const fsDeps = ['readFileSync'];
       if (multiUser) fsDeps.push('existsSync');
@@ -538,7 +538,7 @@ async function scaffold() {
         packageJSON.devDependencies['nodemon'] = '3.0.1';
       }
       
-      if (addClient) packageJSON.devDependencies['browser-sync'] = '2.29.3';
+      if (addClient) packageJSON.devDependencies['browser-sync'] = '3.0.3';
       
       addParsedFiles([{
         executable: true,
@@ -578,14 +578,14 @@ async function scaffold() {
     }
     
     if (eslint) {
-      packageJSON.devDependencies['eslint'] = '8.2.0';
+      packageJSON.devDependencies['eslint'] = '8.57.1';
       packageJSON.devDependencies['eslint-plugin-node'] = '11.1.0';
       
       const lintExts = ['js'];
       const sourceFolders = ['bin', 'src'];
       
       if (clientFrameworkIsSvelte) {
-        packageJSON.devDependencies['eslint-plugin-svelte'] = '2.34.0';
+        packageJSON.devDependencies['eslint-plugin-svelte'] = '2.44.1';
         lintExts.push('svelte');
       }
       
