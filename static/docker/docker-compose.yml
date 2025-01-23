@@ -40,7 +40,7 @@ services:
     volumes:
       #TOKEN:^DC__NODE_CERTS
       - type: bind
-        source: "${PWD}/certs.localhost"
+        source: "${PWD}/certs"
         target: "/app_certs"
       #TOKEN:$DC__NODE_CERTS
       - "${PWD}/.app_data:/app_data"
