@@ -259,9 +259,8 @@ else httpModule = require('node:http');
 const server = httpModule.createServer(serverOpts, /* TOKEN:#SERVER__APP_HANDLER */);
 //TOKEN:^SERVER__WEBSOCKET
 const wss = socket(server, {
-  handleClientConnection: function handleClientConnection(wss) {
-    wss.dispatchToClient(WS__MSG__CONNECTED_TO_SERVER, { id: wss.id, msg: 'App connected to Server' });
-  },
+  handleClientConnect: require('./socket/handleClientConnect'),
+  handleClientDisconnect: require('./socket/handleClientDisconnect'),
   msgHandlers: {
     client: {
       [WS__MSG__EXAMPLE]: function handleExample(wss, data) {

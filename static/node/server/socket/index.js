@@ -1,6 +1,6 @@
 const { OPEN, WebSocketServer } = require('ws');
-const { WS__MSG__SERVER_DOWN } = require('../constants');
-const log = require('../utils/logger')('server:socket');
+const { WS__MSG__SERVER_DOWN } = require('../../constants');
+const log = require('../../utils/logger')('server:socket');
 
 function accountForServerDeath(server) {
   const serverConnections = new Set();
@@ -107,7 +107,7 @@ module.exports = function socket(server, opts = {}) {
       id: genUniqueId(),
     };
     
-    if (opts.handleClientConnection) opts.handleClientConnection(_wss);
+    if (opts.handleClientConnect) opts.handleClientConnect(_wss);
     
     socket.on('message', function handleClientMessage(payload) {
       const { data, type } = JSON.parse(payload);
@@ -133,6 +133,8 @@ module.exports = function socket(server, opts = {}) {
     
     socket.on('close', (code, reason) => {
       log.info(`Client disconnected | ${code} | ${reason}`);
+      
+      if (opts.handleClientDisconnect) opts.handleClientDisconnect(_wss, code, reason);
     });
   });
   

@@ -355,13 +355,23 @@ async function scaffold() {
         packageJSON.dependencies['ws'] = '8.11.0';
         
         addParsedFiles([{
-          file: 'socket.js',
-          from: 'node/server',
-          to: 'src/server',
+          file: 'index.js',
+          from: 'node/server/socket',
+          to: 'src/server/socket',
           tokens: [
             { token: 'SERVER_SOCKET__VHOST', remove: !vHost },
           ],
         }]);
+        copyFiles([
+          {
+            files: [
+              'handleClientConnect.js',
+              'handleClientDisconnect.js',
+            ],
+            from: 'node/server/socket',
+            to: 'src/server/socket',
+          },
+        ]);
       }
     }
     
