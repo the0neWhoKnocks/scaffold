@@ -135,7 +135,7 @@ services:
       NODE_EXTRA_CA_CERTS: /home/node/certs/localhost-CA.crt
     image: theonewhoknocks/nodejs-proxy
     ports:
-      - 9002:80
+      - 9002:#TOKEN:#DC__E2E_PROXY_PORT
       - 9229:9229
     user: "${CURR_UID}:${CURR_GID}"
     volumes:
@@ -144,7 +144,7 @@ services:
         source: "${PWD}/certs"
         target: "/home/node/certs"
       - type: bind
-        source: "${PWD}/e2e/cypress/fixtures/cache"
+        source: "${PWD}/e2e/proxy_cache"
         target: "/home/node/proxy/cache"
       - "${PWD}/proxy/matcher.js:/home/node/proxy/matcher.js"
   

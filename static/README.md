@@ -78,23 +78,6 @@ dc up //TOKEN:#README__DC_CMD
 
 ## E2E Testing
 
-In order to ensure Cypress runs consistently on all OS's for CI and the GUI mode I've opted for the Docker image. One downside to this is the size (over 2gb, yeesh). I tried the non-Docker route, and the setup would be different for all OS's and there was no guarantee it'd even work.
-
-To get the GUI to work, follow the instructions for your OS.
-
-**Windows/WSL**
-- Install `choco install vcxsrv`
-
-**OSX**
-- Install `brew install xquartz`
-- Start XQuartz `open -a xquartz`.
-   - Go to Preferences > Security.
-      - Make sure `Allow connections from network clients` is checked
-- Once the settings have been updated you can close XQuartz
-- If you run `echo $DISPLAY` and it's blank, restart your system. The variable should equal something like `/private/tmp/com.apple.launchd.7X4k55BnyT/org.xquartz:0`.
-
-Once things are wired up you can run any of the below.
-
 ```sh
 nr test
 nr test:watch

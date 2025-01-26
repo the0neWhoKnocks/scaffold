@@ -13,6 +13,7 @@ REPO_FUNCS+=("startcont")
 function startcont {
   # ensure required directories are set up
   mkdir -p ./{.app_data,.ignore}
+  chmod 777 ./.app_data # mainly for testing to allow lower privelaged containers ability to modify contents of folder
   touch ./.ignore/.zsh_history
   chmod 777 ./.ignore/.zsh_history
   #TOKEN:^REPOFUNCS__DOTENV

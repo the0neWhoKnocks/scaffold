@@ -45,7 +45,7 @@ context('App', () => {
   
   //TOKEN:^TEST__MULTI_USER
   function resetWorkspace() {
-    cy.exec(`rm -rf /app/data/*`);
+    cy.exec(`rm -rf /app_data/*`);
     cy.window().then((win) => {
       win.sessionStorage.clear();
     });

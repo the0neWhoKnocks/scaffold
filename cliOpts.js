@@ -46,6 +46,7 @@ const scaffoldQuestions = [
       return previouslyScaffolded;
     },
   },
+  
   {
     message: 'Add Server',
     type: 'confirm',
@@ -126,6 +127,7 @@ const scaffoldQuestions = [
       },
     ],
   },
+  
   {
     message: 'Add Client',
     type: 'confirm',
@@ -158,6 +160,29 @@ const scaffoldQuestions = [
       });
     },
   },
+  
+  {
+    message: 'Add E2E tests?',
+    type: 'confirm',
+    name: 'addE2E',
+  },
+  {
+    when: ({ addE2E }) => addE2E,
+    message: '  E2E Framework',
+    type: 'list',
+    name: 'e2eFramework',
+    choices: [
+      { name: 'Cypress', value: 'cypress' },
+      { name: 'PlayWright', value: 'playwright' },
+    ],
+  },
+  {
+    when: ({ addE2E }) => addE2E,
+    message: '  Proxy External Server-Side Test Requests?',
+    type: 'confirm',
+    name: 'e2eProxy',
+  },
+  
   {
     message: 'Dev Options',
     type: 'checkbox',
@@ -166,8 +191,6 @@ const scaffoldQuestions = [
     filter: answers => merge(answers),
     choices: [
       { name: 'Add .env file', value: { dotenv: true }, checked: false },
-      { name: 'Add e2e tests', value: { e2eTests: true }, checked: false },
-      { name: 'Add e2e proxy (external requests get cached & served)', value: { e2eProxy: true }, checked: false },
       { name: 'Add fancy logging util', value: { logger: 'ulog' }, checked: true },
       { name: 'ESLint', value: { eslint: true }, checked: true },
       { name: 'Watch for changes', value: { hasWatcher: true }, checked: true },

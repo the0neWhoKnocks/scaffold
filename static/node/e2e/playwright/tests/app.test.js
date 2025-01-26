@@ -1,0 +1,179 @@
+import {
+  APP__TITLE,
+  //TOKEN:^TEST__MULTI_USER
+  ROUTE__API__USER_CREATE,
+  ROUTE__API__USER_LOGIN,
+  ROUTE__API__USER_SET_DATA,
+  ROUTE__API__USER_SET_PROFILE,
+  //TOKEN:$TEST__MULTI_USER
+} from '@src/constants'; // `@src` mapped in `docker-compose` volume
+import {
+  LOG_TYPE__REQUEST,
+  //TOKEN:^TEST__WEB_SOCKETS
+  LOG_TYPE__WEBSOCKET,
+  //TOKEN:$TEST__WEB_SOCKETS
+  //TOKEN:^TEST__MULTI_USER
+  exec,
+  //TOKEN:$TEST__MULTI_USER
+  expect,
+  test,
+} from './fixtures/AppFixture';
+
+test('App', async ({ app }) => {
+  //TOKEN:^TEST__MULTI_USER
+  await exec('rm -rf /app_data/*');
+  //TOKEN:^TEST__MULTI_USER
+  
+  await app.loadPage();
+  
+  await test.step('should have the correct title', async () => {
+    await app.verifyPageTitle(APP__TITLE);
+  });
+  //TOKEN:^TEST__MULTI_USER
+
+  await test.step('should fill out App config', async () => {
+    await app.inputAdminConfig('temp', 'pepper');
+  });
+  //TOKEN:$TEST__MULTI_USER
+  //TOKEN:^TEST__API
+    
+  await test.step('should make a request to the simple API', async () => {
+    await app.clearLogs();
+    const resp = await app.triggerAPI();
+    await app.verifyLogMsgs({
+      msgs: [`API ${JSON.stringify(resp)}`],
+      screenshot: { label: 'API triggered', loc: '.server-data__logs' },
+      type: LOG_TYPE__REQUEST,
+    });
+  });
+  //TOKEN:$TEST__API
+  //TOKEN:^TEST__EXT_API
+  
+  await test.step('should make a request to an external API', async () => {
+    await app.clearLogs();
+    const resp = await app.triggerExtAPI();
+    await app.verifyLogMsgs({
+      msgs: [`EXT_API ${resp.question} | ${resp.answer}`],
+      type: LOG_TYPE__REQUEST,
+    });
+    //TOKEN:^TEST__PROXY
+    
+    const q = "I'm a mocked trivia question!";
+    const a = 'True';
+    await app.setProxyState({ mockData: [{ question: q, correct_answer: a }] });
+    await app.clearLogs();
+    await app.triggerExtAPI();
+    await app.verifyLogMsgs({
+      msgs: [`EXT_API ${q} | ${a}`],
+      type: LOG_TYPE__REQUEST,
+    });
+    await app.clearProxyState();
+    //TOKEN:$TEST__PROXY
+    
+    await app.screenshot('ext API triggered', '.server-data__logs');
+  });
+  //TOKEN:$TEST__EXT_API
+  //TOKEN:^TEST__WEB_SOCKETS
+  
+  await test.step('should trigger the WebSocket', async () => {
+    await app.clearLogs();
+    const msg = await app.triggerSocket();
+    await app.verifyLogMsgs({
+      msgs: [msg],
+      screenshot: { label: 'Socket triggered', loc: '.server-data__logs' },
+      type: LOG_TYPE__WEBSOCKET,
+    });
+  });
+  //TOKEN:$TEST__WEB_SOCKETS
+  //TOKEN:^TEST__MULTI_USER
+
+  await test.step('should execute User actions', async () => {
+    const SELECTOR__CREATE_FORM = '.create-form';
+    const SELECTOR__LOGIN_FORM = '.login-form';
+    const SELECTOR__USER_MENU = '.user-menu';
+    const SELECTOR__USER_DATA_FORM = '.user-data-form';
+    const SELECTOR__USER_PROFILE_FORM = '.user-profile-form';
+    
+    const page = app.testCtx.fixture.page;
+    
+    await page.locator('.api-nav').getByRole('button', { name: 'Login' }).click();
+    await app.screenshot('Login clicked');
+    
+    let loginFormEl = page.locator(SELECTOR__LOGIN_FORM);
+    await loginFormEl.getByRole('button', { name: 'Create Account' }).click();
+    await app.screenshot('Create Account open');
+    
+    const USERNAME = 'user';
+    const PASSWORD = 'pass';
+    const createUserResp = app.waitForResp('POST', ROUTE__API__USER_CREATE);
+    const createFormEl = page.locator(SELECTOR__CREATE_FORM);
+    await app.fill(createFormEl.locator('input[name="username"]'), USERNAME);
+    await app.fill(createFormEl.locator('input[name="password"]'), PASSWORD);
+    await app.fill(createFormEl.locator('input[name="passwordConfirmed"]'), PASSWORD);
+    await createFormEl.getByRole('button', { name: 'Create' }).click();
+    await createUserResp;
+    loginFormEl = page.locator(SELECTOR__LOGIN_FORM);
+    await expect(loginFormEl.locator('input[name="username"]')).toHaveValue(USERNAME);
+    await expect(loginFormEl.locator('input[name="password"]')).toHaveValue(PASSWORD);
+    await app.screenshot('User created');
+    
+    const loginResp = app.waitForResp('POST', ROUTE__API__USER_LOGIN);
+    await loginFormEl.getByRole('button', { name: 'Log In' }).click();
+    await loginResp;
+    await expect(loginFormEl).toHaveCount(0);
+    await app.screenshot('User logged in');
+    
+    const userMenu = page.locator(SELECTOR__USER_MENU);
+    await userMenu.getByRole('button', { name: USERNAME }).click();
+    await app.screenshot('User menu open');
+    
+    let setProfileResp = app.waitForResp('POST', ROUTE__API__USER_SET_PROFILE);
+    await userMenu.locator('nav').getByRole('button', { name: 'Edit Profile' }).click();
+    let profileForm = page.locator(SELECTOR__USER_PROFILE_FORM);
+    await app.fill(profileForm.locator('input[name="username"]'), '{selectall}user1');
+    await app.screenshot('User name changed');
+    await profileForm.getByRole('button', { name: 'Update' }).click();
+    await setProfileResp;
+    await expect(profileForm).toHaveCount(0);
+    await app.screenshot('User name updated');
+    
+    const setDataResp = app.waitForResp('POST', ROUTE__API__USER_SET_DATA);
+    await userMenu.getByRole('button', { name: 'user1' }).click();
+    await userMenu.locator('nav').getByRole('button', { name: 'Set Data' }).click();
+    const dataForm = page.locator(SELECTOR__USER_DATA_FORM);
+    await app.fill(dataForm.locator('textarea'), 'random user data');
+    await app.screenshot('User data entered');
+    await dataForm.getByRole('button', { name: 'Save' }).click();
+    await setDataResp;
+    await expect(dataForm).toHaveCount(0);
+    await app.screenshot('User data set');
+    
+    setProfileResp = app.waitForResp('POST', ROUTE__API__USER_SET_PROFILE);
+    await userMenu.getByRole('button', { name: 'user1' }).click();
+    await userMenu.locator('nav').getByRole('button', { name: 'Edit Profile' }).click();
+    profileForm = page.locator(SELECTOR__USER_PROFILE_FORM);
+    await app.fill(profileForm.locator('input[name="username"]'), '{selectall}user');
+    await app.fill(profileForm.locator('input[name="password"]'), '{selectall}pass1');
+    await app.screenshot('User password changed');
+    await profileForm.getByRole('button', { name: 'Update' }).click();
+    await setProfileResp;
+    await expect(profileForm).toHaveCount(0);
+    await app.screenshot('User password updated');
+    
+    await userMenu.getByRole('button', { name: 'user' }).click();
+    await userMenu.locator('nav').getByRole('button', { name: 'Logout' }).click();
+    await page.locator('.api-nav').getByRole('button', { name: 'Login' }).isVisible();
+    await app.screenshot('User logged out');
+  });
+  //TOKEN:$TEST__MULTI_USER
+
+  await test.step('should demonstrate multiple tabs', async () => {
+    await app.screenshot('Tab 1');
+    
+    await app.createPage();
+    await app.switchToPage(2);
+    await app.loadPage();
+    
+    await app.screenshot('Tab 2');
+  });
+});

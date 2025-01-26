@@ -1,0 +1,61 @@
+# NOTE:
+# - Using a separate compose file because the `VOL_` variables are only defined
+#   via the test-runner, and can't define volumes via CLI since `up` is required
+#   instead of `run` to allow for `--abort-on-container-exit` to work. Other
+#   missing variables are ignored, but for some reason there's a yaml validation
+#   check that fails for missing volume definitions even if I'm not trying to
+#   run the container with the missing variables.
+# - The context for `PWD` is the repo root since the test-runner is run via npm
+#   in the project root.
+
+services:
+  #TOKEN:#DC__APP_NAME:
+    extends:
+      file: "${PWD}/docker-compose.yml"
+      service: #TOKEN:#DC__APP_NAME
+    container_name: #TOKEN:#DC__APP_NAME-test
+    # environment:
+    #   DATA_PATH: /test/data.json
+    hostname: #TOKEN:#DC__APP_NAME # domain name (usually assigned via container name)
+    # volumes:
+    #   - "${PWD}/e2e/tests/fixtures/data.json:/test/data.json:r"
+  
+  #TOKEN:#DC__APP_NAME-e2e:
+    build:
+      context: "${PWD}/e2e/"
+      dockerfile: Dockerfile
+    command: $CMD
+    container_name: #TOKEN:#DC__APP_NAME-e2e
+    depends_on:
+      #TOKEN:#DC__E2E_DEPENDS_ON:
+        condition: service_healthy
+    environment:
+      BASE_URL: "https://#TOKEN:#DC__APP_NAME:3000" # <PROTOCOL>://<CONTAINER_NAME>:<CONTAINER_PORT>
+      DISPLAY: $TEST_DISPLAY
+    hostname: e2etests
+    ipc: host # Using `--ipc=host` is recommended when using Chrome (Docker docs). Chrome can run out of memory without this flag.
+    ports:
+      - "3001:3000"
+    security_opt:
+      - "seccomp:${PWD}/e2e/seccomp_profile.json"
+    volumes:
+      - type: bind
+        source: "${PWD}/.app_data"
+        target: "/app_data"
+      - "${PWD}/e2e:/e2e"
+      - "${PWD}/src/constants.js:/node_modules/@src/constants.js:r" # map local modules to the fake `@src` parent
+      - $VOL_DBUS
+      - $VOL_X11
+  #TOKEN:^DC__E2E_PROXY
+  
+  proxy:
+    extends: 
+      file: "${PWD}/docker-compose.yml"
+      service: proxy
+  
+  proxied-app: 
+    extends:
+      file: "${PWD}/docker-compose.yml"
+      service: proxied-app
+    hostname: #TOKEN:#DC__APP_NAME # domain name (usually assigned via container name)
+  #TOKEN:$DC__E2E_PROXY
