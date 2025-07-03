@@ -152,14 +152,18 @@ const shell = ({
           animation-delay: 300ms;
           animation-fill-mode: both;
         }
+        //TOKEN:^SHELL__SVELTE
+        body:not(.view-loaded) #${DOM__SVELTE_MOUNT_POINT},
+        //TOKEN:$SHELL__SVELTE
         body.no-js .loading-msg .msg,
-        body.view-loaded .loading-msg,
-        body:not(.view-loaded) #${DOM__SVELTE_MOUNT_POINT} {
+        body.view-loaded .loading-msg {
           display: none;
         }
-
-        .root,
-        #${DOM__SVELTE_MOUNT_POINT} {
+        
+        //TOKEN:^SHELL__SVELTE
+        #${DOM__SVELTE_MOUNT_POINT},
+        //TOKEN:$SHELL__SVELTE
+        .root {
           width: 100%;
           height: 100%;
         }
