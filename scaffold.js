@@ -788,6 +788,8 @@ async function scaffold() {
         tokens: [
           { token: 'DOCKER__APP_NAME', replacement: kebabAppName },
           { token: 'DOCKER__CLIENT', remove: !addClient },
+          { token: 'DOCKER__CLIENT_OR_SERVER', remove: !addClient && !addServer },
+          { token: 'DOCKER__SERVER', remove: !addServer },
         ],
       },
       {

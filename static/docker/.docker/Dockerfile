@@ -61,9 +61,13 @@ RUN npm i --only=production --quiet --unsafe-perm \
   && rm ./package*.json
 
 # Copy locally compiled code to the image
+#TOKEN:^DOCKER__CLIENT_OR_SERVER
 COPY --chown=node:node ./dist/constants.js ./constants.js
 COPY --chown=node:node ./dist/utils ./utils
+#TOKEN:$DOCKER__CLIENT_OR_SERVER
+#TOKEN:^DOCKER__SERVER
 COPY --chown=node:node ./dist/server ./server
+#TOKEN:$DOCKER__SERVER
 #TOKEN:^DOCKER__CLIENT
 COPY --chown=node:node ./dist/public ./public
 #TOKEN:$DOCKER__CLIENT
