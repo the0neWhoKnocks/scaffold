@@ -54,11 +54,11 @@ const outputFilename = ({ chunk, contentHashType }) => {
     case 'css/mini-extract': {
       // dump CSS files in a 'css' folder
       const newName = chunk.name.replace(new RegExp(`^${ENTRY_PREFIX__JS}`), ENTRY_PREFIX__CSS);
-      _name = `${newName}_[chunkhash:${HASH_LENGTH}].css`;
+      _name = `${newName}_[contenthash:${HASH_LENGTH}].css`;
       break;
     }
     case 'javascript': {
-      _name = `[name]_[chunkhash:${HASH_LENGTH}].js`;
+      _name = `[name]_[contenthash:${HASH_LENGTH}].js`;
       break;
     }
   }
