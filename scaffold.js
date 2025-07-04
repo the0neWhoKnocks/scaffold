@@ -261,7 +261,8 @@ async function scaffold() {
       packageJSON.scripts['start:dev'] += ' &&'; // wait for previous step, then execute next step
     }
     if (hasWatcher) {
-      packageJSON.scripts['start:dev'] += ' ./watcher.js "./bin/prep-dist.sh" "./dist/public/manifest.json"';
+      // `--no-deprecation` to silence deprecation in BrowserSync's `http-proxy` usage.
+      packageJSON.scripts['start:dev'] += ' NODE_OPTIONS=\'--no-deprecation\' ./watcher.js "./bin/prep-dist.sh" "./dist/public/manifest.json"';
     }
     else {
       // NOTE: If it's gotten to this point, not really certain a `start:dev` would be neccessary since a User could just run `build && start`.
@@ -270,15 +271,15 @@ async function scaffold() {
     
     if (addServer) {
       if (serverFrameworkIsPolka) {
-        packageJSON.dependencies['polka'] = '1.0.0-next.23';
+        packageJSON.dependencies['polka'] = '1.0.0-next.28';
       }
       else if (serverFrameworkIsExpress) {
         packageJSON.dependencies['express'] = '4.17.1';
       }
       
-      if (compression) packageJSON.dependencies['compression'] = '1.7.4';
+      if (compression) packageJSON.dependencies['compression'] = '1.8.0';
       if (cookies) packageJSON.dependencies['cookie-parser'] = '1.4.5';
-      if (staticFiles) packageJSON.dependencies['sirv'] = '2.0.4';
+      if (staticFiles) packageJSON.dependencies['sirv'] = '3.0.1';
       
       const fsDeps = ['readFileSync'];
       if (multiUser) fsDeps.push('existsSync');
@@ -360,7 +361,7 @@ async function scaffold() {
       }
       
       if (webSocket) {
-        packageJSON.dependencies['ws'] = '8.11.0';
+        packageJSON.dependencies['ws'] = '8.18.2';
         
         addParsedFiles([{
           file: 'index.js',
@@ -387,15 +388,15 @@ async function scaffold() {
       if (bundlerIsWebpack) {
         packageJSON.devDependencies['clean-webpack-plugin'] = '4.0.0';
         packageJSON.devDependencies['ignore-emit-webpack-plugin'] = '2.0.6';
-        packageJSON.devDependencies['terser-webpack-plugin'] = '5.2.5';
-        packageJSON.devDependencies['webpack'] = '5.88.2';
-        packageJSON.devDependencies['webpack-cli'] = '4.9.1';
-        packageJSON.devDependencies['webpack-manifest-plugin'] = '4.0.2';
+        packageJSON.devDependencies['terser-webpack-plugin'] = '5.3.14';
+        packageJSON.devDependencies['webpack'] = '5.99.9';
+        packageJSON.devDependencies['webpack-cli'] = '6.0.1';
+        packageJSON.devDependencies['webpack-manifest-plugin'] = '5.0.1';
         
         if (clientFrameworkIsSvelte) {
-          packageJSON.devDependencies['css-loader'] = '6.5.1';
-          packageJSON.devDependencies['css-minimizer-webpack-plugin'] = '3.1.3';
-          packageJSON.devDependencies['mini-css-extract-plugin'] = '2.4.4';
+          packageJSON.devDependencies['css-loader'] = '7.1.2';
+          packageJSON.devDependencies['css-minimizer-webpack-plugin'] = '7.0.2';
+          packageJSON.devDependencies['mini-css-extract-plugin'] = '2.9.2';
           packageJSON.devDependencies['svelte-loader'] = '3.2.4';
         }
         
@@ -552,11 +553,11 @@ async function scaffold() {
     
     if (hasWatcher) {
       if (addServer) {
-        packageJSON.devDependencies['chokidar'] = '3.5.2';
-        packageJSON.devDependencies['nodemon'] = '3.0.1';
+        packageJSON.devDependencies['chokidar'] = '3.6.0'; // NOTE: latest version that still has glob, newer removed glob and could break parts of `watcher.js`
+        packageJSON.devDependencies['nodemon'] = '3.1.10';
       }
       
-      if (addClient) packageJSON.devDependencies['browser-sync'] = '3.0.3';
+      if (addClient) packageJSON.devDependencies['browser-sync'] = '3.0.4';
       
       addParsedFiles([{
         executable: true,
