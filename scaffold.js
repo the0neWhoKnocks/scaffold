@@ -799,6 +799,7 @@ async function scaffold() {
           { token: 'DOCKER__CLIENT', remove: !addClient },
           { token: 'DOCKER__CLIENT_OR_SERVER', remove: !addClient && !addServer },
           { token: 'DOCKER__SERVER', remove: !addServer },
+          { token: 'DOCKER__WEBPACK', remove: !bundlerIsWebpack },
         ],
       },
       {
@@ -974,6 +975,7 @@ async function scaffold() {
       
       listItems.push(
         `Run: ${chalk.cyan('source ./bin/repo-funcs.sh && echo "Loaded: \${REPO_FUNCS}"')}`,
+        `Build the Container with: ${chalk.cyan(`docker compose build ${kebabAppName}`)}`,
         `Start the Container with: ${chalk.cyan('startcont')}`,
         `Install Dev dependencies with: ${chalk.cyan('npm i')}`,
       );

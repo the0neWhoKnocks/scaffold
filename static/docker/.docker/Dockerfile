@@ -38,8 +38,8 @@ RUN ["node", "-e", " \
   if (lock) fs.writeFileSync('package-lock.json', JSON.stringify(lock)); \
 "]
 
-# Set up the environment
-FROM node24-dev-base AS #TOKEN:#DOCKER__APP_NAME
+# Env where prod deps are installed
+FROM node24-dev-base AS #TOKEN:#DOCKER__APP_NAME--prod
 ENV APP=/home/node/app
 ENV IN_CONTAINER=true
 ENV NODE_ENV=production
@@ -60,16 +60,34 @@ COPY --chown=node:node --from=#TOKEN:#DOCKER__APP_NAME--packagejson ./package*.j
 RUN npm i --only=production --quiet --unsafe-perm \
   && rm ./package*.json
 
-# Copy locally compiled code to the image
+
+# Env with dev deps to compile assets
+FROM #TOKEN:#DOCKER__APP_NAME--prod AS #TOKEN:#DOCKER__APP_NAME--dev
+# Install Dev deps (updated scripts or deps will invalidate build-cache)
+COPY --chown=node:node ./package*.json ./
+ENV NODE_ENV=development
+RUN npm i --quiet
+# Build is separate to utilize the build-cache if the package.json hasn't changed.
+COPY --chown=node:node ./bin/prep-dist.sh ./bin/
+COPY --chown=node:node ./src ./src
+#TOKEN:^DOCKER__WEBPACK
+COPY --chown=node:node ./webpack.config.js ./
+#TOKEN:$DOCKER__WEBPACK
+RUN npm run build
+
+
+# Bring over compiled assets and finalize.
+FROM #TOKEN:#DOCKER__APP_NAME--prod AS #TOKEN:#DOCKER__APP_NAME
+
 #TOKEN:^DOCKER__CLIENT_OR_SERVER
-COPY --chown=node:node ./dist/constants.js ./constants.js
-COPY --chown=node:node ./dist/utils ./utils
+COPY --chown=node:node --from=#TOKEN:#DOCKER__APP_NAME--dev $APP/dist/constants.js ./constants.js
+COPY --chown=node:node --from=#TOKEN:#DOCKER__APP_NAME--dev $APP/dist/utils ./utils
 #TOKEN:$DOCKER__CLIENT_OR_SERVER
 #TOKEN:^DOCKER__SERVER
-COPY --chown=node:node ./dist/server ./server
+COPY --chown=node:node --from=#TOKEN:#DOCKER__APP_NAME--dev $APP/dist/server ./server
 #TOKEN:$DOCKER__SERVER
 #TOKEN:^DOCKER__CLIENT
-COPY --chown=node:node ./dist/public ./public
+COPY --chown=node:node --from=#TOKEN:#DOCKER__APP_NAME--dev $APP/dist/public ./public
 #TOKEN:$DOCKER__CLIENT
 
 # Expose the default port from the Server, on the container
