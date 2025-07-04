@@ -7,22 +7,26 @@
   import Dialog from './Dialog.svelte';
   import LabeledInput from './LabeledInput.svelte';
   
-  export let onClose = undefined;
-  export let onError = undefined;
-  export let onSuccess = undefined;
-  export let open = false;
-  export let userInfo = undefined;
-  let dataLoaded = false;
-  let dataUpdated = false;
-  let formRef;
+  let {
+    onClose,
+    onError,
+    onSuccess,
+    open = false,
+    userInfo,
+  } = $props();
+  let dataLoaded = $state(false);
+  let dataUpdated = $state(false);
+  let formRef = $state();
   let initialFormData;
-  let inputRef;
-  let oldPassword = '';
-  let oldUsername = '';
-  let password = '';
-  let username = '';
+  let inputRef = $state();
+  let oldPassword = $state('');
+  let oldUsername = $state('');
+  let password = $state('');
+  let username = $state('');
 
-  function handleSubmit() {
+  function handleSubmit(ev) {
+    ev.preventDefault();
+    
     postData(formRef.action, formRef)
       .then((data) => {
         if (onSuccess) onSuccess(data);
@@ -53,17 +57,19 @@
     dataUpdated = initialFormData !== [...new FormData(formRef).values()].join('');
   }
   
-  $: if (dataLoaded && inputRef) inputRef.focus();
-  
-  $: if (formRef && dataLoaded) {
-    initialFormData = [...new FormData(formRef).values()].join('');
-  }
-  
-  $: if (open) { getUserProfile(); }
-  else {
-    dataLoaded = false;
-    dataUpdated = false;
-  }
+  $effect(() => {
+    if (dataLoaded && inputRef) inputRef.focus();
+    
+    if (formRef && dataLoaded) {
+      initialFormData = [...new FormData(formRef).values()].join('');
+    }
+    
+    if (open) { getUserProfile(); }
+    else {
+      dataLoaded = false;
+      dataUpdated = false;
+    }
+  });
 </script>
 
 {#if dataLoaded}
@@ -71,23 +77,24 @@
     onCloseClick={handleCloseClick}
     title="User Profile"
   >
-    <form
-      action={ROUTE__API__USER_SET_PROFILE}
-      bind:this={formRef}
-      class="user-profile-form"
-      method="POST"
-      on:input={handleChange}
-      on:submit|preventDefault={handleSubmit}
-      slot="dialogBody"
-    >
-      <input type="hidden" name="oldPassword" value={oldPassword} />
-      <input type="hidden" name="oldUsername" value={oldUsername} />
-      <LabeledInput label="Username" name="username" value={username} autoFocus compact required />
-      <LabeledInput label="Password" name="password" value={password} compact required />
-      <nav>
-        <button disabled={!dataUpdated}>Update</button>
-      </nav>
-    </form>
+    {#snippet dialogBodySnippet()}
+      <form
+        action={ROUTE__API__USER_SET_PROFILE}
+        bind:this={formRef}
+        class="user-profile-form"
+        method="POST"
+        oninput={handleChange}
+        onsubmit={handleSubmit}
+      >
+        <input type="hidden" name="oldPassword" value={oldPassword} />
+        <input type="hidden" name="oldUsername" value={oldUsername} />
+        <LabeledInput label="Username" name="username" value={username} autoFocus compact required />
+        <LabeledInput label="Password" name="password" value={password} compact required />
+        <nav>
+          <button disabled={!dataUpdated}>Update</button>
+        </nav>
+      </form>
+    {/snippet}
   </Dialog>
 {/if}
 

@@ -1,3 +1,4 @@
+import { mount } from 'svelte';
 import { DOM__SVELTE_MOUNT_POINT } from '../constants';
 import App from './components/App.svelte';
 //TOKEN:^CLIENT__MULTI_USER
@@ -9,12 +10,12 @@ const props = {
   props: window.app.props,
 };
 //TOKEN:^CLIENT__NO_MULTI_USER
-new App(props);
+mount(App, props);
 //TOKEN:$CLIENT__NO_MULTI_USER
 //TOKEN:^CLIENT__MULTI_USER
 
-if (window.app.configExists) new App(props);
-else new ConfigDialog(props);
+if (window.app.configExists) mount(App, props);
+else mount(ConfigDialog, props);
 //TOKEN:$CLIENT__MULTI_USER
 
 document.body.classList.add('view-loaded');

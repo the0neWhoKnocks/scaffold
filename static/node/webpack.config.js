@@ -12,22 +12,20 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const ENTRY_PREFIX__CSS = 'css/'; // folder path to dump CSS files in after compilation
 const ENTRY_PREFIX__JS = 'js/'; // folder path to dump JS files in after compilation
 const HASH_LENGTH = 5;
-const alias = {
-  //TOKEN:^WP__SVELTE
-  svelte: resolve('node_modules', 'svelte/src/runtime'),
-  //TOKEN:$WP__SVELTE
-};
 const conditionNames = [
+  //TOKEN:^WP__SVELTE
+  'svelte',
+  //TOKEN:$WP__SVELTE
+  'browser',
   'require',
   'node',
-  'svelte',
 ];
 const extensions = [
+  '.mjs',
+  '.js',
   //TOKEN:^WP__SVELTE
   '.svelte',
   //TOKEN:$WP__SVELTE
-  '.mjs',
-  '.js',
   '.json',
   '.html',
 ];
@@ -35,8 +33,8 @@ const mainFields = [
   //TOKEN:^WP__SVELTE
   'svelte',
   //TOKEN:$WP__SVELTE
-  'module',
   'browser',
+  'module',
   'main',
 ];
 const mode = process.env.NODE_ENV || 'development';
@@ -99,8 +97,6 @@ const conf = {
               url: false, // prevent encoding/inlining images
             },
           },
-          // remove duplicate svelte classes
-          { loader: resolve('./.webpack/loader.remove-duplicate-svelte-classes') },
         ],
       },
       //TOKEN:$WP__SVELTE
@@ -185,7 +181,7 @@ const conf = {
       writeToFileEmit: true,
     }),
   ],
-  resolve: { alias, conditionNames, extensions, mainFields },
+  resolve: { conditionNames, extensions, mainFields },
   stats: {
     children: false,
     entrypoints: false,

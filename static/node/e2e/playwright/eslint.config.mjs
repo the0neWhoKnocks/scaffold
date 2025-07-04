@@ -1,12 +1,8 @@
-module.exports = {
-  extends: [
-    'plugin:playwright/recommended',
-  ],
-  overrides: [
-    {
-      files: 'tests/**',
-    },
-  ],
+import playwright from 'eslint-plugin-playwright';
+
+export default [{
+  ...playwright.configs['flat/recommended'],
+  files: ['tests/**'],
   rules: {
     'node/no-missing-import': ['error', {
       allowModules: [
@@ -23,4 +19,4 @@ module.exports = {
       ],
     }],
   },
-};
+}];

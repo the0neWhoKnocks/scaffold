@@ -1,10 +1,11 @@
 <script>
-  export let label = '';
-  let _class = '';
-  export { _class as class };
+  let {
+    class: className = '',
+    label = '',
+  } = $props();
 </script>
 
-<div class="hr-with-text {_class}">
+<div class="hr-with-text {className}">
   <span>{label}</span>
 </div>
 

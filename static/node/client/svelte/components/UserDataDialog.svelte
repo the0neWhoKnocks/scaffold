@@ -6,17 +6,21 @@
   import postData from '../utils/postData';
   import Dialog from './Dialog.svelte';
   
-  export let onClose = undefined;
-  export let onError = undefined;
-  export let onSuccess = undefined;
-  export let open = false;
-  export let userInfo = undefined;
-  let data;
-  let dataLoaded = false;
-  let formRef;
-  let inputRef;
+  let {
+    onClose,
+    onError,
+    onSuccess,
+    open = false,
+    userInfo,
+  } = $props();
+  let data = $state();
+  let dataLoaded = $state(false);
+  let formRef = $state();
+  let inputRef = $state();
 
-  function handleSubmit() {
+  function handleSubmit(ev) {
+    ev.preventDefault();
+    
     postData(formRef.action, formRef)
       .then((data) => {
         
@@ -41,10 +45,12 @@
     if (onClose) onClose();
   }
   
-  $: if (dataLoaded && inputRef) inputRef.focus();
-  
-  $: if (open) { getUserData(); }
-  else { dataLoaded = false; }
+  $effect(() => {
+    if (dataLoaded && inputRef) inputRef.focus();
+    
+    if (open) { getUserData(); }
+    else { dataLoaded = false; }
+  });
 </script>
 
 {#if dataLoaded}
@@ -52,26 +58,27 @@
     onCloseClick={handleCloseClick}
     title="User Data"
   >
-    <form
-      action={ROUTE__API__USER_SET_DATA}
-      bind:this={formRef}
-      class="user-data-form"
-      method="POST"
-      on:submit|preventDefault={handleSubmit}
-      slot="dialogBody"
-    >
-      <input type="hidden" name="password" value={userInfo.password} />
-      <input type="hidden" name="username" value={userInfo.username} />
-      <textarea
-        bind:this={inputRef}
-        bind:value={data}
-        name="data"
-        placeholder="Enter some data"
-      ></textarea>
-      <nav>
-        <button>Save</button>
-      </nav>
-    </form>
+    {#snippet dialogBodySnippet()}
+      <form
+        action={ROUTE__API__USER_SET_DATA}
+        bind:this={formRef}
+        class="user-data-form"
+        method="POST"
+        onsubmit={handleSubmit}
+      >
+        <input type="hidden" name="password" value={userInfo.password} />
+        <input type="hidden" name="username" value={userInfo.username} />
+        <textarea
+          bind:this={inputRef}
+          bind:value={data}
+          name="data"
+          placeholder="Enter some data"
+        ></textarea>
+        <nav>
+          <button>Save</button>
+        </nav>
+      </form>
+    {/snippet}
   </Dialog>
 {/if}
 

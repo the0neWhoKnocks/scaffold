@@ -14,16 +14,18 @@
   import HRWithText from './HRWithText.svelte';
   import LabeledInput from './LabeledInput.svelte';
   
-  export let onClose = undefined;
-  export let onSuccess = undefined;
-  export let open = false;
-  let createFormRef;
-  let createUserOpen = false;
-  let loginFormRef;
-  let loginPassword;
-  let loginUsername;
-  let rememberCredentials = false;
-  let rememberCredentialsRef;
+  let {
+    onClose,
+    onSuccess,
+    open = false,
+  } = $props();
+  let createFormRef = $state();
+  let createUserOpen = $state(false);
+  let loginFormRef = $state();
+  let loginPassword = $state();
+  let loginUsername = $state();
+  let rememberCredentials = $state(false);
+  let rememberCredentialsRef = $state();
   
   function handleLoginSubmit(ev) {
     ev.preventDefault();
@@ -94,94 +96,96 @@
 
 {#if open}
   <Dialog onCloseClick={handleCloseClick}>
-    <form
-      action={ROUTE__API__USER_LOGIN}
-      autocomplete='off'
-      bind:this={loginFormRef}
-      class="login-form"
-      method="POST"
-      on:submit={handleLoginSubmit}
-      slot="dialogBody"
-      spellcheck="false"
-    >
-      <HRWithText class="for--top" label="Log In" />
-      <LabeledInput
-        autoFocus
-        compact
-        label="Username"
-        name="username"
-        required
-        value={loginUsername}
-      />
-      <LabeledInput
-        compact
-        label="Password"
-        name="password"
-        required
-        type="password"
-        value={loginPassword}
-      />
-      <label class="remember-me">
-        <input
-          type="checkbox"
-          bind:checked={rememberCredentials}
-          bind:this={rememberCredentialsRef}
+    {#snippet dialogBodySnippet()}
+      <form
+        action={ROUTE__API__USER_LOGIN}
+        autocomplete='off'
+        bind:this={loginFormRef}
+        class="login-form"
+        method="POST"
+        onsubmit={handleLoginSubmit}
+        spellcheck="false"
+      >
+        <HRWithText class="for--top" label="Log In" />
+        <LabeledInput
+          autoFocus
+          compact
+          label="Username"
+          name="username"
+          required
+          value={loginUsername}
         />
-        Remember Me
-      </label>
-      <button value="login">Log In</button>
-      <HRWithText label="or" />
-      <button
-        type="button"
-        value="create"
-        on:click={handleCreateAccountClick}
-      >Create Account</button>
-    </form>
+        <LabeledInput
+          compact
+          label="Password"
+          name="password"
+          required
+          type="password"
+          value={loginPassword}
+        />
+        <label class="remember-me">
+          <input
+            type="checkbox"
+            bind:checked={rememberCredentials}
+            bind:this={rememberCredentialsRef}
+          />
+          Remember Me
+        </label>
+        <button value="login">Log In</button>
+        <HRWithText label="or" />
+        <button
+          type="button"
+          value="create"
+          onclick={handleCreateAccountClick}
+        >Create Account</button>
+      </form>
+    {/snippet}
   </Dialog>
 {/if}
 {#if createUserOpen}
   <Dialog onCloseClick={handleCloseClick}>
-    <form
-      action={ROUTE__API__USER_CREATE}
-      autocomplete="off"
-      bind:this={createFormRef}
-      class="create-form"
-      method="POST"
-      on:submit={handleCreateSubmit}
-      slot="dialogBody"
-      spellcheck="false"
-    >
-      <HRWithText class="for--top" label="Create Account" />
-      <LabeledInput
-        autoFocus 
-        compact
-        label="Username"
-        name="username"
-        required
-      />
-      <LabeledInput
-        compact
-        label="Password"
-        name="password"
-        required
-        type="password"
-      />
-      <LabeledInput
-        compact
-        label="Confirm Password"
-        name="passwordConfirmed"
-        required
-        type="password"
-      />
-      <nav>
-        <button
-          on:click={handleCancelCreateClick}
-          type="button"
-          value="cancel"
-        >Cancel</button>
-        <button value="create">Create</button>
-      </nav>
-    </form>
+    {#snippet dialogBodySnippet()}
+      <form
+        action={ROUTE__API__USER_CREATE}
+        autocomplete="off"
+        bind:this={createFormRef}
+        class="create-form"
+        method="POST"
+        onsubmit={handleCreateSubmit}
+        spellcheck="false"
+      >
+        <HRWithText class="for--top" label="Create Account" />
+        <LabeledInput
+          autoFocus 
+          compact
+          label="Username"
+          name="username"
+          required
+        />
+        <LabeledInput
+          compact
+          label="Password"
+          name="password"
+          required
+          type="password"
+        />
+        <LabeledInput
+          compact
+          label="Confirm Password"
+          name="passwordConfirmed"
+          required
+          type="password"
+        />
+        <nav>
+          <button
+            onclick={handleCancelCreateClick}
+            type="button"
+            value="cancel"
+          >Cancel</button>
+          <button value="create">Create</button>
+        </nav>
+      </form>
+    {/snippet}
   </Dialog>
 {/if}
 

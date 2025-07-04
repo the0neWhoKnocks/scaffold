@@ -1,6 +1,6 @@
 <script>
   //TOKEN:^APP__SERVER_INTERACTIONS
-  import { afterUpdate, onMount } from 'svelte';
+  import { onMount } from 'svelte';
   //TOKEN:$APP__SERVER_INTERACTIONS
   import logger from '../../utils/logger';
   //TOKEN:^APP__HAS_CONSTANTS
@@ -41,25 +41,25 @@
   
   const log = logger('app');
   //TOKEN:^APP__SERVER_INTERACTIONS
-  let logsLength = 0;
-  let serverData = [];
+  let logsLength = $state(0);
+  let serverData = $state([]);
   let serverDataRef;
   //TOKEN:$APP__SERVER_INTERACTIONS
   //TOKEN:^APP__WEB_SOCKET
   let socketAPI;
   //TOKEN:$APP__WEB_SOCKET
   //TOKEN:^APP__MULTI_USER
-  let loginOpened = false;
-  let userStorageType;
-  let mounted = false;
-  let username;
-  let userNavOpen = false;
-  let userDataOpened = false;
-  let userInfo;
-  let userProfileOpened = false;
+  let loginOpened = $state(false);
+  let userStorageType = $state();
+  let mounted = $state(false);
+  let username = $state();
+  let userNavOpen = $state(false);
+  let userDataOpened = $state(false);
+  let userInfo = $state();
+  let userProfileOpened = $state(false);
   //TOKEN:$APP__MULTI_USER
   //TOKEN:^APP__EXT_API
-  let extAPIPending = false;
+  let extAPIPending = $state(false);
   //TOKEN:$APP__EXT_API
   //TOKEN:^APP__SERVER_INTERACTIONS
   
@@ -187,14 +187,16 @@
     
     printMessage('USER', `profile updated: ${JSON.stringify(data)}`);
   }
-  
-  $: if (userProfileOpened || userDataOpened) {
-    userNavOpen = false;
-  }
   //TOKEN:$APP__MULTI_USER
   //TOKEN:^APP__SERVER_INTERACTIONS
   
-  afterUpdate(() => {
+  $effect(() => {
+    //TOKEN:^APP__MULTI_USER
+    if (userProfileOpened || userDataOpened) {
+      userNavOpen = false;
+    }
+    
+    //TOKEN:$APP__MULTI_USER
     if (logsLength !== serverData.length && serverDataRef) {
       serverDataRef.scrollTop = serverDataRef.scrollHeight;
     }
@@ -245,7 +247,7 @@
     <!--TOKEN:^APP__SERVER_INTERACTIONS -->
     <div class="server-data">
       <nav class="server-data__nav">
-        <button on:click={clearLogs}>Clear</button>
+        <button onclick={clearLogs}>Clear</button>
       </nav>
       <pre
         class="server-data__logs"
@@ -257,21 +259,21 @@
     </div>
     <nav class="api-nav">
       <!--TOKEN:^APP__API -->
-      <button on:click={callAPI}>Trigger API</button>
+      <button onclick={callAPI}>Trigger API</button>
       <!--TOKEN:$APP__API -->
       <!--TOKEN:^APP__EXT_API -->
       <button
         class:pending={extAPIPending}
-        on:click={callExtAPI}
+        onclick={callExtAPI}
       >Trigger Ext. API</button>
       <!--TOKEN:$APP__EXT_API -->
       <!--TOKEN:^APP__WEB_SOCKET -->
-      <button on:click={callSocket}>Trigger Socket</button>
+      <button onclick={callSocket}>Trigger Socket</button>
       <!--TOKEN:$APP__WEB_SOCKET -->
       <!--TOKEN:^APP__MULTI_USER -->
       {#if userStorageType}
         <div class="user-menu">
-          <button on:click={toggleUserNav}>
+          <button onclick={toggleUserNav}>
             <Icon type={ICON__USER} />
             {username}
             {#if userNavOpen}
@@ -281,13 +283,13 @@
             {/if}
           </button>
           <nav class:open={userNavOpen}>
-            <button on:click={openUserProfile}>Edit Profile</button>
-            <button on:click={openUserData}>Set Data</button>
-            <button on:click={logoutUser}>Logout</button>
+            <button onclick={openUserProfile}>Edit Profile</button>
+            <button onclick={openUserData}>Set Data</button>
+            <button onclick={logoutUser}>Logout</button>
           </nav>
         </div>
       {:else}
-        <button on:click={openLogin} class:checking={!mounted}>Login</button>
+        <button onclick={openLogin} class:checking={!mounted}>Login</button>
       {/if}
       <!--TOKEN:$APP__MULTI_USER -->
     </nav>

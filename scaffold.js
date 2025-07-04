@@ -243,6 +243,9 @@ async function scaffold() {
         start: 'node ./dist/server',
         'start:dev': './bin/prep-dist.sh'
       },
+      engines: {
+        node: '>=24.1.0',
+      },
       dependencies: {},
       devDependencies: {},
     };
@@ -393,13 +396,7 @@ async function scaffold() {
           packageJSON.devDependencies['css-loader'] = '6.5.1';
           packageJSON.devDependencies['css-minimizer-webpack-plugin'] = '3.1.3';
           packageJSON.devDependencies['mini-css-extract-plugin'] = '2.4.4';
-          packageJSON.devDependencies['svelte-loader'] = '3.1.9';
-          
-          copyFiles([{
-            files: ['loader.remove-duplicate-svelte-classes.js'],
-            from: 'node/webpack',
-            to: '.webpack',
-          }]);
+          packageJSON.devDependencies['svelte-loader'] = '3.2.4';
         }
         
         addParsedFiles([{
@@ -415,7 +412,7 @@ async function scaffold() {
       }
       
       if (clientFrameworkIsSvelte) {
-        packageJSON.devDependencies['svelte'] = '4.2.2';
+        packageJSON.devDependencies['svelte'] = '5.33.14';
         packageJSON.devDependencies['svelte-portal'] = '2.2.0';
         
         addParsedFiles([
@@ -443,6 +440,12 @@ async function scaffold() {
             ],
           },
         ]);
+        
+        copyFiles([{
+          files: ['svelte.config.js'],
+          from: 'node',
+          to: '',
+        }]);
       }
       
       if (multiUser) {
@@ -594,14 +597,15 @@ async function scaffold() {
     }
     
     if (eslint) {
-      packageJSON.devDependencies['eslint'] = '8.57.1';
-      packageJSON.devDependencies['eslint-plugin-node'] = '11.1.0';
+      packageJSON.devDependencies['eslint'] = '9.28.0';
+      packageJSON.devDependencies['eslint-plugin-n'] = '17.19.0';
+      packageJSON.devDependencies['globals'] = '16.2.0'; // needed for newer eslint
       
       const lintExts = ['js'];
       const sourceFolders = ['bin', 'src'];
       
       if (clientFrameworkIsSvelte) {
-        packageJSON.devDependencies['eslint-plugin-svelte'] = '2.44.1';
+        packageJSON.devDependencies['eslint-plugin-svelte'] = '3.9.1';
         lintExts.push('svelte');
       }
       
@@ -610,7 +614,7 @@ async function scaffold() {
       packageJSON.scripts['lint'] = `eslint ./*.js "{${sourceFolders.sort().join(',')}}/**/*.{${lintExts.sort().join(',')}}"`;
       
       addParsedFiles([{
-        file: '.eslintrc.js',
+        file: 'eslint.config.mjs',
         from: 'node',
         to: '',
         tokens: [
@@ -663,7 +667,7 @@ async function scaffold() {
       
       switch (e2eFramework) {
         case 'cypress':
-          packageJSON.devDependencies['eslint-plugin-cypress'] = '2.15.1';
+          packageJSON.devDependencies['eslint-plugin-cypress'] = '5.1.0';
           
           copyFiles([
             {
@@ -682,7 +686,12 @@ async function scaffold() {
               to: 'e2e/cypress/support',
             },
             {
-              files: ['.eslintrc.js', 'cypress.config.js', 'Dockerfile', 'state.json'],
+              files: [
+                'cypress.config.js',
+                'Dockerfile',
+                'eslint.config.mjs',
+                'state.json',
+              ],
               from: 'node/e2e/cypress',
               to: 'e2e',
             },
@@ -721,8 +730,8 @@ async function scaffold() {
           copyFiles([
             {
               files: [
-                '.eslintrc.js',
                 'Dockerfile',
+                'eslint.config.mjs',
                 'playwright.config.js',
                 'seccomp_profile.json',
               ],

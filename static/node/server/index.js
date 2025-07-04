@@ -46,7 +46,6 @@ const {
   //TOKEN:$SERVER__MULTI_USER
   SERVER__PORT,
   //TOKEN:^SERVER__WEBSOCKET
-  WS__MSG__CONNECTED_TO_SERVER,
   WS__MSG__EXAMPLE,
   //TOKEN:^SERVER__VHOST
   WS__MSG__PING,
@@ -213,9 +212,10 @@ app
   //TOKEN:$SERVER__MULTI_USER
   //TOKEN:^SERVER__API
   .get(ROUTE__API__HELLO, (req, res) => {
-    const { parse: parseQuery } = require('node:querystring');
-    const { parse: parseURL } = require('node:url');
-    const params = { ...parseQuery(parseURL(req.url).query) };
+    const params = [...(new URL(req.url)).searchParams].reduce((obj, [ key, val ]) => {
+      obj[key] = val;
+      return obj;
+    }, {});
     log.info(`[API] Recieved params: ${JSON.stringify(params)}`);
     res.json({ hello: 'dave' });
   })
@@ -291,7 +291,7 @@ const wss = socket(server, {
         }, 2000);
       },
     },
-  }
+  },
 });
 //TOKEN:$SERVER__WEBSOCKET
 

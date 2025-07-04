@@ -2,20 +2,22 @@
   import { onMount } from 'svelte';
   import Icon, { ICON__ASTERISK } from './Icon.svelte';
   
-  export let autoComplete = false;
-  export let autoFocus = false;
-  export let compact = false;
-  export let disabled = false;
-  export let helpText = '';
-  export let hiddenValue = '';
-  export let label = '';
-  export let name = '';
-  export let placeholder = ' '; // empty space required for `placeholder-shown` selector
-  export let required;
-  export let type = 'text';
-  export let value = '';
-  let _class = '';
-  export { _class as class };
+  let {
+    autoComplete = false,
+    autoFocus = false,
+    children,
+    class: className = '',
+    compact = false,
+    disabled = false,
+    helpText = '',
+    hiddenValue = '',
+    label = '',
+    name = '',
+    placeholder = ' ', // empty space required for `placeholder-shown` selector
+    required,
+    type = 'text',
+    value = '',
+  } = $props();
   
   const id = btoa(`cli_${name}`).replace(/=/g, '');
   let inputRef;
@@ -26,7 +28,7 @@
 </script>
 
 <div
-  class="labeled-input {_class}"
+  class="labeled-input {className}"
   class:is--compact={compact}
 >
   <div class="labeled-input__wrapper">
@@ -52,7 +54,7 @@
   {#if helpText}
     <p class="help-text">{helpText}</p>
   {/if}
-  <slot name="lowerMarkup"></slot>
+  {@render children?.()}
 </div>
 
 <style>
