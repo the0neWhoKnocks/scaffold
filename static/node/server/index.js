@@ -212,7 +212,7 @@ app
   //TOKEN:$SERVER__MULTI_USER
   //TOKEN:^SERVER__API
   .get(ROUTE__API__HELLO, (req, res) => {
-    const params = [...(new URL(req.url)).searchParams].reduce((obj, [ key, val ]) => {
+    const params = [...(new URL(`${req.headers.host}}/${req.url}`)).searchParams].reduce((obj, [ key, val ]) => {
       obj[key] = val;
       return obj;
     }, {});
