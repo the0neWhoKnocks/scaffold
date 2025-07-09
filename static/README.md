@@ -107,7 +107,9 @@ This repo utilizes GitHub workflows to auto-deploy a GitHub page.
 
 ## Local HTTPS
 
-Follow instructions from https://github.com/the0neWhoKnocks/generate-certs
+Follow instructions from:
+- https://github.com/the0neWhoKnocks/docker-examples/tree/main/examples/cert-auth#run
+- https://github.com/the0neWhoKnocks/generate-certs
 //TOKEN:$README__HTTPS
 //TOKEN:^README__LOGGING
 

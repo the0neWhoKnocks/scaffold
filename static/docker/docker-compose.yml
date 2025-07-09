@@ -30,12 +30,6 @@ services:
     expose:
       - "${VHOST__PORT__APP}"
     #TOKEN:$DC__VHOST
-    healthcheck:
-      interval: "3s"
-      retries: 3
-      start_interval: "2s"
-      test: wget --no-verbose --tries=1 --spider --no-check-certificate #TOKEN:#DC__PROTOCOL://localhost:3000 || exit 1
-      timeout: "2s"
     image: #TOKEN:#DC__USERNAME/#TOKEN:#DC__APP_NAME
     #TOKEN:^DC__PORTS
     ports:
@@ -75,32 +69,6 @@ services:
       - "${PWD}/.ignore:/home/node/dev" # allows for .zsh_history to be written
       # Map the current directory over for development
       - "${PWD}:/home/node/app"
-  #TOKEN:^DC__E2E
-  
-  e2e-#TOKEN:#DC__APP_NAME:
-    build:
-      context: ./e2e/
-      dockerfile: Dockerfile
-    # command: 'cypress run --browser chrome'
-    container_name: e2e-#TOKEN:#DC__APP_NAME
-    depends_on:
-      - #TOKEN:#DC__E2E_DEPENDS_ON
-    # environment:
-    #   # ELECTRON_ENABLE_LOGGING: 1 # view console logs from Browser (headless)
-    #   # DEBUG: cypress:server:browsers:electron # view Electron internal logging
-    hostname: cypresstests
-    ipc: host # https://github.com/cypress-io/cypress/issues/350#issuecomment-267704772
-    ports:
-      - "3001:3000"
-    privileged: true
-    working_dir: /e2e
-    volumes:
-      - type: bind
-        source: "${PWD}/.app_data"
-        target: "/app_data"
-      - "${PWD}/e2e:/e2e"
-      - "${PWD}/src:/src"
-  #TOKEN:$DC__E2E
   #TOKEN:^DC__VHOST
   
   nginx-proxy:

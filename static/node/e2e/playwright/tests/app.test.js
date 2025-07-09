@@ -107,9 +107,9 @@ test('App', async ({ app }) => {
     const PASSWORD = 'pass';
     const createUserResp = app.waitForResp('POST', ROUTE__API__USER_CREATE);
     const createFormEl = page.locator(SELECTOR__CREATE_FORM);
-    await app.fill(createFormEl.locator('input[name="username"]'), USERNAME);
-    await app.fill(createFormEl.locator('input[name="password"]'), PASSWORD);
-    await app.fill(createFormEl.locator('input[name="passwordConfirmed"]'), PASSWORD);
+    await createFormEl.locator('input[name="username"]').fill(USERNAME);
+    await createFormEl.locator('input[name="password"]').fill(PASSWORD);
+    await createFormEl.locator('input[name="passwordConfirmed"]').fill(PASSWORD);
     await createFormEl.getByRole('button', { name: 'Create' }).click();
     await createUserResp;
     loginFormEl = page.locator(SELECTOR__LOGIN_FORM);
@@ -130,7 +130,7 @@ test('App', async ({ app }) => {
     let setProfileResp = app.waitForResp('POST', ROUTE__API__USER_SET_PROFILE);
     await userMenu.locator('nav').getByRole('button', { name: 'Edit Profile' }).click();
     let profileForm = page.locator(SELECTOR__USER_PROFILE_FORM);
-    await app.fill(profileForm.locator('input[name="username"]'), '{selectall}user1');
+    await profileForm.locator('input[name="username"]').fill('user1');
     await app.screenshot('User name changed');
     await profileForm.getByRole('button', { name: 'Update' }).click();
     await setProfileResp;
@@ -141,7 +141,7 @@ test('App', async ({ app }) => {
     await userMenu.getByRole('button', { name: 'user1' }).click();
     await userMenu.locator('nav').getByRole('button', { name: 'Set Data' }).click();
     const dataForm = page.locator(SELECTOR__USER_DATA_FORM);
-    await app.fill(dataForm.locator('textarea'), 'random user data');
+    await dataForm.locator('textarea').fill('random user data');
     await app.screenshot('User data entered');
     await dataForm.getByRole('button', { name: 'Save' }).click();
     await setDataResp;
@@ -152,8 +152,8 @@ test('App', async ({ app }) => {
     await userMenu.getByRole('button', { name: 'user1' }).click();
     await userMenu.locator('nav').getByRole('button', { name: 'Edit Profile' }).click();
     profileForm = page.locator(SELECTOR__USER_PROFILE_FORM);
-    await app.fill(profileForm.locator('input[name="username"]'), '{selectall}user');
-    await app.fill(profileForm.locator('input[name="password"]'), '{selectall}pass1');
+    await profileForm.locator('input[name="username"]').fill('user');
+    await profileForm.locator('input[name="password"]').fill('pass1');
     await app.screenshot('User password changed');
     await profileForm.getByRole('button', { name: 'Update' }).click();
     await setProfileResp;

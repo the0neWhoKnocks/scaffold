@@ -625,7 +625,7 @@ async function scaffold() {
     }
     
     if (e2eFramework) {
-      packageJSON.scripts['test'] = './e2e/bin/test-runner.sh';
+      packageJSON.scripts['test'] = `./e2e/bin/test-runner.sh --name ${kebabAppName}`;
       packageJSON.scripts['test:watch'] = 'npm run test -- --watch';
       
       copyFiles([
@@ -644,9 +644,7 @@ async function scaffold() {
           from: 'node/e2e/bin',
           to: 'e2e/bin',
           tokens: [
-            { token: 'TEST_RUNNER__APP_NAME', replacement: (e2eProxy) ? 'proxied-app' : kebabAppName },
             { token: 'TEST_RUNNER__E2E_NAME', replacement: `${kebabAppName}-e2e` },
-            { token: 'TEST_RUNNER__FRAMEWORK__CYPRESS', remove: e2eFramework !== 'cypress' },
             { token: 'TEST_RUNNER__FRAMEWORK__PLAYWRIGHT', remove: e2eFramework !== 'playwright' },
             { token: 'TEST_RUNNER__PROTOCOL', replacement: (secure) ? 'https' : 'http' },
             { token: 'TEST_RUNNER__PROXY', remove: !e2eProxy },
@@ -663,54 +661,9 @@ async function scaffold() {
         { token: 'TEST__PROXY', remove: !e2eProxy },
         { token: 'TEST__REQUESTS', remove: !apiEnabled && !externalRequests },
         { token: 'TEST__SERVER_INTERACTIONS', remove: !hasServerInteractions },
-        { token: 'TEST__WEB_SOCKETS', remove: !webSocket },
       ];
       
       switch (e2eFramework) {
-        case 'cypress':
-          packageJSON.devDependencies['eslint-plugin-cypress'] = '5.1.0';
-          
-          copyFiles([
-            {
-              files: ['1x1.png'],
-              from: 'node/e2e/cypress/fixtures',
-              to: 'e2e/cypress/fixtures',
-            },
-            {
-              files: ['index.js'],
-              from: 'node/e2e/cypress/plugins',
-              to: 'e2e/cypress/plugins',
-            },
-            {
-              files: ['e2e.js'],
-              from: 'node/e2e/cypress/support',
-              to: 'e2e/cypress/support',
-            },
-            {
-              files: [
-                'cypress.config.js',
-                'Dockerfile',
-                'eslint.config.mjs',
-                'state.json',
-              ],
-              from: 'node/e2e/cypress',
-              to: 'e2e',
-            },
-          ]);
-          
-          addParsedFiles([
-            {
-              file: 'commands.js',
-              from: 'node/e2e/cypress/support',
-              to: 'e2e/cypress/support',
-              tokens: [
-                { token: 'COMMANDS__PROXY', remove: !e2eProxy },
-              ],
-            },
-          ]);
-          
-          break;
-        
         case 'playwright':
           packageJSON.devDependencies['eslint-plugin-playwright'] = '1.7.0';
           
@@ -725,12 +678,18 @@ async function scaffold() {
               file: 'docker-compose.yml',
               from: 'node/e2e/playwright',
               to: 'e2e',
-              tokens: sharedDockerTokens,
+              tokens: [
+                ...sharedDockerTokens,
+                { token: 'DC__EXT_APP_NAME', replacement: (e2eProxy) ? 'proxied-app' : kebabAppName },
+                { token: 'DC__PROTOCOL', replacement: (secure) ? 'https' : 'http' },
+                { token: 'DC__SECURE', remove: !secure },
+              ],
             },
           ]);
           copyFiles([
             {
               files: [
+                '.gitignore',
                 'Dockerfile',
                 'eslint.config.mjs',
                 'playwright.config.js',
@@ -827,11 +786,9 @@ async function scaffold() {
           ...sharedDockerTokens,
           { token: 'DC__BSYNC', remove: !(hasWatcher && addClient) },
           { token: 'DC__DEV_APP_NAME', replacement: kebabAppNameDev },
-          { token: 'DC__E2E', remove: e2eFramework !== 'cypress' },
           { token: 'DC__E2E_PROXY_PORT', replacement: (secure) ? 443 : 80 },
           { token: 'DC__NODE_CERTS', remove: !addCerts },
           { token: 'DC__PORTS', remove: vHost },
-          { token: 'DC__PROTOCOL', replacement: (secure) ? 'https' : 'http' },
           { token: 'DC__USERNAME', replacement: username },
           { token: 'DC__VHOST', remove: !vHost },
           { token: 'DC__VHOST_NON_SECURE', remove: secure },
@@ -873,9 +830,7 @@ async function scaffold() {
       to: '',
       tokens: [
         { token: 'IGNORE__DOTENV', remove: !dotenv },
-        { token: 'IGNORE__CYPRESS', remove: e2eFramework !== 'cypress' },
         { token: 'IGNORE__HTTPS', remove: !secure },
-        { token: 'IGNORE__PLAYWRIGHT', remove: e2eFramework !== 'playwright' },
         { token: 'IGNORE__VHOST', remove: !vHost },
       ],
     },

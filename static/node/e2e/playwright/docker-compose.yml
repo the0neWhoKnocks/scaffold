@@ -9,14 +9,23 @@
 #   in the project root.
 
 services:
-  #TOKEN:#DC__APP_NAME:
+  #TOKEN:#DC__APP_NAME-test:
     extends:
       file: "${PWD}/docker-compose.yml"
-      service: #TOKEN:#DC__APP_NAME
+      service: #TOKEN:#DC__EXT_APP_NAME
     container_name: #TOKEN:#DC__APP_NAME-test
-    # environment:
-    #   DATA_PATH: /test/data.json
-    hostname: #TOKEN:#DC__APP_NAME # domain name (usually assigned via container name)
+    environment:
+      # DATA_PATH: /test/data.json
+      #TOKEN:^DC__SECURE
+      NODE_EXTRA_CA_CERTS: /home/node/certs/tests.crt
+      #TOKEN:#DC__SECURE
+    healthcheck: # required for the test container to start
+      interval: "3s"
+      retries: 3
+      start_interval: "2s"
+      test: wget --no-verbose --tries=1 --spider --no-check-certificate #TOKEN:#DC__PROTOCOL://localhost:3000 || exit 1
+      timeout: "2s"
+    hostname: tests.lan # domain name (usually assigned via container name)
     # volumes:
     #   - "${PWD}/e2e/tests/fixtures/data.json:/test/data.json:r"
   
@@ -30,7 +39,7 @@ services:
       #TOKEN:#DC__E2E_DEPENDS_ON:
         condition: service_healthy
     environment:
-      BASE_URL: "https://#TOKEN:#DC__APP_NAME:3000" # <PROTOCOL>://<CONTAINER_NAME>:<CONTAINER_PORT>
+      BASE_URL: "#TOKEN:#DC__PROTOCOL://tests.lan:3000"
       DISPLAY: $TEST_DISPLAY
     hostname: e2etests
     ipc: host # Using `--ipc=host` is recommended when using Chrome (Docker docs). Chrome can run out of memory without this flag.
@@ -38,10 +47,11 @@ services:
       - "3001:3000"
     security_opt:
       - "seccomp:${PWD}/e2e/seccomp_profile.json"
+    user: "${CURR_UID}:${CURR_GID}"
     volumes:
-      - type: bind
-        source: "${PWD}/.app_data"
-        target: "/app_data"
+      #TOKEN:^DC__SECURE
+      - "${PWD}/certs:/certs:r"
+      #TOKEN:#DC__SECURE
       - "${PWD}/e2e:/e2e"
       - "${PWD}/src/constants.js:/node_modules/@src/constants.js:r" # map local modules to the fake `@src` parent
       - $VOL_DBUS

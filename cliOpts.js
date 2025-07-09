@@ -172,7 +172,6 @@ const scaffoldQuestions = [
     type: 'list',
     name: 'e2eFramework',
     choices: [
-      { name: 'Cypress', value: 'cypress' },
       { name: 'PlayWright', value: 'playwright' },
     ],
   },

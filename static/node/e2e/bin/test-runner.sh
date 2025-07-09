@@ -11,6 +11,10 @@ isWSL=false
 # Parse arguments
 while [ $# -gt 0 ]; do
   case $1 in
+    --name)
+      CONT_NAME=$2
+      shift
+      ;;
     --skip-build)
       BUILD=false
       ;;
@@ -33,20 +37,18 @@ else
   isOSX=$(uname | grep -qi "darwin" &> /dev/null)
 fi
 
-APP_SERVICE="#TOKEN:#TEST_RUNNER__APP_NAME"
+APP_SERVICE="${CONT_NAME}-test"
+CURR_GID=$(id -g)
+CURR_UID=$(id -u)
 #TOKEN:^TEST_RUNNER__FRAMEWORK__PLAYWRIGHT
 E2E_COMPOSE_FILE="./e2e/docker-compose.yml"
 #TOKEN:$TEST_RUNNER__FRAMEWORK__PLAYWRIGHT
-E2E_CONTAINER_NAME="#TOKEN:#TEST_RUNNER__E2E_NAME"
-E2E_SERVICE="#TOKEN:#TEST_RUNNER__E2E_NAME"
+E2E_CONTAINER_NAME="${CONT_NAME}-e2e"
+E2E_SERVICE="${CONT_NAME}-e2e"
 #TOKEN:^TEST_RUNNER__PROXY
 PROXY_SERVICE="proxy"
 #TOKEN:$TEST_RUNNER__PROXY
 xlaunchPath="${SCRIPT_DIR}/XServer.xlaunch"
-#TOKEN:^TEST_RUNNER__FRAMEWORK__CYPRESS
-cypressCmd=""
-extraArgs="-e CYPRESS_baseUrl=#TOKEN:#TEST_RUNNER__PROTOCOL://${DOCKER_HOST}:3000"
-#TOKEN:$TEST_RUNNER__FRAMEWORK__CYPRESS
 #TOKEN:^TEST_RUNNER__FRAMEWORK__PLAYWRIGHT
 extraArgs=""
 #TOKEN:$TEST_RUNNER__FRAMEWORK__PLAYWRIGHT
@@ -76,9 +78,6 @@ if $WATCH_MODE; then
     IP=$(ip addr show | grep docker | grep -Eo 'inet ([^/]+)' | sed 's|inet ||')
     DBUS_PATH=$(echo "${DBUS_SESSION_BUS_ADDRESS}" | sed 's|unix:path=||')
     display="${DISPLAY}"
-    #TOKEN:^TEST_RUNNER__FRAMEWORK__CYPRESS
-    extraArgs="${extraArgs} --user $(id -u):$(id -g) -e DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS}" -v /tmp/.X11-unix:/tmp/.X11-unix:rw -v /run/dbus/system_bus_socket:/run/dbus/system_bus_socket -v ${DBUS_PATH}:${DBUS_PATH}"
-    #TOKEN:$TEST_RUNNER__FRAMEWORK__CYPRESS
     #TOKEN:^TEST_RUNNER__FRAMEWORK__PLAYWRIGHT
     export VOL_X11='/tmp/.X11-unix:/tmp/.X11-unix:rw'
     export VOL_DBUS='/run/dbus/system_bus_socket:/run/dbus/system_bus_socket'
@@ -89,10 +88,6 @@ if $WATCH_MODE; then
   fi
   
   if [[ "$display" != "" ]]; then
-    #TOKEN:^TEST_RUNNER__FRAMEWORK__CYPRESS
-    cypressCmd="docker compose run --name=${E2E_CONTAINER_NAME} -e DISPLAY=$display ${extraArgs} --rm --entrypoint cypress ${E2E_SERVICE} open --e2e --browser electron --project ."
-    
-    #TOKEN:$TEST_RUNNER__FRAMEWORK__CYPRESS
     if [[ "$xlaunchBinary" != "" ]] && [ -f "$xlaunchBinary" ]; then
       echo;
       echo "[START] XServer"
@@ -121,14 +116,7 @@ fi
 
 if $BUILD; then
   echo;
-  echo "[BUILD] App"
-  npm run build
-  
-  echo;
   echo "[BUILD] Containers"
-  #TOKEN:^TEST_RUNNER__FRAMEWORK__CYPRESS
-  docker compose build ${APP_SERVICE} ${E2E_SERVICE} #TOKEN:#TEST_RUNNER__PROXY_SERVICE_REF
-  #TOKEN:$TEST_RUNNER__FRAMEWORK__CYPRESS
   #TOKEN:^TEST_RUNNER__FRAMEWORK__PLAYWRIGHT
   docker compose -f "${E2E_COMPOSE_FILE}" build ${APP_SERVICE} ${E2E_SERVICE} #TOKEN:#TEST_RUNNER__PROXY_SERVICE_REF
   #TOKEN:^TEST_RUNNER__FRAMEWORK__PLAYWRIGHT
@@ -137,14 +125,6 @@ fi
 echo;
 echo "[START] Tests"
 echo;
-#TOKEN:^TEST_RUNNER__FRAMEWORK__CYPRESS
-if [[ "$cypressCmd" != "" ]]; then
-  echo "[RUN] ${cypressCmd}"
-  ${cypressCmd}
-else
-  docker compose up "${extraArgs}" --abort-on-container-exit --remove-orphans "${E2E_SERVICE}"
-fi
-#TOKEN:$TEST_RUNNER__FRAMEWORK__CYPRESS
 #TOKEN:^TEST_RUNNER__FRAMEWORK__PLAYWRIGHT
 if $WATCH_MODE; then
   export CMD="npx playwright test --ui"
@@ -160,9 +140,6 @@ docker compose -f "${E2E_COMPOSE_FILE}" up --abort-on-container-exit --remove-or
 #TOKEN:$TEST_RUNNER__FRAMEWORK__PLAYWRIGHT
 exitCode=$(echo $?)
 
-#TOKEN:^TEST_RUNNER__FRAMEWORK__CYPRESS
-docker compose down
-#TOKEN:$TEST_RUNNER__FRAMEWORK__CYPRESS
 #TOKEN:^TEST_RUNNER__FRAMEWORK__PLAYWRIGHT
 docker compose -f "${E2E_COMPOSE_FILE}" down
 #TOKEN:$TEST_RUNNER__FRAMEWORK__PLAYWRIGHT

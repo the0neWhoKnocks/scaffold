@@ -9,13 +9,6 @@ certs*
 conf.d
 #TOKEN:$IGNORE__VHOST
 dist
-#TOKEN:^IGNORE__CYPRESS
-e2e/cypress/screenshots
-#TOKEN:$IGNORE__CYPRESS
-#TOKEN:^IGNORE__PLAYWRIGHT
-e2e/artifacts
-e2e/reports
-#TOKEN:$IGNORE__PLAYWRIGHT
 node_modules
 
 # Files
