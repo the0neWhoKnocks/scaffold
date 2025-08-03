@@ -205,7 +205,6 @@ async function scaffold() {
   const sharedDockerTokens = [
     { token: 'DC__APP_NAME', replacement: kebabAppName },
     { token: 'DC__E2E_DEPENDS_ON', replacement: (e2eProxy) ? 'proxied-app' : kebabAppName },
-    { token: 'DC__E2E_PROXY', remove: !e2eProxy },
   ];
   
   if (projectType === 'node') {
@@ -682,17 +681,27 @@ async function scaffold() {
               to: 'e2e',
               tokens: [
                 ...sharedDockerTokens,
+                { token: 'DC__E2E_PROXY', remove: !e2eProxy },
+                { token: 'DC__E2E_PROXY_PORT', replacement: (secure) ? 443 : 80 },
                 { token: 'DC__EXT_APP_NAME', replacement: (e2eProxy) ? 'proxied-app' : kebabAppName },
+                { token: 'DC__NODE_CERTS', remove: !addCerts && !e2eProxy },
                 { token: 'DC__PROTOCOL', replacement: (secure) ? 'https' : 'http' },
                 { token: 'DC__SECURE', remove: !secure },
               ],
             },
           ]);
+          
           copyFiles([
             {
               files: [
-                '.gitignore',
                 'Dockerfile',
+              ],
+              from: 'node/e2e/.docker',
+              to: 'e2e/.docker',
+            },
+            {
+              files: [
+                '.gitignore',
                 'eslint.config.mjs',
                 'playwright.config.js',
                 'seccomp_profile.json',
@@ -788,7 +797,6 @@ async function scaffold() {
           ...sharedDockerTokens,
           { token: 'DC__BSYNC', remove: !(hasWatcher && addClient) },
           { token: 'DC__DEV_APP_NAME', replacement: kebabAppNameDev },
-          { token: 'DC__E2E_PROXY_PORT', replacement: (secure) ? 443 : 80 },
           { token: 'DC__NODE_CERTS', remove: !addCerts },
           { token: 'DC__PORTS', remove: vHost },
           { token: 'DC__USERNAME', replacement: username },
