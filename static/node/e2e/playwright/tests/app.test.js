@@ -12,18 +12,32 @@ import {
   //TOKEN:^TEST__WEB_SOCKETS
   LOG_TYPE__WEBSOCKET,
   //TOKEN:$TEST__WEB_SOCKETS
-  //TOKEN:^TEST__MULTI_USER
-  exec,
-  //TOKEN:$TEST__MULTI_USER
+  //TOKEN:^TEST__STATIC_UTILS
+  AppFixture,
+  //TOKEN:$TEST__STATIC_UTILS
   expect,
   test,
 } from './fixtures/AppFixture';
+//TOKEN:^TEST__STATIC_UTILS
+
+const {
+  //TOKEN:^TEST__PROXY
+  clearProxyState,
+  //TOKEN:$TEST__PROXY
+  //TOKEN:^TEST__MULTI_USER
+  exec,
+  //TOKEN:$TEST__MULTI_USER
+  //TOKEN:^TEST__PROXY
+  setProxyState,
+  //TOKEN:$TEST__PROXY
+} = AppFixture;
+//TOKEN:$TEST__STATIC_UTILS
 
 test('App', async ({ app }) => {
   //TOKEN:^TEST__MULTI_USER
   await exec('rm -rf /app_data/*');
-  //TOKEN:^TEST__MULTI_USER
   
+  //TOKEN:$TEST__MULTI_USER
   await app.loadPage();
   
   await test.step('should have the correct title', async () => {
@@ -60,14 +74,14 @@ test('App', async ({ app }) => {
     
     const q = "I'm a mocked trivia question!";
     const a = 'True';
-    await app.setProxyState({ mockData: [{ question: q, correct_answer: a }] });
+    await setProxyState({ mockData: [{ question: q, correct_answer: a }] });
     await app.clearLogs();
     await app.triggerExtAPI();
     await app.verifyLogMsgs({
       msgs: [`EXT_API ${q} | ${a}`],
       type: LOG_TYPE__REQUEST,
     });
-    await app.clearProxyState();
+    await clearProxyState();
     //TOKEN:$TEST__PROXY
     
     await app.screenshot('ext API triggered', '.server-data__logs');

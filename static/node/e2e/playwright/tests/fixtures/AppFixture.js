@@ -43,6 +43,18 @@ class AppFixture extends BaseFixture {
     });
     //TOKEN:$TEST__REQUESTS
   }
+  //TOKEN:^TEST__PROXY
+  
+  static clearProxyState() { return AppFixture.setProxyState(); }
+  
+  static setProxyState(state = {}) {
+    return fetch('//TOKEN:#TEST__PROTOCOL://172.17.0.1:9002/state', {
+      method: 'PUT',
+      headers: { 'Content-type': 'application/json; charset=UTF-8' },
+      body: JSON.stringify(state),
+    });
+  }
+  //TOKEN:$TEST__PROXY
   
   async clearLogs() {
     this.fx.page
@@ -61,12 +73,6 @@ class AppFixture extends BaseFixture {
     
     await expect(this.getLogsEl()).toBeEmpty();
   }
-  //TOKEN:^TEST__PROXY
-  
-  clearProxyState() {
-    return this.setProxyState();
-  }
-  //TOKEN:$TEST__PROXY
   //TOKEN:^TEST__EXT_API
   
   decodeHTML(rawTxt) {
@@ -99,21 +105,6 @@ class AppFixture extends BaseFixture {
     await this.screenshot('Config created');
   }
   //TOKEN:$TEST__MULTI_USER
-  //TOKEN:^TEST__PROXY
-
-  async setProxyState(state = {}) {
-    await this.fx.page.evaluate((_state) => {
-      try {
-        return fetch('//TOKEN:#TEST__PROTOCOL://172.17.0.1:9002/state', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(_state),
-        });
-      }
-      catch (err) { console.log(err); }
-    }, state);
-  }
-  //TOKEN:$TEST__PROXY
   //TOKEN:^TEST__API
   
   async triggerAPI() {

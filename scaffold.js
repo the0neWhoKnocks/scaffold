@@ -661,6 +661,8 @@ async function scaffold() {
         { token: 'TEST__PROXY', remove: !e2eProxy },
         { token: 'TEST__REQUESTS', remove: !apiEnabled && !externalRequests },
         { token: 'TEST__SERVER_INTERACTIONS', remove: !hasServerInteractions },
+        { token: 'TEST__STATIC_UTILS', remove: !e2eProxy && !multiUser },
+        { token: 'TEST__WEB_SOCKETS', remove: !webSocket },
       ];
       
       switch (e2eFramework) {
