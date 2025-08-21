@@ -3,6 +3,8 @@
 FROM mcr.microsoft.com/playwright:v1.53.2-noble AS playwright_v1
 
 RUN npm i -g -E @playwright/test@v1.53.2 \
+  # for custom matcher message colors
+  @colors/colors@1.6.0 \
   # create symlink so global modules can be found
   && ln -s /usr/lib/node_modules /node_modules
 

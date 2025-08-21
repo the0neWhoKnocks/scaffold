@@ -15,8 +15,9 @@ services:
     environment:
       CRT: /home/node/certs/localhost.crt
       KEY: /home/node/certs/localhost.key
-      MOCKS_PATH: /home/node/proxy/cache
       NODE_EXTRA_CA_CERTS: /home/node/certs/localhost-CA.crt
+      # for matcher
+      MOCKS_PATH: /home/node/proxy/cache
     image: theonewhoknocks/nodejs-proxy
     ports:
       - 9002:#TOKEN:#DC__E2E_PROXY_PORT
@@ -30,7 +31,9 @@ services:
       - type: bind
         source: "${PWD}/e2e/proxy_cache"
         target: "/home/node/proxy/cache"
-      - "${PWD}/proxy/matcher.js:/home/node/proxy/matcher.js"
+      - type: bind
+        source: "${PWD}/e2e/proxy/matcher.js"
+        target: "/home/node/proxy/matcher.js"
   
   #TOKEN:$DC__E2E_PROXY
   #TOKEN:#DC__APP_NAME-test:
@@ -81,7 +84,9 @@ services:
       #TOKEN:#DC__E2E_DEPENDS_ON:
         condition: service_healthy
     environment:
+      # runner env
       BASE_URL: "#TOKEN:#DC__PROTOCOL://tests.lan:3000"
+      CMD: $CMD # so the config can check if it's headless or not
       DISPLAY: $TEST_DISPLAY
     hostname: e2etests
     ipc: host # Using `--ipc=host` is recommended when using Chrome (Docker docs). Chrome can run out of memory without this flag.
@@ -91,23 +96,12 @@ services:
       - "seccomp:${PWD}/e2e/seccomp_profile.json"
     user: "${CURR_UID}:${CURR_GID}"
     volumes:
-      #TOKEN:^DC__SECURE
-      - "${PWD}/certs:/certs:r"
-      #TOKEN:#DC__SECURE
-      - "${PWD}/e2e:/e2e"
-      - "${PWD}/src/constants.js:/node_modules/@src/constants.js:r" # map local modules to the fake `@src` parent
+      - type: bind
+        source: "${PWD}/e2e"
+        target: "/e2e"
+      - type: bind
+        read_only: true
+        source: "${PWD}/src/constants.js"
+        target: "/node_modules/@src/constants.js" # map local modules to the fake `@src` parent
       - $VOL_DBUS
       - $VOL_X11
-  #TOKEN:^DC__E2E_PROXY
-  
-  proxy:
-    extends: 
-      file: "${PWD}/docker-compose.yml"
-      service: proxy
-  
-  proxied-app: 
-    extends:
-      file: "${PWD}/docker-compose.yml"
-      service: proxied-app
-    hostname: #TOKEN:#DC__APP_NAME # domain name (usually assigned via container name)
-  #TOKEN:$DC__E2E_PROXY

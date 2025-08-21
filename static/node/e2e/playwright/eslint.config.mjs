@@ -4,19 +4,27 @@ export default [{
   ...playwright.configs['flat/recommended'],
   files: ['tests/**'],
   rules: {
-    'node/no-missing-import': ['error', {
+    'n/no-missing-import': ['error', {
       allowModules: [
         '@playwright/test', // NOTE: There's a known issue where new modules with an `exports` section don't resolve in eslint: https://github.com/import-js/eslint-plugin-import/issues/1810
-        '@src/constants', // NOTE: mapped from `docker-compose` file
+      ],
+    }],
+    'n/no-unsupported-features/node-builtins': ['error', {
+      'ignores': [
+        'localStorage',
+        'navigator',
+        'sessionStorage',
       ],
     }],
     'playwright/expect-expect': ['error', {
       assertFunctionNames: [
         'inputAdminConfig',
         'switchToPage',
-        'verifyPageTitle',
         'verifyLogMsgs',
       ],
     }],
+    'playwright/no-conditional-expect': 'off',
+    'playwright/no-conditional-in-test': 'off',
+    'playwright/no-nested-step': 'off',
   },
 }];

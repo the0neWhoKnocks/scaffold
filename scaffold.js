@@ -600,6 +600,7 @@ async function scaffold() {
     }
     
     if (eslint) {
+      packageJSON.devDependencies['@stylistic/eslint-plugin'] = '5.2.3';
       packageJSON.devDependencies['eslint'] = '9.28.0';
       packageJSON.devDependencies['eslint-plugin-n'] = '17.19.0';
       packageJSON.devDependencies['globals'] = '16.2.0'; // needed for newer eslint

@@ -7,7 +7,7 @@ import {
   //TOKEN:^TEST__EXT_API
   ROUTE__API__EXT,
   //TOKEN:$TEST__EXT_API
-} from '@src/constants';
+} from '@src/constants'; // eslint-disable-line n/no-missing-import
 //TOKEN:$TEST__SERVER_INTERACTIONS
 
 export const LOG_TYPE__REQUEST = 'request';
@@ -57,10 +57,7 @@ class AppFixture extends BaseFixture {
   //TOKEN:$TEST__PROXY
   
   async clearLogs() {
-    this.fx.page
-      .locator('.server-data__nav')
-      .getByRole('button', { name: 'Clear' })
-      .click();
+    await this.getEl('.server-data__nav button:text-is("Clear")').click();
     //TOKEN:^TEST__SERVER_INTERACTIONS
     
     //TOKEN:^TEST__REQUESTS
@@ -71,7 +68,10 @@ class AppFixture extends BaseFixture {
     //TOKEN:$TEST__WEB_SOCKETS
     //TOKEN:$TEST__SERVER_INTERACTIONS
     
-    await expect(this.getLogsEl()).toBeEmpty();
+    await expect(
+      this.getLogsEl(),
+      'Log entries should have been cleared'
+    ).toBeEmpty();
   }
   //TOKEN:^TEST__EXT_API
   
@@ -86,17 +86,17 @@ class AppFixture extends BaseFixture {
   //TOKEN:^TEST__SERVER_INTERACTIONS
   
   getAPINav() {
-    return this.fx.page.locator('.api-nav');
+    return this.getEl('.api-nav');
   }
   //TOKEN:$TEST__SERVER_INTERACTIONS
   
   getLogsEl() {
-    return this.fx.page.locator('.server-data__logs');
+    return this.getEl('.server-data__logs');
   }
   //TOKEN:^TEST__MULTI_USER
   
   async inputAdminConfig(cipher, salt) {
-    const dialog = await this.fx.waitForDialog();
+    const dialog = await this.waitForDialog();
     await dialog.locator('input[name="cipherKey"]').fill(cipher);
     await dialog.locator('input[name="salt"]').fill(salt);
     await this.screenshot('Config filled out');
@@ -108,7 +108,7 @@ class AppFixture extends BaseFixture {
   //TOKEN:^TEST__API
   
   async triggerAPI() {
-    const resp = this.waitForResp('GET', ROUTE__API__HELLO);
+    const resp = this.waitForResp(ROUTE__API__HELLO);
     await this.getAPINav().getByRole('button', { name: 'Trigger API' }).click();
     
     await this.waitForPending();
@@ -119,7 +119,7 @@ class AppFixture extends BaseFixture {
   //TOKEN:^TEST__EXT_API
   
   async triggerExtAPI() {
-    const resp = this.waitForResp('GET', ROUTE__API__EXT);
+    const resp = this.waitForResp(ROUTE__API__EXT);
     await this.getAPINav().getByRole('button', { name: 'Trigger Ext. API' }).click();
     
     await this.waitForPending();
@@ -146,17 +146,26 @@ class AppFixture extends BaseFixture {
       switch (type) {
         //TOKEN:^TEST__REQUESTS
         case LOG_TYPE__REQUEST:
-          await expect(this.fx.page.apiResps.includes(msg)).toBe(true);
+          expect(
+            this.fx.page.apiResps.includes(msg),
+            'Response should contain message'
+          ).toTruthy();
           break;
         //TOKEN:$TEST__REQUESTS
         //TOKEN:^TEST__WEB_SOCKETS
         case LOG_TYPE__WEBSOCKET:
-          await expect(this.fx.page.wsMsgs.includes(msg)).toBe(true);
+          await expect(
+            this.fx.page.wsMsgs.includes(msg),
+            'WebSocket payload should contain message'
+          ).toBe(true);
           break;
         //TOKEN:$TEST__WEB_SOCKETS
       }
       
-      await expect(this.getLogsEl()).toHaveText(msg);
+      await expect(
+        this.getLogsEl(),
+        'Log entry should contain message'
+      ).toHaveText(msg);
     }
     
     if (screenshot) {
@@ -165,10 +174,6 @@ class AppFixture extends BaseFixture {
     }
   }
   //TOKEN:$TEST__SERVER_INTERACTIONS
-  
-  async verifyPageTitle(title) {
-    await expect(await this.fx.page.title()).toBe(title);
-  }
   //TOKEN:^TEST__REQUESTS
   
   async waitForPending() {

@@ -11,7 +11,11 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   
   // Run all tests in parallel.
-  fullyParallel: true,
+  fullyParallel: false,
+  
+  // Number of test failures for the whole test suite run. After reaching this
+  // number, testing will stop and exit with an error.
+  maxFailures: 1,
   
   // Folder for test artifacts such as screenshots, videos, traces, etc.
   outputDir: 'artifacts',
@@ -22,36 +26,6 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-    
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
   ],
   
   // Retry on CI only.
@@ -68,14 +42,19 @@ export default defineConfig({
   // Glob patterns or regular expressions that match test files.
   testMatch: '*.test.js',
   
-  // // If tests take longer that X seconds, it should fail.
-  // timeout: 2000,
+  // If tests take longer that X seconds, it should fail.
+  timeout: 120000,
   
+  // https://playwright.dev/docs/api/class-testoptions
   use: {
     // For things like `click`
     actionTimeout: 2000,
     // Base URL to use in actions like `await page.goto('/')`.
     baseURL: process.env.BASE_URL,
+    
+    // Including so that `page.pause()` works (only when `false`)
+    headless: !process.env.CMD.includes(' --ui'),
+    
     // bypass having to create certs just for the test container
     ignoreHTTPSErrors: true,
     // Collect trace when retrying the failed test.
@@ -83,5 +62,5 @@ export default defineConfig({
   },
   
   // Opt out of parallel tests on CI.
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
 });

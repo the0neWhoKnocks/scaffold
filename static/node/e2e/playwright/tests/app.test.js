@@ -6,7 +6,7 @@ import {
   ROUTE__API__USER_SET_DATA,
   ROUTE__API__USER_SET_PROFILE,
   //TOKEN:$TEST__MULTI_USER
-} from '@src/constants'; // `@src` mapped in `docker-compose` volume
+} from '@src/constants';  // eslint-disable-line n/no-missing-import
 import {
   LOG_TYPE__REQUEST,
   //TOKEN:^TEST__WEB_SOCKETS
@@ -33,6 +33,8 @@ const {
 } = AppFixture;
 //TOKEN:$TEST__STATIC_UTILS
 
+test.describe.configure({ mode: 'serial' }); // Required to stop tests on failure.
+
 test('App', async ({ app }) => {
   //TOKEN:^TEST__MULTI_USER
   await exec('rm -rf /app_data/*');
@@ -41,7 +43,7 @@ test('App', async ({ app }) => {
   await app.loadPage();
   
   await test.step('should have the correct title', async () => {
-    await app.verifyPageTitle(APP__TITLE);
+    await expect(app.page).toHaveTitle(APP__TITLE);
   });
   //TOKEN:^TEST__MULTI_USER
 
@@ -108,25 +110,23 @@ test('App', async ({ app }) => {
     const SELECTOR__USER_DATA_FORM = '.user-data-form';
     const SELECTOR__USER_PROFILE_FORM = '.user-profile-form';
     
-    const page = app.testCtx.fixture.page;
-    
-    await page.locator('.api-nav').getByRole('button', { name: 'Login' }).click();
+    await app.getEl('.api-nav').getByRole('button', { name: 'Login' }).click();
     await app.screenshot('Login clicked');
     
-    let loginFormEl = page.locator(SELECTOR__LOGIN_FORM);
+    let loginFormEl = app.getEl(SELECTOR__LOGIN_FORM);
     await loginFormEl.getByRole('button', { name: 'Create Account' }).click();
     await app.screenshot('Create Account open');
     
     const USERNAME = 'user';
     const PASSWORD = 'pass';
     const createUserResp = app.waitForResp('POST', ROUTE__API__USER_CREATE);
-    const createFormEl = page.locator(SELECTOR__CREATE_FORM);
+    const createFormEl = app.getEl(SELECTOR__CREATE_FORM);
     await createFormEl.locator('input[name="username"]').fill(USERNAME);
     await createFormEl.locator('input[name="password"]').fill(PASSWORD);
     await createFormEl.locator('input[name="passwordConfirmed"]').fill(PASSWORD);
     await createFormEl.getByRole('button', { name: 'Create' }).click();
     await createUserResp;
-    loginFormEl = page.locator(SELECTOR__LOGIN_FORM);
+    loginFormEl = app.getEl(SELECTOR__LOGIN_FORM);
     await expect(loginFormEl.locator('input[name="username"]')).toHaveValue(USERNAME);
     await expect(loginFormEl.locator('input[name="password"]')).toHaveValue(PASSWORD);
     await app.screenshot('User created');
@@ -137,13 +137,13 @@ test('App', async ({ app }) => {
     await expect(loginFormEl).toHaveCount(0);
     await app.screenshot('User logged in');
     
-    const userMenu = page.locator(SELECTOR__USER_MENU);
+    const userMenu = app.getEl(SELECTOR__USER_MENU);
     await userMenu.getByRole('button', { name: USERNAME }).click();
     await app.screenshot('User menu open');
     
     let setProfileResp = app.waitForResp('POST', ROUTE__API__USER_SET_PROFILE);
     await userMenu.locator('nav').getByRole('button', { name: 'Edit Profile' }).click();
-    let profileForm = page.locator(SELECTOR__USER_PROFILE_FORM);
+    let profileForm = app.getEl(SELECTOR__USER_PROFILE_FORM);
     await profileForm.locator('input[name="username"]').fill('user1');
     await app.screenshot('User name changed');
     await profileForm.getByRole('button', { name: 'Update' }).click();
@@ -154,7 +154,7 @@ test('App', async ({ app }) => {
     const setDataResp = app.waitForResp('POST', ROUTE__API__USER_SET_DATA);
     await userMenu.getByRole('button', { name: 'user1' }).click();
     await userMenu.locator('nav').getByRole('button', { name: 'Set Data' }).click();
-    const dataForm = page.locator(SELECTOR__USER_DATA_FORM);
+    const dataForm = app.getEl(SELECTOR__USER_DATA_FORM);
     await dataForm.locator('textarea').fill('random user data');
     await app.screenshot('User data entered');
     await dataForm.getByRole('button', { name: 'Save' }).click();
@@ -165,7 +165,7 @@ test('App', async ({ app }) => {
     setProfileResp = app.waitForResp('POST', ROUTE__API__USER_SET_PROFILE);
     await userMenu.getByRole('button', { name: 'user1' }).click();
     await userMenu.locator('nav').getByRole('button', { name: 'Edit Profile' }).click();
-    profileForm = page.locator(SELECTOR__USER_PROFILE_FORM);
+    profileForm = app.getEl(SELECTOR__USER_PROFILE_FORM);
     await profileForm.locator('input[name="username"]').fill('user');
     await profileForm.locator('input[name="password"]').fill('pass1');
     await app.screenshot('User password changed');
@@ -176,7 +176,7 @@ test('App', async ({ app }) => {
     
     await userMenu.getByRole('button', { name: 'user' }).click();
     await userMenu.locator('nav').getByRole('button', { name: 'Logout' }).click();
-    await page.locator('.api-nav').getByRole('button', { name: 'Login' }).isVisible();
+    await app.getEl('.api-nav').getByRole('button', { name: 'Login' }).isVisible();
     await app.screenshot('User logged out');
   });
   //TOKEN:$TEST__MULTI_USER
