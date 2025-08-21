@@ -236,6 +236,9 @@ async function scaffold() {
       await del(list, { cwd: PATH__PROJECT_ROOT });
     }
     
+    const alpineVersion = '3.22';
+    const nodeVersion = '24.1.0';
+    const nodeMajorVersion = nodeVersion.split('.').shift();
     const packageJSON = {
       scripts: {
         build: './bin/prep-dist.sh',
@@ -243,7 +246,7 @@ async function scaffold() {
         'start:dev': './bin/prep-dist.sh'
       },
       engines: {
-        node: '>=24.1.0',
+        node: `>=${nodeVersion}`,
       },
       dependencies: {},
       devDependencies: {},
@@ -769,6 +772,8 @@ async function scaffold() {
           { token: 'DOCKER__APP_NAME', replacement: kebabAppName },
           { token: 'DOCKER__CLIENT', remove: !addClient },
           { token: 'DOCKER__CLIENT_OR_SERVER', remove: !addClient && !addServer },
+          { token: 'DOCKER__DEV_BASE', replacement: `node${nodeMajorVersion}-dev-base` },
+          { token: 'DOCKER__NODEJS_IMG', replacement: `node:${nodeVersion}-alpine${alpineVersion}` },
           { token: 'DOCKER__SERVER', remove: !addServer },
           { token: 'DOCKER__WEBPACK', remove: !bundlerIsWebpack },
         ],
