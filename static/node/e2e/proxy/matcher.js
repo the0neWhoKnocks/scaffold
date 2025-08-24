@@ -25,4 +25,4 @@ module.exports = async function matcher({
     else console.log(`${color.block.warn('WARN')} No payload for ${color.text.info(fullURL)}`);
   }
   else next();
-}
+};

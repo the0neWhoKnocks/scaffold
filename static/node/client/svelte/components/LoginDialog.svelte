@@ -20,11 +20,11 @@
     open = false,
   } = $props();
   let createFormRef = $state();
-  let createUserOpen = $state(false);
+  let createUserOpen = $state.raw(false);
   let loginFormRef = $state();
-  let loginPassword = $state();
-  let loginUsername = $state();
-  let rememberCredentials = $state(false);
+  let loginPassword = $state.raw();
+  let loginUsername = $state.raw();
+  let rememberCredentials = $state.raw(false);
   let rememberCredentialsRef = $state();
   
   function handleLoginSubmit(ev) {

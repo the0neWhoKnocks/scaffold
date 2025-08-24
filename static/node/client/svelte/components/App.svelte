@@ -41,25 +41,25 @@
   
   const log = logger('app');
   //TOKEN:^APP__SERVER_INTERACTIONS
-  let logsLength = $state(0);
-  let serverData = $state([]);
+  let logsLength = $state.raw(0);
+  let serverData = $state.raw([]);
   let serverDataRef;
   //TOKEN:$APP__SERVER_INTERACTIONS
   //TOKEN:^APP__WEB_SOCKET
   let socketAPI;
   //TOKEN:$APP__WEB_SOCKET
   //TOKEN:^APP__MULTI_USER
-  let loginOpened = $state(false);
-  let userStorageType = $state();
-  let mounted = $state(false);
-  let username = $state();
-  let userNavOpen = $state(false);
-  let userDataOpened = $state(false);
-  let userInfo = $state();
-  let userProfileOpened = $state(false);
+  let loginOpened = $state.raw(false);
+  let userStorageType = $state.raw();
+  let mounted = $state.raw(false);
+  let username = $state.raw();
+  let userNavOpen = $state.raw(false);
+  let userDataOpened = $state.raw(false);
+  let userInfo = $state.raw();
+  let userProfileOpened = $state.raw(false);
   //TOKEN:$APP__MULTI_USER
   //TOKEN:^APP__EXT_API
-  let extAPIPending = $state(false);
+  let extAPIPending = $state.raw(false);
   //TOKEN:$APP__EXT_API
   //TOKEN:^APP__SERVER_INTERACTIONS
   

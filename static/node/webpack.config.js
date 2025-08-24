@@ -65,7 +65,7 @@ const outputFilename = ({ chunk, contentHashType }) => {
 };
 
 const conf = {
-  devtool: dev && 'inline-cheap-source-map',
+  devtool: dev && 'eval-source-map',
   entry: {
     'js/app': resolve(__dirname, './src/client/index.js'),
   },

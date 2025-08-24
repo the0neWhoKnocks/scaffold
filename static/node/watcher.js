@@ -30,7 +30,7 @@ if (process.env.NODE_EXTRA_CA_CERTS) {
   bSyncHTTPS = {
     cert: process.env.NODE_EXTRA_CA_CERTS,
     key: process.env.NODE_EXTRA_CA_CERTS.replace('.crt', '.key'),
-  }
+  };
   //TOKEN:$WATCHER__CLIENT
 }
 //TOKEN:^WATCHER__SERVER
@@ -262,4 +262,3 @@ fileGate
     //TOKEN:$WATCHER__LOGGER
     process.exit(1); // eslint-disable-line n/no-process-exit
   });
-  

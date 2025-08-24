@@ -25,8 +25,8 @@ const ulog = require('ulog');
 ulog.config.log_format = 'lvl noPadName message';
 if (process.env.FOR_CLIENT_BUNDLE) {
   ulog.config.log = 'debug';
-  window.localStorage.log = ulog.config.log;
-  window.localStorage.log_format = ulog.config.log_format;
+  window.localStorage.log = ulog.config.log; // eslint-disable-line n/no-unsupported-features/node-builtins
+  window.localStorage.log_format = ulog.config.log_format; // eslint-disable-line n/no-unsupported-features/node-builtins
 }
 ulog.use({
   use: [ require('ulog/mods/formats') ],

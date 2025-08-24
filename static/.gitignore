@@ -18,3 +18,9 @@ node_modules
 #TOKEN:^IGNORE__DOTENV
 .env
 #TOKEN:$IGNORE__DOTENV
+#TOKEN:^IGNORE__E2E
+
+# E2E files/folders
+artifacts
+reports
+#TOKEN:$IGNORE__E2E

@@ -83,7 +83,7 @@ export function connectToSocket() {
       socket.onmessage = function onWSMsg({ data: msgData }) {
         const { data, type } = JSON.parse(msgData);
         
-        log.debug(`Message from Server: "${ type }"`, data);
+        log.debug(`Message from Server: "${type}"`, data);
         
         if (socketAPI.listeners[type]) {
           socketAPI.listeners[type].forEach(cb => { cb(data); });
@@ -110,7 +110,7 @@ export function connectToSocket() {
       if (
         !socketAPI.connected
         && ev.currentTarget.readyState === WebSocket.CLOSED
-      ) err = `WebSocket error, could not connect to ${ WS_URL }`;
+      ) err = `WebSocket error, could not connect to ${WS_URL}`;
       
       log.error(err);
       reject(err);

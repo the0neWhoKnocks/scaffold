@@ -5,9 +5,9 @@ const log = require('../../utils/logger')('server:socket');
 function accountForServerDeath(server) {
   const serverConnections = new Set();
   const deathSignals = [
-    'SIGINT', 
+    'SIGINT',
     'SIGQUIT',
-    'SIGTERM', 
+    'SIGTERM',
   ];
   server.on('connection', connection => {
     serverConnections.add(connection);
@@ -141,4 +141,4 @@ module.exports = function socket(server, opts = {}) {
   accountForServerDeath(server);
   
   return server.wss;
-}
+};

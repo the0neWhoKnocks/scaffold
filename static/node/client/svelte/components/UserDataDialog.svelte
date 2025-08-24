@@ -13,8 +13,8 @@
     open = false,
     userInfo,
   } = $props();
-  let data = $state();
-  let dataLoaded = $state(false);
+  let data = $state.raw();
+  let dataLoaded = $state.raw(false);
   let formRef = $state();
   let inputRef = $state();
 

@@ -279,7 +279,7 @@ async function scaffold() {
         packageJSON.dependencies['express'] = '4.17.1';
       }
       
-      if (compression) packageJSON.dependencies['compression'] = '1.8.0';
+      if (compression) packageJSON.dependencies['compression'] = '1.8.1';
       if (cookies) packageJSON.dependencies['cookie-parser'] = '1.4.5';
       if (staticFiles) packageJSON.dependencies['sirv'] = '3.0.1';
       
@@ -331,7 +331,7 @@ async function scaffold() {
       ]);
       
       if (multiUser) {
-        packageJSON.dependencies['body-parser'] = '1.20.1';
+        packageJSON.dependencies['body-parser'] = '2.2.0';
         packageJSON.dependencies['mkdirp'] = '1.0.4';
         
         copyFiles([
@@ -363,7 +363,7 @@ async function scaffold() {
       }
       
       if (webSocket) {
-        packageJSON.dependencies['ws'] = '8.18.2';
+        packageJSON.dependencies['ws'] = '8.18.3';
         
         addParsedFiles([{
           file: 'index.js',
@@ -391,14 +391,14 @@ async function scaffold() {
         packageJSON.devDependencies['clean-webpack-plugin'] = '4.0.0';
         packageJSON.devDependencies['ignore-emit-webpack-plugin'] = '2.0.6';
         packageJSON.devDependencies['terser-webpack-plugin'] = '5.3.14';
-        packageJSON.devDependencies['webpack'] = '5.99.9';
+        packageJSON.devDependencies['webpack'] = '5.101.3';
         packageJSON.devDependencies['webpack-cli'] = '6.0.1';
         packageJSON.devDependencies['webpack-manifest-plugin'] = '5.0.1';
         
         if (clientFrameworkIsSvelte) {
           packageJSON.devDependencies['css-loader'] = '7.1.2';
           packageJSON.devDependencies['css-minimizer-webpack-plugin'] = '7.0.2';
-          packageJSON.devDependencies['mini-css-extract-plugin'] = '2.9.2';
+          packageJSON.devDependencies['mini-css-extract-plugin'] = '2.9.4';
           packageJSON.devDependencies['svelte-loader'] = '3.2.4';
         }
         
@@ -415,7 +415,7 @@ async function scaffold() {
       }
       
       if (clientFrameworkIsSvelte) {
-        packageJSON.devDependencies['svelte'] = '5.33.14';
+        packageJSON.devDependencies['svelte'] = '5.38.2';
         packageJSON.devDependencies['svelte-portal'] = '2.2.0';
         
         addParsedFiles([
@@ -600,16 +600,17 @@ async function scaffold() {
     }
     
     if (eslint) {
+      packageJSON.devDependencies['@eslint/compat'] = '1.3.2';
       packageJSON.devDependencies['@stylistic/eslint-plugin'] = '5.2.3';
-      packageJSON.devDependencies['eslint'] = '9.28.0';
-      packageJSON.devDependencies['eslint-plugin-n'] = '17.19.0';
-      packageJSON.devDependencies['globals'] = '16.2.0'; // needed for newer eslint
+      packageJSON.devDependencies['eslint'] = '9.33.0';
+      packageJSON.devDependencies['eslint-plugin-n'] = '17.21.3';
+      packageJSON.devDependencies['globals'] = '16.3.0'; // needed for newer eslint
       
       const lintExts = ['js'];
       const sourceFolders = ['bin', 'src'];
       
       if (clientFrameworkIsSvelte) {
-        packageJSON.devDependencies['eslint-plugin-svelte'] = '3.9.1';
+        packageJSON.devDependencies['eslint-plugin-svelte'] = '3.11.0';
         lintExts.push('svelte');
       }
       
@@ -618,10 +619,11 @@ async function scaffold() {
       packageJSON.scripts['lint'] = `eslint ./*.js "{${sourceFolders.sort().join(',')}}/**/*.{${lintExts.sort().join(',')}}"`;
       
       addParsedFiles([{
-        file: 'eslint.config.mjs',
+        file: 'eslint.config.js',
         from: 'node',
         to: '',
         tokens: [
+          { token: 'LINT__E2E', remove: !e2eFramework },
           { token: 'LINT__SVELTE', remove: !clientFrameworkIsSvelte },
         ],
       }]);
@@ -705,8 +707,6 @@ async function scaffold() {
             },
             {
               files: [
-                '.gitignore',
-                'eslint.config.mjs',
                 'playwright.config.js',
                 'seccomp_profile.json',
               ],
@@ -845,6 +845,7 @@ async function scaffold() {
       from: '',
       to: '',
       tokens: [
+        { token: 'IGNORE__E2E', remove: !e2eFramework },
         { token: 'IGNORE__DOTENV', remove: !dotenv },
         { token: 'IGNORE__HTTPS', remove: !secure },
         { token: 'IGNORE__VHOST', remove: !vHost },

@@ -14,15 +14,14 @@
     open = false,
     userInfo,
   } = $props();
-  let dataLoaded = $state(false);
-  let dataUpdated = $state(false);
+  let dataLoaded = $state.raw(false);
+  let dataUpdated = $state.raw(false);
   let formRef = $state();
   let initialFormData;
-  let inputRef = $state();
-  let oldPassword = $state('');
-  let oldUsername = $state('');
-  let password = $state('');
-  let username = $state('');
+  let oldPassword = $state.raw('');
+  let oldUsername = $state.raw('');
+  let password = $state.raw('');
+  let username = $state.raw('');
 
   function handleSubmit(ev) {
     ev.preventDefault();
@@ -58,8 +57,6 @@
   }
   
   $effect(() => {
-    if (dataLoaded && inputRef) inputRef.focus();
-    
     if (formRef && dataLoaded) {
       initialFormData = [...new FormData(formRef).values()].join('');
     }
