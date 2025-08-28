@@ -43,7 +43,9 @@ services:
         source: "${PWD}/certs"
         target: "/app_certs"
       #TOKEN:$DC__NODE_CERTS
-      - "${PWD}/.app_data:/app_data"
+      - type: bind
+        source: "${PWD}/.app_data"
+        target: "/app_data"
   
   #TOKEN:#DC__DEV_APP_NAME:
     extends: #TOKEN:#DC__APP_NAME # allows for just changing key pieces of data for development
@@ -64,11 +66,21 @@ services:
       - "9229:9229"
     volumes:
       # Map shell files over, so they're maintained between sessions
-      - "${PWD}/.docker/.vimrc:/home/node/.vimrc"
-      - "${PWD}/.docker/.zshrc:/home/node/.zshrc"
-      - "${PWD}/.ignore:/home/node/dev" # allows for .zsh_history to be written
+      - type: bind
+        source: "${PWD}/.docker/.vimrc"
+        target: "/home/node/.vimrc"
+      - type: bind
+        source: "${PWD}/.docker/.zshrc"
+        target: "/home/node/.zshrc"
+      # allows for .zsh_history to be written
+      - type: bind
+        source: "${PWD}/.ignore"
+        target: "/home/node/dev"
       # Map the current directory over for development
-      - "${PWD}:/home/node/app"
+      - type: bind
+        source: "${PWD}"
+        target: "/home/node/app"
+      
   #TOKEN:^DC__VHOST
   
   nginx-proxy:

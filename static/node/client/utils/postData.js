@@ -1,24 +1,19 @@
 const serializeForm = require('./serializeForm');
 
-function postWithFetch(url, body) {
-  return window.fetch(url, {
+async function postWithFetch(url, body) {
+  const resp = await window.fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body,
-  })
-    .then((resp) => {
-      return new Promise((res, rej) => {
-        const contentType = resp.headers.get('content-type');
-        const data = ( contentType && contentType.includes('application/json') )
-          ? resp.json()
-          : resp.text();
-        
-        data.then((d) => {
-          if (!resp.ok) return rej(d);
-          res(d);
-        });
-      });
-    });
+  });
+  
+  const contentType = resp.headers.get('content-type');
+  const data = (contentType?.includes('application/json'))
+    ? await resp.json()
+    : await resp.text();
+  
+  if (resp.ok) return data;
+  throw new Error(data?.message || data);
 }
 
 function postWithXHR(url, body, opts) {
@@ -39,4 +34,4 @@ function postWithXHR(url, body, opts) {
 module.exports = function postData(url, obj, opts = {}) {
   const body = JSON.stringify((obj instanceof HTMLElement) ? serializeForm(obj) : obj);
   return (opts.onProgress) ? postWithXHR(url, body, opts) : postWithFetch(url, body);
-}
+};

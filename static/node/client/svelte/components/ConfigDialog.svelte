@@ -9,18 +9,20 @@
   
   let formRef;
   
-  function handleSubmit(ev) {
+  async function handleSubmit(ev) {
     ev.preventDefault();
     
-    postData(formRef.action, formRef)
-      .then(() => { window.location.reload(); })
-      .catch((err) => { alert(err); });
+    try {
+      await postData(formRef.action, formRef);
+      window.location.reload();
+    }
+    catch (err) { alert(err); }
   }
 </script>
 
 <div class="config">
   <Dialog modal>
-    {#snippet dialogBodySnippet()}
+    {#snippet s_dialogBody()}
       <form
         action={ROUTE__API__CONFIG_CREATE}
         autocomplete="off"

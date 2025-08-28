@@ -1,12 +1,11 @@
-const { existsSync, readFile } = require('node:fs');
+const { readFile } = require('node:fs/promises');
+const fileExists = require('./fileExists');
 
-module.exports = function loadUserData(filePath) {
-  return new Promise((resolve) => {
-    if (existsSync(filePath)) {
-      readFile(filePath, 'utf8', (err, data) => {
-        resolve(JSON.parse(data));
-      });
-    }
-    else resolve('');
-  });
-}
+module.exports = async function loadUserData(filePath) {
+  if ((await fileExists(filePath))) {
+    const data = await readFile(filePath, 'utf8');
+    return JSON.parse(data);
+  }
+  
+  return '';
+};

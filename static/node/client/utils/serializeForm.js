@@ -82,4 +82,4 @@ module.exports = function serializeForm(formEl) {
   });
   
   return serialized;
-}
+};

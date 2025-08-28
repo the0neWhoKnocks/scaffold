@@ -40,4 +40,4 @@ module.exports = function decrypt(cryptConfig, valueHex, userPassword) {
     }
     catch (err) { reject(err); }
   });
-}
+};

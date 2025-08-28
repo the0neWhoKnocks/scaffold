@@ -72,21 +72,20 @@
   //TOKEN:$APP__SERVER_INTERACTIONS
   //TOKEN:^APP__API
   
-  function callAPI() {
-    fetch(`${ROUTE__API__HELLO}?name=hal`)
-      .then(resp => resp.json())
-      .then(data => {
-        printMessage('API', JSON.stringify(data));
-      })
-      .catch(err => {
-        log.error(err);
-        alert(err);
-      });
+  async function callAPI() {
+    try {
+      const data = await fetch(`${ROUTE__API__HELLO}?name=hal`).then(resp => resp.json());
+      printMessage('API', JSON.stringify(data));
+    }
+    catch (err) {
+      log.error(err);
+      alert(err);
+    }
   }
   //TOKEN:$APP__API
   //TOKEN:^APP__EXT_API
   
-  function decodeHTMLEntities (str) {
+  function decodeHTMLEntities(str) {
     if (str && typeof str === 'string') {
       const element = document.createElement('div');
       // strip script/html tags
@@ -99,19 +98,19 @@
 
     return str;
   }
-  function callExtAPI() {
+  
+  async function callExtAPI() {
     extAPIPending = true;
     
-    fetch(`${ROUTE__API__EXT}`)
-      .then(resp => resp.json())
-      .then(({ answer, question }) => {      
-        printMessage('EXT_API', `${decodeHTMLEntities(question)} | ${decodeHTMLEntities(answer)}`);
-        extAPIPending = false;
-      })
-      .catch(err => {
-        log.error(err);
-        alert(err);
-      });
+    try {
+      const { answer, question } = await fetch(`${ROUTE__API__EXT}`).then(resp => resp.json());
+      printMessage('EXT_API', `${decodeHTMLEntities(question)} | ${decodeHTMLEntities(answer)}`);
+    }
+    catch (err) {
+      log.error(err);
+      alert(err);
+    }
+    finally { extAPIPending = false; }
   }
   //TOKEN:$APP__EXT_API
   //TOKEN:^APP__WEB_SOCKET
@@ -203,11 +202,11 @@
     logsLength = serverData.length;
   });
   
-  onMount(/* TOKEN:#APP__ASYNC_MOUNT */() => {
+  onMount(async () => {
     log.info('App starting');
     //TOKEN:^APP__API
     
-    callAPI();
+    await callAPI();
     //TOKEN:$APP__API
     //TOKEN:^APP__WEB_SOCKET
     

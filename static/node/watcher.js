@@ -249,7 +249,7 @@ fileGate
       serverFilesWatcher.close();
       nodemon.emit('quit');
       //TOKEN:$WATCHER__SERVER
-      process.exit(0); // eslint-disable-line n/no-process-exit
+      process.exit(0);
     }
     
     process.on('SIGINT', killWatcher.bind(null, 'SIGINT'));
@@ -260,5 +260,5 @@ fileGate
     //TOKEN:^WATCHER__LOGGER
     logger.error(err);
     //TOKEN:$WATCHER__LOGGER
-    process.exit(1); // eslint-disable-line n/no-process-exit
+    process.exit(1);
   });

@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import Icon, { ICON__ASTERISK } from './Icon.svelte';
   
   let {
@@ -23,7 +23,10 @@
   let inputRef;
   
   if (autoFocus) {
-    onMount(() => { inputRef.focus(); });
+    onMount(async () => {
+      await tick();
+      inputRef.focus();
+    });
   }
 </script>
 

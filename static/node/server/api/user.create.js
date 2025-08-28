@@ -45,4 +45,4 @@ module.exports = async function createUserProfile(req, res) {
     log.error(msg);
     res.error(500, msg);
   }
-}
+};

@@ -18,7 +18,7 @@ const constants = {
   ROUTE__API__CONFIG_CREATE: `${API_PREFIX}/config/create`,
   //TOKEN:$CONST__MULTI_USER
   //TOKEN:^CONST__EXT_API
-  ROUTE__API__EXT: `/ext`,
+  ROUTE__API__EXT: '/ext',
   //TOKEN:$CONST__EXT_API
   //TOKEN:^CONST__API
   ROUTE__API__HELLO: `${API_PREFIX}/hello`,

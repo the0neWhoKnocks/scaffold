@@ -222,13 +222,13 @@ app
   //TOKEN:$SERVER__API
   //TOKEN:^SERVER__EXT_API
   .get(ROUTE__API__EXT, async (req, res) => {
-    log.info(`[EXT_API] Calling external API`);
+    log.info('[EXT_API] Calling external API');
     try {
       const resp = await fetch('https://opentdb.com/api.php?amount=1');
       
       if (!resp.ok) return res.error(resp.status);
         
-      log.info(`[EXT_API] Recieved response`);
+      log.info('[EXT_API] Recieved response');
       const { results: [{ correct_answer, question }] } = await resp.json();
       res.json({ answer: correct_answer, question });
     }

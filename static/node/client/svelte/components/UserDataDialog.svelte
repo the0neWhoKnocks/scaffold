@@ -18,31 +18,30 @@
   let formRef = $state();
   let inputRef = $state();
 
-  function handleSubmit(ev) {
+  async function handleSubmit(ev) {
     ev.preventDefault();
     
-    postData(formRef.action, formRef)
-      .then((data) => {
-        
-        if (onSuccess) onSuccess(data);
-      })
-      .catch(({ message }) => { alert(message); });
+    try {
+      const data = await postData(formRef.action, formRef);
+      onSuccess?.(data);
+    }
+    catch ({ message }) { alert(message); }
   }
   
-  function getUserData() {
-    return postData(ROUTE__API__USER_GET_DATA, userInfo)
-      .then((resp) => {
-        data = resp.data;
-        dataLoaded = true;
-      })
-      .catch(({ message }) => {
-        if (onError) onError();
-        alert(message);
-      });
+  async function getUserData() {
+    try {
+      const resp = await postData(ROUTE__API__USER_GET_DATA, userInfo);
+      data = resp.data;
+      dataLoaded = true;
+    }
+    catch ({ message }) {
+      onError?.();
+      alert(message);
+    }
   }
   
   function handleCloseClick() {
-    if (onClose) onClose();
+    onClose?.();
   }
   
   $effect(() => {
@@ -58,7 +57,7 @@
     onCloseClick={handleCloseClick}
     title="User Data"
   >
-    {#snippet dialogBodySnippet()}
+    {#snippet s_dialogBody()}
       <form
         action={ROUTE__API__USER_SET_DATA}
         bind:this={formRef}

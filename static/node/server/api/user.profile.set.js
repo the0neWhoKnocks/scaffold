@@ -1,8 +1,9 @@
-const { existsSync, rename, writeFile } = require('node:fs');
+const { rename, writeFile } = require('node:fs/promises');
 const { PATH__USERS } = require('../../constants');
 const log = require('../../utils/logger')('api.user.profile.set');
 const decrypt = require('../utils/decrypt');
 const encrypt = require('../utils/encrypt');
+const fileExists = require('../utils/fileExists');
 const getUserDataPath = require('../utils/getUserDataPath');
 const loadUsers = require('../utils/loadUsers');
 const loadUserData = require('../utils/loadUserData');
@@ -49,79 +50,75 @@ module.exports = async function setProfile(req, res) {
       delete users[encryptedOldUsername];
     }
     
-    pending.push(
-      new Promise((resolve, reject) => {
-        writeFile(PATH__USERS, JSON.stringify(users, null, 2), 'utf8', (err) => {
-          if (err) {
-            const msg = `Failed to update "${PATH__USERS}"\n${err.stack}`;
-            log.error(msg);
-            return reject(msg);
-          }
-          
-          log.info(`Updated "${PATH__USERS}"`);
-          resolve();
-        });
-      })
-    );
+    const update = async () => {
+      try {
+        await writeFile(PATH__USERS, JSON.stringify(users, null, 2), 'utf8');
+        log.info(`Updated "${PATH__USERS}"`);
+      }
+      catch (err) {
+        const msg = `Failed to update "${PATH__USERS}"\n${err.stack}`;
+        log.error(msg);
+        throw new Error(msg);
+      }
+    };
+    pending.push(update());
     
     if (password !== oldPassword) {
       const loadedData = await loadUserData(oldDataPath);
-      const decryptedData = await decrypt(appConfig, loadedData, oldPassword);
-      pendingReEncryption = encrypt(appConfig, decryptedData, password)
-        .then(({ combined }) => new Promise((resolve, reject) => {
-          writeFile(oldDataPath, JSON.stringify(combined, null, 2), 'utf8', (err) => {
-            if (err) {
-              const msg = `Failed to write "${oldDataPath}"\n${err.stack}`;
-              log.error(msg);
-              return reject(msg);
-            }
-            
-            log.info(`Updated "${oldDataPath}"`);
-            resolve();
-          });
-        }));
       
-      pending.push(pendingReEncryption);
+      if (loadedData) {
+        const decryptedData = await decrypt(appConfig, loadedData, oldPassword);
+        const reEncryptData = async () => {
+          try {
+            const { combined } = await encrypt(appConfig, decryptedData, password);
+            await writeFile(oldDataPath, JSON.stringify(combined, null, 2), 'utf8');
+            log.info(`Updated "${oldDataPath}"`);
+          }
+          catch (err) {
+            const msg = `Failed to write "${oldDataPath}"\n${err.stack}`;
+            log.error(msg);
+            throw new Error(msg);
+          }
+        };
+        
+        pendingReEncryption = reEncryptData();
+        pending.push(pendingReEncryption);
+      }
+      else log.info('User data empty, skipping re-encryption');
     }
     
     if (
       CURRENT_DATA_PATH !== oldDataPath
-      && existsSync(oldDataPath)
+      && (await fileExists(oldDataPath))
     ) {
-      const pendingRename = pendingReEncryption.then(() => {
-        return new Promise((resolve, reject) => {
-          rename(oldDataPath, CURRENT_DATA_PATH, (err) => {
-            if (err) {
-              const msg = `Failed to rename "${oldDataPath}" to "${CURRENT_DATA_PATH}"\n${err.stack}`;
-              log.error(msg);
-              return reject(msg);
-            }
-            
-            log.info(`Renamed "${oldDataPath}" to "${CURRENT_DATA_PATH}"`);
-            resolve();
-          });
-        });
+      const pendingRename = pendingReEncryption.then(async () => {
+        try {
+          await rename(oldDataPath, CURRENT_DATA_PATH);
+          log.info(`Renamed "${oldDataPath}" to "${CURRENT_DATA_PATH}"`);
+        }
+        catch (err) {
+          const msg = `Failed to rename "${oldDataPath}" to "${CURRENT_DATA_PATH}"\n${err.stack}`;
+          log.error(msg);
+          throw new Error(msg);
+        }
       });
       
       pending.push(pendingRename);
     }
     
-    Promise.all(pending)
-      .then(() => {
-        res.json({
-          username: USERNAME,
-          password: PASSWORD,
-        });
-      })
-      .catch((err) => {
-        const msg = `Failed while setting data\n${err.stack}`;
-        log.error(msg);
-        res.error(500, msg);
-      });
+    try {
+      await Promise.all(pending);
+      res.json({ username: USERNAME, password: PASSWORD });
+    }
+    catch (err) {
+      const msg = `Failed while setting data\n${err.stack}`;
+      log.error(msg);
+      res.error(500, msg);
+    }
   }
   catch (err) {
     const msg = `Failed to set profile data \n ${err.stack}`;
     log.error(msg);
     res.error(500, msg);
   }
-}
+};

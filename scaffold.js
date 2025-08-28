@@ -204,8 +204,11 @@ async function scaffold() {
   const hasServerInteractions = apiEnabled || externalRequests || webSocket || multiUser;
   const sharedDockerTokens = [
     { token: 'DC__APP_NAME', replacement: kebabAppName },
-    { token: 'DC__E2E_DEPENDS_ON', replacement: (e2eProxy) ? 'proxied-app' : kebabAppName },
   ];
+  const alpineVersion = '3.22';
+  const nodeVersion = '24.1.0';
+  const nodeMajorVersion = nodeVersion.split('.').shift();
+  const addCerts = secure && !vHost;
   
   if (projectType === 'node') {
     if (removePreviousScaffold) {
@@ -236,9 +239,6 @@ async function scaffold() {
       await del(list, { cwd: PATH__PROJECT_ROOT });
     }
     
-    const alpineVersion = '3.22';
-    const nodeVersion = '24.1.0';
-    const nodeMajorVersion = nodeVersion.split('.').shift();
     const packageJSON = {
       scripts: {
         build: './bin/prep-dist.sh',
@@ -352,6 +352,7 @@ async function scaffold() {
             files: [
               'decrypt.js',
               'encrypt.js',
+              'fileExists.js',
               'getUserDataPath.js',
               'loadUserData.js',
               'loadUsers.js',
@@ -391,6 +392,9 @@ async function scaffold() {
         packageJSON.devDependencies['clean-webpack-plugin'] = '4.0.0';
         packageJSON.devDependencies['ignore-emit-webpack-plugin'] = '2.0.6';
         packageJSON.devDependencies['terser-webpack-plugin'] = '5.3.14';
+        // NOTE:
+        // - webpack `outputModule` breaks after `5.95.0`.
+        // - webpack minification might mangle var names, creating duplicate declarations after `5.91.0`.
         packageJSON.devDependencies['webpack'] = '5.101.3';
         packageJSON.devDependencies['webpack-cli'] = '6.0.1';
         packageJSON.devDependencies['webpack-manifest-plugin'] = '5.0.1';
@@ -425,7 +429,6 @@ async function scaffold() {
             to: 'src/client/components',
             tokens: [
               { token: 'APP__API', remove: !apiEnabled },
-              { token: 'APP__ASYNC_MOUNT', replacement: webSocket ? 'async ' : '' },
               { token: 'APP__EXT_API', remove: !externalRequests },
               { token: 'APP__HAS_CONSTANTS', remove: !apiEnabled && !externalRequests && !multiUser && !webSocket },
               { token: 'APP__MULTI_USER', remove: !multiUser },
@@ -616,7 +619,7 @@ async function scaffold() {
       
       if (e2eFramework) sourceFolders.push('e2e');
       
-      packageJSON.scripts['lint'] = `eslint ./*.js "{${sourceFolders.sort().join(',')}}/**/*.{${lintExts.sort().join(',')}}"`;
+      packageJSON.scripts['lint'] = 'eslint';
       
       addParsedFiles([{
         file: 'eslint.config.js',
@@ -707,6 +710,13 @@ async function scaffold() {
             },
             {
               files: [
+                'BaseFixture.js'
+              ],
+              from: 'node/e2e/playwright/tests/fixtures',
+              to: 'e2e/tests/fixtures',
+            },
+            {
+              files: [
                 'playwright.config.js',
                 'seccomp_profile.json',
               ],
@@ -753,7 +763,6 @@ async function scaffold() {
   
   if (docker) {
     const { username } = docker;
-    const addCerts = secure && !vHost;
     const files = [
       {
         file: '.vimrc',
@@ -776,6 +785,7 @@ async function scaffold() {
           { token: 'DOCKER__DEV_BASE', replacement: `node${nodeMajorVersion}-dev-base` },
           { token: 'DOCKER__NODEJS_IMG', replacement: `node:${nodeVersion}-alpine${alpineVersion}` },
           { token: 'DOCKER__SERVER', remove: !addServer },
+          { token: 'DOCKER__SVELTE', remove: !clientFrameworkIsSvelte },
           { token: 'DOCKER__WEBPACK', remove: !bundlerIsWebpack },
         ],
       },

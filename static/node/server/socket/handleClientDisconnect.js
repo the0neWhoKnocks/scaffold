@@ -5,4 +5,4 @@ module.exports = function handleClientDisconnect(wss, code, reason) {
     id: wss.id,
     msg: `User '${wss.id}' disconnected | code: ${code} | reason: ${reason}`,
   });
-}
+};

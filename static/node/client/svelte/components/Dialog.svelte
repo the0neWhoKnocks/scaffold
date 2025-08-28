@@ -2,6 +2,7 @@
   let dialogNum = 0;
 </script>
 <script>
+  import { onMount, tick } from 'svelte';
   import { cubicOut } from 'svelte/easing'; // visualizations https://svelte.dev/repl/6904f0306d6f4985b55f5f9673f762ef?version=3.4.1
   import Portal from 'svelte-portal';
   
@@ -9,12 +10,12 @@
     animDuration = 300,
     bodyColor = '#eee',
     borderColor = '#000',
-    dialogBodySnippet,
-    dialogTitleSnippet,
     modal = false,
-    onCloseClick,
-    onCloseEnd,
-    onOpenEnd,
+    onCloseClick = undefined,
+    onCloseEnd = undefined,
+    onOpenEnd = undefined,
+    s_dialogBody,
+    s_dialogTitle,
     title = '',
     titleBGColor = '#333',
     titleTextColor = '#eee',
@@ -22,6 +23,7 @@
   
   dialogNum += 1;
   let dNum = dialogNum;
+  let show = $state.raw(false);
   
   const cssVars = `
     --dialog-anim-duration: ${animDuration}ms;
@@ -53,19 +55,19 @@
     duration: animDuration,
     css: t => `opacity: ${t};`,
     easing: cubicOut,
-	});
+  });
   
   function handleCloseEnd() {
-    if (onCloseEnd) onCloseEnd();
+    onCloseEnd?.();
     dialogNum -= 1;
   }
   
   function handleOpenEnd() {
-    if (onOpenEnd) onOpenEnd();
+    onOpenEnd?.();
   }
   
   function handleCloseClick() {
-    if (!modal && onCloseClick) onCloseClick();
+    if (!modal) onCloseClick?.();
   }
   
   function handleKeyDown({ key }) {
@@ -76,58 +78,63 @@
       }
     }
   }
+  
+  onMount(async () => {
+    // wait a sec to ensure the animation for the Dialog plays, and handlers fire.
+    await tick();
+    show = true;
+  });
 </script>
 
 <svelte:window onkeydown={handleKeyDown}/>
 
-<Portal target="#overlays">
-  <div 
-    class="dialog-wrapper"
-    style={cssVars}
-  >
+{#if show}
+  <Portal target="#overlays">
     <div
-      class="dialog-mask"
-      aria-hidden="true"
-      onclick={handleCloseClick}
-      in:toggleMask
-      out:toggleMask
-    ></div>
-    <dialog
-      class="dialog"
-      class:is--modal={modal}
-      open
-      in:toggleDialog="{{ dir: 'in', start: 70 }}"
-      out:toggleDialog="{{ start: 50 }}"
-      onintroend={handleOpenEnd}
-      onoutroend={handleCloseEnd}
+      class="dialog-wrapper"
+      style={cssVars}
     >
-      {#if !modal || modal && (title || dialogTitleSnippet)}
-        <nav class="dialog__nav">
-          <div class="dialog__title">
-            {#if dialogTitleSnippet}
-              {@render dialogTitleSnippet?.()}
-            {:else}
-              {title}
+      <div
+        class="dialog-mask"
+        aria-hidden="true"
+        onclick={handleCloseClick}
+        in:toggleMask
+        out:toggleMask
+      ></div>
+      <dialog
+        class="dialog"
+        class:is--modal={modal}
+        open
+        in:toggleDialog="{{ dir: 'in', start: 70 }}"
+        out:toggleDialog="{{ start: 50 }}"
+        onintroend={handleOpenEnd}
+        onoutroend={handleCloseEnd}
+      >
+        {#if !modal || (modal && (title || s_dialogTitle))}
+          <nav class="dialog__nav">
+            <div class="dialog__title">
+              {#if s_dialogTitle}{@render s_dialogTitle()}{:else}{title}{/if}
+            </div>
+            {#if !modal}
+              <button
+                type="button"
+                class="dialog__close-btn"
+                onclick={handleCloseClick}
+              >&#10005;</button>
             {/if}
-          </div>
-          {#if !modal}
-            <button
-              type="button"
-              class="dialog__close-btn"
-              onclick={handleCloseClick}
-            >&#10005;</button>
-          {/if}
-        </nav>
-      {/if}
-      <div class="dialog__body">
-        {@render dialogBodySnippet?.()}
-      </div>
-    </dialog>
-  </div>
-</Portal>
+          </nav>
+        {/if}
+        <div class="dialog__body">
+          {@render s_dialogBody?.()}
+        </div>
+      </dialog>
+    </div>
+  </Portal>
+{/if}
 
 <style>
   .dialog-wrapper {
+    pointer-events: all;
     position: fixed;
     top: 0;
     left: 0;
@@ -145,8 +152,8 @@
   .dialog-wrapper :global(input),
   .dialog-wrapper :global(select),
   .dialog-wrapper :global(textarea) {
-		fill: orange;
-	}
+    fill: orange;
+  }
   .dialog-wrapper :global(button:not(:disabled)) {
     cursor: pointer;
   }
@@ -196,6 +203,7 @@
     color: var(--dialog-title-text-color);
     border: none;
     background: var(--dialog-title-bg-color);
+    flex-basis: 2em;
   }
   .is--modal .dialog__close-btn {
     display: none;

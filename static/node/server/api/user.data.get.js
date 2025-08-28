@@ -26,4 +26,4 @@ module.exports = async function getData(req, res) {
     log.error(msg);
     res.error(500, msg);
   }
-}
+};

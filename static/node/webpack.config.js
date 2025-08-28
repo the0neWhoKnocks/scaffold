@@ -40,7 +40,7 @@ const mainFields = [
 const mode = process.env.NODE_ENV || 'development';
 const dev = mode === 'development';
 
-const outputFilename = ({ chunk, contentHashType }) => {  
+const outputFilename = ({ chunk, contentHashType }) => {
   let _name;
   
   // Account for dynamic imports that likely won't have path prefixes.
@@ -65,9 +65,9 @@ const outputFilename = ({ chunk, contentHashType }) => {
 };
 
 const conf = {
-  devtool: dev && 'eval-source-map',
+  devtool: dev && 'source-map',
   entry: {
-    'js/app': resolve(__dirname, './src/client/index.js'),
+    [`${ENTRY_PREFIX__JS}app`]: resolve(__dirname, './src/client/index.js'),
   },
   mode,
   module: {
@@ -114,7 +114,7 @@ const conf = {
         vendor: {
           chunks: 'all', // `initial` accounts for the static items in `entry` but `all` picks up on dynamic imports as well
           enforce: true,
-          name: 'js/vendor',
+          name: `${ENTRY_PREFIX__JS}vendor`,
           test: /[\\/]node_modules[\\/]/,
         },
       },

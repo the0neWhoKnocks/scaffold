@@ -157,8 +157,7 @@ module.exports = [
       }],
       'playwright/expect-expect': ['error', {
         assertFunctionNames: [
-          'verifyFormatSelectorValue',
-          'verifyLockStyling',
+          'verifyLogMsgs',
         ],
       }],
       'playwright/no-conditional-expect': 'off',

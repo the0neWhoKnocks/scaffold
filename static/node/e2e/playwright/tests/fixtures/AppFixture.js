@@ -1,4 +1,4 @@
-import BaseFixture, { createTest, expect } from './BaseFixture';
+import BaseFixture, { createTest, expect, expectImg } from './BaseFixture';
 //TOKEN:^TEST__SERVER_INTERACTIONS
 import {
   //TOKEN:^TEST__API
@@ -13,9 +13,9 @@ import {
 export const LOG_TYPE__REQUEST = 'request';
 export const LOG_TYPE__WEBSOCKET = 'ws';
 
-class AppFixture extends BaseFixture {
+export class AppFixture extends BaseFixture {
   constructor({ browser, context, page, testCtx, testInfo }) {
-    super({ browser, context, page, testCtx, testInfo });
+    super({ browser, context, page, testCtx, testInfo, useWS: true });
     //TOKEN:^TEST__REQUESTS
     
     page.apiResps = [];
@@ -108,7 +108,7 @@ class AppFixture extends BaseFixture {
   //TOKEN:^TEST__API
   
   async triggerAPI() {
-    const resp = this.waitForResp(ROUTE__API__HELLO);
+    const resp = this.waitForResp(`${ROUTE__API__HELLO}**`);
     await this.getAPINav().getByRole('button', { name: 'Trigger API' }).click();
     
     await this.waitForPending();
@@ -135,8 +135,6 @@ class AppFixture extends BaseFixture {
   
   async triggerSocket() {
     await this.getAPINav().getByRole('button', { name: 'Trigger Socket' }).click();
-    const msgs = this.fx.page.wsMsgs;
-    return msgs[msgs.length - 1];
   }
   //TOKEN:$TEST__WEB_SOCKETS
   //TOKEN:^TEST__SERVER_INTERACTIONS
@@ -149,23 +147,15 @@ class AppFixture extends BaseFixture {
           expect(
             this.fx.page.apiResps.includes(msg),
             'Response should contain message'
-          ).toTruthy();
+          ).toBeTruthy();
           break;
         //TOKEN:$TEST__REQUESTS
-        //TOKEN:^TEST__WEB_SOCKETS
-        case LOG_TYPE__WEBSOCKET:
-          await expect(
-            this.fx.page.wsMsgs.includes(msg),
-            'WebSocket payload should contain message'
-          ).toBe(true);
-          break;
-        //TOKEN:$TEST__WEB_SOCKETS
       }
       
       await expect(
         this.getLogsEl(),
         'Log entry should contain message'
-      ).toHaveText(msg);
+      ).toContainText(msg);
     }
     
     if (screenshot) {
@@ -184,4 +174,4 @@ class AppFixture extends BaseFixture {
 }
 
 export const test = createTest({ FxClass: AppFixture, fxKey: 'app' });
-export { expect };
+export { expect, expectImg };

@@ -27,27 +27,26 @@
   let rememberCredentials = $state.raw(false);
   let rememberCredentialsRef = $state();
   
-  function handleLoginSubmit(ev) {
+  async function handleLoginSubmit(ev) {
     ev.preventDefault();
     
-    postData(loginFormRef.action, loginFormRef)
-      .then((userData) => {
-        setStorage({
-          data: userData,
-          key: NAMESPACE__STORAGE__USER,
-          persistent: rememberCredentialsRef.checked,
-        });
-        
-        onSuccess(userData);
-      })
-      .catch(({ message }) => { alert(message); });
+    try {
+      const userData = await postData(loginFormRef.action, loginFormRef);
+      setStorage({
+        data: userData,
+        key: NAMESPACE__STORAGE__USER,
+        persistent: rememberCredentialsRef.checked,
+      });
+      
+      onSuccess?.(userData);
+    }
+    catch ({ message }) { alert(message); }
   }
   
   function handleCloseClick() {
     open = false;
     createUserOpen = false;
-    
-    if (onClose) onClose();
+    onClose?.();
   }
   
   function handleCreateAccountClick() {
@@ -60,7 +59,7 @@
     open = true;
   }
   
-  function handleCreateSubmit(ev) {
+  async function handleCreateSubmit(ev) {
     ev.preventDefault();
     
     const data = new FormData(createFormRef);
@@ -68,13 +67,13 @@
     const username = data.get('username');
     
     if (password === data.get('passwordConfirmed')) {
-      postData(createFormRef.action, createFormRef)
-        .then(() => {
-          loginUsername = username;
-          loginPassword = password;
-          handleCancelCreateClick();
-        })
-        .catch(({ message }) => { alert(message); });
+      try {
+        await postData(createFormRef.action, createFormRef);
+        loginUsername = username;
+        loginPassword = password;
+        handleCancelCreateClick();
+      }
+      catch ({ message }) { alert(message); }
     }
     else {
       alert("Your passwords don't match");
@@ -96,7 +95,7 @@
 
 {#if open}
   <Dialog onCloseClick={handleCloseClick}>
-    {#snippet dialogBodySnippet()}
+    {#snippet s_dialogBody()}
       <form
         action={ROUTE__API__USER_LOGIN}
         autocomplete='off'
@@ -144,7 +143,7 @@
 {/if}
 {#if createUserOpen}
   <Dialog onCloseClick={handleCloseClick}>
-    {#snippet dialogBodySnippet()}
+    {#snippet s_dialogBody()}
       <form
         action={ROUTE__API__USER_CREATE}
         autocomplete="off"
@@ -156,7 +155,7 @@
       >
         <HRWithText class="for--top" label="Create Account" />
         <LabeledInput
-          autoFocus 
+          autoFocus
           compact
           label="Username"
           name="username"

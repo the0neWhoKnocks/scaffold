@@ -1,4 +1,5 @@
 import { exec as _exec } from 'node:child_process';
+import { basename, dirname } from 'node:path';
 import { readFile, stat, writeFile } from 'node:fs/promises';
 import colors from '@colors/colors/safe';
 import { test, expect as baseExpect } from '@playwright/test';
@@ -25,9 +26,9 @@ const exec = async (cmd, { failOnNonZeroExit = true } = {}) => {
 };
 const genShotKeys = (testInfo) => {
   const testFileKey = testInfo.titlePath[0].replace(/\.test\.js$/, '');
-  const testNameKey = `[${testInfo.titlePath[1]}]`;
+  const testNameKey = `【${testInfo.titlePath[1]}】`;
   
-  return { testFileKey, testNameKey }; 
+  return { testFileKey, testNameKey };
 };
 const genShotPrefix = ({ testFileKey, testNameKey }) => {
   return `${testFileKey}/${testNameKey}`.toLowerCase().replace(/\s/g, '-');
@@ -354,12 +355,14 @@ export default class BaseFixture {
   }
   
   async screenshot(name, loc) {
-    const _loc = (typeof loc === 'string') ? this.getEl(loc) : loc; 
+    const _loc = (typeof loc === 'string') ? this.getEl(loc) : loc;
     if (!screenshotNdxs[this.fx.ndxKey]) screenshotNdxs[this.fx.ndxKey] = 1;
     
     const screenshotNdx = screenshotNdxs[this.fx.ndxKey];
-    const formattedName = `${`${this.fx.shotNamePrefix}_${pad(screenshotNdx)}__${name}`.toLowerCase().replace(/\s/g, '-')}`;
-    const filename = `${PATH__REL_SCREENSHOTS}/${formattedName}.jpg`;
+    const parFolder = dirname(this.fx.shotNamePrefix);
+    const testName = basename(this.fx.shotNamePrefix);
+    const formattedName = `${`${testName}_${pad(screenshotNdx)}__${name}`.toLowerCase().replaceAll('[', '【').replaceAll(']', '】').replaceAll(/[^【】0-9a-zA-Z-._]/g, '-')}`;
+    const filename = `${PATH__REL_SCREENSHOTS}/${parFolder}/${formattedName}.jpg`;
     
     screenshotNdxs[this.fx.ndxKey] += 1;
     
@@ -371,7 +374,7 @@ export default class BaseFixture {
       quality: 90,
       type: 'jpeg',
     });
-    await this.testInfo.attach(formattedName, {
+    await this.testInfo.attach(`${parFolder}/${formattedName}`, {
       body: img,
       contentType: 'image/jpeg',
     });
@@ -431,7 +434,7 @@ export default class BaseFixture {
     }
     
     return {
-      intoView: (opts) => loc.evaluate((el, { offset = 0, scrollOpts } = {}) => {
+      intoView: (opts) => loc.evaluate((el, { offset = 0, ...restOpts } = {}) => {
         function getScrollParent(node) {
           if (!node) return undefined;
         
@@ -446,19 +449,24 @@ export default class BaseFixture {
         }
         
         let scrollEl = getScrollParent(el);
-        if (scrollEl === document.body) scrollEl = window;
-        const scrollProp = (scrollEl.scrollY !== undefined) ? 'scrollY' : 'scrollTop';
-        const offsetPosition = (
+        let scrollProp = 'scrollTop';
+        let topPos = scrollEl[scrollProp] + (
           el.getBoundingClientRect().top
           - document.body.getBoundingClientRect().top
           - offset
         );
         
+        if (scrollEl === document.body) {
+          scrollEl = window;
+          scrollProp = 'scrollY';
+          topPos = el.offsetTop - offset;
+        }
+        
         return new Promise((resolve) => {
-          if (offsetPosition) {
+          if (topPos) {
             scrollEl.scrollTo({
-              ...scrollOpts,
-              top: scrollEl[scrollProp] + offsetPosition,
+              ...restOpts,
+              top: topPos,
             });
             
             let prevPos;
@@ -473,12 +481,12 @@ export default class BaseFixture {
           }
           else resolve();
         });
-      }, { ...scrollOpts, ...opts  }),
+      }, { ...scrollOpts, ...opts }),
       to: async (x, y, opts) => {
         if (x !== undefined) await loc.evaluate(scrollHandler, ['left', x, { ...scrollOpts, ...opts }]);
         if (y !== undefined) await loc.evaluate(scrollHandler, ['top', y, { ...scrollOpts, ...opts }]);
       },
-      toBottom: (opts) => loc.evaluate(scrollHandler, ['top','scrollHeight', { ...scrollOpts, ...opts }]),
+      toBottom: (opts) => loc.evaluate(scrollHandler, ['top', 'scrollHeight', { ...scrollOpts, ...opts }]),
       toLeft: (opts) => loc.evaluate(scrollHandler, ['left', 0, { ...scrollOpts, ...opts }]),
       toRight: (opts) => loc.evaluate(scrollHandler, ['left', 'scrollWidth', { ...scrollOpts, ...opts }]),
       toTop: (opts) => loc.evaluate(scrollHandler, ['top', 0, { ...scrollOpts, ...opts }]),
@@ -506,7 +514,7 @@ export default class BaseFixture {
       else await loc.pressSequentially(t);
     }
     
-    if (waitAfter) await this.fx.page.waitForTimeout(waitAfter);  // eslint-disable-line playwright/no-wait-for-timeout
+    if (waitAfter) await this.fx.page.waitForTimeout(waitAfter); // eslint-disable-line playwright/no-wait-for-timeout
   }
   
   async waitForDialog(selector) {
@@ -562,7 +570,7 @@ export default class BaseFixture {
           this.fx.page.wsHandlers.splice(this.fx.page.wsHandlers.indexOf(handler), 1);
           resolve(data);
         }
-      }
+      };
       
       this.fx.page.wsHandlers.push(handler);
     });
@@ -764,15 +772,24 @@ export const expect = baseExpect.extend({
 });
 export const expectImg = baseExpect.extend({
   async toBeLoaded(loc) {
-    await loc.evaluate((e) => new Promise((resolve) => {
+    const { message, pass } = await loc.evaluate((e) => new Promise((resolve) => {
       const int = setInterval(() => {
         if (e.complete) {
           clearInterval(int);
-          resolve();
+          
+          fetch(e.src).then((resp) => {
+            resolve({
+              message: `Image ${resp.status}'d, failed to load: "${e.src}"`,
+              pass: resp.status < 400,
+            });
+          });
         }
       }, 100);
     }));
     
-    return { pass: true };
+    return {
+      message: () => message,
+      pass,
+    };
   },
 });

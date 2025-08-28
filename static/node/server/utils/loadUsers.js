@@ -1,14 +1,12 @@
-const { existsSync, readFile } = require('node:fs');
+const { readFile } = require('node:fs/promises');
 const { PATH__USERS } = require('../../constants');
+const fileExists = require('./fileExists');
 
-const loadUsers = () => new Promise((resolve, reject) => {
-  if (existsSync(PATH__USERS)) {
-    readFile(PATH__USERS, 'utf8', (err, users) => {
-      if (err) reject(err);
-      else resolve(JSON.parse(users));
-    });
+module.exports = async function loadUsers() {
+  if ((await fileExists(PATH__USERS))) {
+    const users = await readFile(PATH__USERS, 'utf8');
+    return JSON.parse(users);
   }
-  else resolve({});
-});
-
-module.exports = loadUsers;
+  
+  return {};
+};

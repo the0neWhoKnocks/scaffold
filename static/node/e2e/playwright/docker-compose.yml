@@ -49,7 +49,7 @@ services:
       # DATA_PATH: /test/data.json
       #TOKEN:^DC__NODE_CERTS
       NODE_EXTRA_CA_CERTS: /home/node/certs/tests.crt
-      #TOKEN:#DC__NODE_CERTS
+      #TOKEN:$DC__NODE_CERTS
       #TOKEN:^DC__E2E_PROXY
       # proxy stuff
       NODE_TLS_REJECT_UNAUTHORIZED: 0 # Using this to get around error "reason: Hostname/IP does not match certificate's altnames: Host: <HOST>. is not in the cert's altnames: DNS:localhost
@@ -81,13 +81,15 @@ services:
     command: $CMD
     container_name: #TOKEN:#DC__APP_NAME-e2e
     depends_on:
-      #TOKEN:#DC__E2E_DEPENDS_ON:
+      #TOKEN:#DC__APP_NAME-test:
         condition: service_healthy
     environment:
       # runner env
       BASE_URL: "#TOKEN:#DC__PROTOCOL://tests.lan:3000"
       CMD: $CMD # so the config can check if it's headless or not
       DISPLAY: $TEST_DISPLAY
+      # constants
+      DATA_PATH: /app_data
     hostname: e2etests
     ipc: host # Using `--ipc=host` is recommended when using Chrome (Docker docs). Chrome can run out of memory without this flag.
     ports:
@@ -96,6 +98,9 @@ services:
       - "seccomp:${PWD}/e2e/seccomp_profile.json"
     user: "${CURR_UID}:${CURR_GID}"
     volumes:
+      - type: bind
+        source: "${PWD}/.app_data"
+        target: "/app_data"
       - type: bind
         source: "${PWD}/e2e"
         target: "/e2e"
